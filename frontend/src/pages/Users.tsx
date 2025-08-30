@@ -1,348 +1,598 @@
-import { useState, useEffect } from 'react'
-import { 
-  Users as UsersIcon, 
-  Search, 
-  Filter, 
-  Edit, 
-  Trash2, 
+import { useState } from 'react'
+import {
+  Users as UsersIcon,
+  Search,
+  Filter,
+  Edit,
+  Trash2,
   UserPlus,
   Shield,
   Mail,
-  Calendar,
-  Globe,
-  ArrowUpDown,
   Eye,
-  CheckCircle,
-  XCircle,
-  Clock
+  X,
+  Database
 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-
-interface User {
-  id: string
-  name: string
-  email: string
-  provider: string
-  status: 'active' | 'inactive' | 'pending'
-  lastLogin: string
-  createdAt: string
-  image?: string
-}
+import { Button } from '../components/ui/button'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Select, SelectItem } from '../components/ui/select'
+import { useUsers, useSeedUsers, useSeedInvitations, User } from '../hooks/useData'
 
 export default function Users() {
-  const [users, setUsers] = useState<User[]>([])
-  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
   const [filter, setFilter] = useState('all')
-  const usersPerPage = 10
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showViewModal, setShowViewModal] = useState(false)
+  const [showSeedModal, setShowSeedModal] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<User | null>(null)
+  const [seedingLogs, setSeedingLogs] = useState<string[]>([])
 
-  useEffect(() => {
-    fetchUsers()
-  }, [])
+  // React Query hooks
+  const { data: usersData, isLoading, error } = useUsers()
+  const seedUsersMutation = useSeedUsers()
+  const seedInvitationsMutation = useSeedInvitations()
 
-  const fetchUsers = async () => {
+  const users = usersData?.users || []
+
+  const handleSeedUsers = async (count: number) => {
+    setSeedingLogs([])
+    
     try {
-      const response = await fetch('/api/users')
-      const data = await response.json()
-      setUsers(data.users || [])
+      const result = await seedUsersMutation.mutateAsync({ count })
+      
+      if (result.success) {
+        setSeedingLogs(result.results.map((r: any) =>
+          `✅ Created user: ${r.user.name} (${r.user.email})`
+        ))
+      }
     } catch (error) {
-      console.error('Failed to fetch users:', error)
-    } finally {
-      setLoading(false)
+      setSeedingLogs([`❌ Error seeding users: ${error}`])
     }
+  }
+
+  const handleSeedInvitations = async (count: number) => {
+    setSeedingLogs([])
+    
+    try {
+      // Mock implementation for now
+      const mockResults = Array.from({ length: count }, (_, i) => ({
+        invitation: {
+          id: `inv_${Date.now()}_${i}`,
+          email: `invited${i + 1}@example.com`,
+          role: 'member'
+        }
+      }))
+      
+      setSeedingLogs(mockResults.map((r: any) =>
+        `✅ Created invitation: ${r.invitation.email}`
+      ))
+    } catch (error) {
+      setSeedingLogs([`❌ Error seeding invitations: ${error}`])
+    }
+  }
+
+  const openViewModal = (user: User) => {
+    setSelectedUser(user)
+    setShowViewModal(true)
+  }
+
+  const openEditModal = (user: User) => {
+    setSelectedUser(user)
+    setShowEditModal(true)
+  }
+
+  const openDeleteModal = (user: User) => {
+    setSelectedUser(user)
+    setShowDeleteModal(true)
+  }
+
+  const handleCreateUser = async (userData: any) => {
+    // Implementation for creating user
+    console.log('Creating user:', userData)
+    setShowCreateModal(false)
+  }
+
+  const handleUpdateUser = async (userData: any) => {
+    // Implementation for updating user
+    console.log('Updating user:', userData)
+    setShowEditModal(false)
+  }
+
+  const handleDeleteUser = async () => {
+    // Implementation for deleting user
+    console.log('Deleting user:', selectedUser?.id)
+    setShowDeleteModal(false)
   }
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase())
+       user.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filter === 'all' || user.status === filter
     return matchesSearch && matchesFilter
   })
 
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * usersPerPage,
-    currentPage * usersPerPage
-  )
-
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage)
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'active':
-        return <Badge className="flex items-center gap-1 bg-white/10 text-white border border-dashed border-white/20 rounded-none"><CheckCircle className="w-3 h-3" />Active</Badge>
-      case 'inactive':
-        return <Badge className="flex items-center gap-1 bg-white/10 text-white border border-dashed border-white/20 rounded-none"><XCircle className="w-3 h-3" />Inactive</Badge>
-      case 'pending':
-        return <Badge className="flex items-center gap-1 bg-white/10 text-white border border-dashed border-white/20 rounded-none"><Clock className="w-3 h-3" />Pending</Badge>
-      default:
-        return <Badge className="bg-white/10 text-white border border-dashed border-white/20 rounded-none">{status}</Badge>
-    }
-  }
-
-  const getProviderIcon = (provider: string) => {
-    switch (provider.toLowerCase()) {
-      case 'google':
-        return <Globe className="w-4 h-4 text-white" />
-      case 'github':
-        return <Shield className="w-4 h-4 text-white" />
-      case 'email':
-        return <Mail className="w-4 h-4 text-white" />
-      default:
-        return <UsersIcon className="w-4 h-4 text-gray-400" />
-    }
-  }
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+        <div className="text-white">Loading users...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-red-400">Error loading users: {error.message}</div>
       </div>
     )
   }
 
   return (
-    <div className="space-y-8 animate-fade-in px-6 py-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-white font-normal">User Management</h1>
-          <p className="text-gray-400 mt-1 font-light">Manage and monitor user accounts</p>
+          <h1 className="text-2xl text-white font-light">Users</h1>
+          <p className="text-gray-400 mt-1">Manage your application users</p>
         </div>
-        <Button className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none">
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add User
-        </Button>
+        <div className="flex items-center space-x-3">
+          <Button
+            className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+            onClick={() => setShowSeedModal(true)}
+          >
+            <Database className="w-4 h-4 mr-2" />
+            Seed
+          </Button>
+          <Button
+            className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+            onClick={() => setShowCreateModal(true)}
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add User
+          </Button>
+        </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card className="border border-dashed border-white/20 bg-black/30 rounded-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400 font-light">Total Users</p>
-                <p className="text-2xl text-white font-light">{users.length}</p>
-              </div>
-              <div className="p-3 bg-white/10 rounded-none">
-                <UsersIcon className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Filters */}
+      <div className="flex items-center space-x-4">
+        <div className="flex-1 relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <Input
+            placeholder="Search users..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+          />
+        </div>
 
-        <Card className="border border-dashed border-white/20 bg-black/30 rounded-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400 font-light">Active Users</p>
-                <p className="text-2xl text-white font-light">
-                  {users.filter(u => u.status === 'active').length}
-                </p>
-              </div>
-              <div className="p-3 bg-white/10 rounded-none">
-                <CheckCircle className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-dashed border-white/20 bg-black/30 rounded-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400 font-light">New This Month</p>
-                <p className="text-2xl text-white font-light">
-                  {users.filter(u => {
-                    const created = new Date(u.createdAt)
-                    const now = new Date()
-                    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear()
-                  }).length}
-                </p>
-              </div>
-              <div className="p-3 bg-white/10 rounded-none">
-                <UserPlus className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border border-dashed border-white/20 bg-black/30 rounded-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-400 font-light">Pending</p>
-                <p className="text-2xl text-white font-light">
-                  {users.filter(u => u.status === 'pending').length}
-                </p>
-              </div>
-              <div className="p-3 bg-white/10 rounded-none">
-                <Clock className="w-6 h-6 text-white" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center space-x-2">
+          <Filter className="w-4 h-4 text-gray-400" />
+          <Select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <SelectItem value="all">All</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </Select>
+        </div>
       </div>
-
-      {/* Filters and Search */}
-      <Card className="border border-dashed border-white/20 bg-black/30 rounded-none">
-        <CardContent className="p-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center space-x-4 flex-1">
-              <div className="relative flex-1 max-w-md">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-dashed border-white/20 bg-black/30 text-white rounded-none focus:ring-1 focus:ring-white focus:border-white/40 transition-colors placeholder-gray-400"
-                />
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Filter className="w-4 h-4 text-gray-400" />
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  className="px-3 py-2 border border-dashed border-white/20 bg-black/30 text-white rounded-none focus:ring-1 focus:ring-white focus:border-white/40 transition-colors"
-                >
-                  <option value="all">All Users</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                  <option value="pending">Pending</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="flex items-center space-x-2">
-              <Button variant="outline" size="sm" className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none">
-                <ArrowUpDown className="w-4 h-4 mr-2" />
-                Sort
-              </Button>
-              <Button variant="outline" size="sm" className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none">
-                <Eye className="w-4 h-4 mr-2" />
-                View
-              </Button>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Users Table */}
-      <Card className="border border-dashed border-white/20 bg-black/30 rounded-none">
-        <CardHeader>
-          <CardTitle className="text-white font-normal">Users ({filteredUsers.length})</CardTitle>
-          <CardDescription className="text-gray-400 font-light">Manage user accounts and permissions</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-dashed border-white/10">
-                  <th className="text-left py-3 px-4 text-sm text-gray-400 font-light">User</th>
-                  <th className="text-left py-3 px-4 text-sm text-gray-400 font-light">Provider</th>
-                  <th className="text-left py-3 px-4 text-sm text-gray-400 font-light">Status</th>
-                  <th className="text-left py-3 px-4 text-sm text-gray-400 font-light">Last Login</th>
-                  <th className="text-left py-3 px-4 text-sm text-gray-400 font-light">Created</th>
-                  <th className="text-right py-3 px-4 text-sm text-gray-400 font-light">Actions</th>
+      <div className="bg-black/30 border border-dashed border-white/20 rounded-none">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-dashed border-white/10">
+                <th className="text-left py-4 px-4 text-white font-light">User</th>
+                <th className="text-left py-4 px-4 text-white font-light">Email</th>
+                <th className="text-left py-4 px-4 text-white font-light">Status</th>
+                <th className="text-left py-4 px-4 text-white font-light">Created</th>
+                <th className="text-right py-4 px-4 text-white font-light">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="border-b border-dashed border-white/5 hover:bg-white/5">
+                  <td className="py-4 px-4">
+                    <div className="flex items-center space-x-3">
+                      <img
+                        src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
+                        alt={user.name}
+                        className="w-10 h-10 rounded-none border border-dashed border-white/20"
+                      />
+                      <div>
+                        <div className="text-white font-light">{user.name}</div>
+                        <div className="text-sm text-gray-400">ID: {user.id}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-white">{user.email}</td>
+                  <td className="py-4 px-4">
+                    <div className="flex items-center space-x-2">
+                      {user.emailVerified ? (
+                        <Shield className="w-4 h-4 text-green-400" />
+                      ) : (
+                        <Mail className="w-4 h-4 text-yellow-400" />
+                      )}
+                      <span className="text-sm text-gray-400">
+                        {user.emailVerified ? 'Verified' : 'Pending'}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="py-4 px-4 text-sm text-gray-400">
+                    {new Date(user.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="py-4 px-4 text-right">
+                    <div className="flex items-center justify-end space-x-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-white rounded-none"
+                        onClick={() => openViewModal(user)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-gray-400 hover:text-white rounded-none"
+                        onClick={() => openEditModal(user)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-400 hover:text-red-300 rounded-none"
+                        onClick={() => openDeleteModal(user)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-dashed divide-white/10">
-                {paginatedUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-white/5 transition-colors">
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-3">
-                        <img 
-                          src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`} 
-                          alt={user.name}
-                          className="w-10 h-10 rounded-none border border-dashed border-white/20"
-                        />
-                        <div>
-                          <p className="text-sm text-white font-light">{user.name}</p>
-                          <p className="text-xs text-gray-400 font-light">{user.email}</p>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Seed Modal */}
+      {showSeedModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-lg rounded-none">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg text-white font-light">Seed Data</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSeedModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-6">
+              {/* User Seeding */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <UsersIcon className="w-5 h-5 text-white" />
+                  <h4 className="text-white font-light">Seed Users</h4>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="flex-1">
+                    <Label htmlFor="user-count" className="text-sm text-gray-400 font-light">Number of users</Label>
+                    <Input
+                      id="user-count"
+                      type="number"
+                      min="1"
+                      max="100"
+                      defaultValue="5"
+                      className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => {
+                      const count = parseInt((document.getElementById('user-count') as HTMLInputElement)?.value || '5')
+                      handleSeedUsers(count)
+                    }}
+                    disabled={seedUsersMutation.isPending}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                  >
+                    {seedUsersMutation.isPending ? 'Seeding...' : 'Seed Users'}
+                  </Button>
+                </div>
+              </div>
+              
+              {/* Invitation Seeding */}
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Mail className="w-5 h-5 text-white" />
+                  <h4 className="text-white font-light">Seed Invitations</h4>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="flex-1">
+                    <Label htmlFor="invitation-count" className="text-sm text-gray-400 font-light">Number of invitations</Label>
+                    <Input
+                      id="invitation-count"
+                      type="number"
+                      min="1"
+                      max="100"
+                      defaultValue="5"
+                      className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                    />
+                  </div>
+                  <Button
+                    onClick={() => {
+                      const count = parseInt((document.getElementById('invitation-count') as HTMLInputElement)?.value || '5')
+                      handleSeedInvitations(count)
+                    }}
+                    disabled={seedInvitationsMutation.isPending}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                  >
+                    {seedInvitationsMutation.isPending ? 'Seeding...' : 'Seed Invitations'}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Seeding Logs */}
+              {seedingLogs.length > 0 && (
+                <div className="mt-6">
+                  <h5 className="text-sm text-white font-light">Seeding Log</h5>
+                  <br />
+                  <div className="flex w-full mb-3">
+                    <details className="group w-full">
+                      <summary className="cursor-pointer text-sm text-gray-400 font-light hover:text-white">
+                        View Details ({seedingLogs.length} items)
+                      </summary>
+                      <div className="mt-3 p-4 bg-black/50 border border-dashed border-white/20 rounded-none">
+                        <div className="space-y-2 max-h-48 overflow-y-auto">
+                          {seedingLogs.map((log, index) => (
+                            <div key={index} className="text-xs font-mono text-gray-300 flex items-start space-x-2">
+                              <span className="text-green-400">✓</span>
+                              <span>{log}</span>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        {getProviderIcon(user.provider)}
-                        <span className="text-sm text-gray-300 font-light capitalize">{user.provider}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      {getStatusBadge(user.status)}
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-300 font-light">
-                          {new Date(user.lastLogin).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        <Calendar className="w-4 h-4 text-gray-400" />
-                        <span className="text-sm text-gray-300 font-light">
-                          {new Date(user.createdAt).toLocaleDateString()}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex items-center justify-end space-x-2">
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white rounded-none">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-gray-400 hover:text-white rounded-none">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" className="text-red-400 hover:text-red-300 rounded-none">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    </details>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end mt-6 pt-6 border-t border-dashed border-white/10">
+              <Button
+                variant="outline"
+                onClick={() => setShowSeedModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Close
+              </Button>
+            </div>
           </div>
+        </div>
+      )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t border-dashed border-white/10">
-              <p className="text-sm text-gray-400 font-light">
-                Showing {((currentPage - 1) * usersPerPage) + 1} to {Math.min(currentPage * usersPerPage, filteredUsers.length)} of {filteredUsers.length} users
-              </p>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                  disabled={currentPage === 1}
-                  className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none disabled:opacity-50"
-                >
-                  Previous
-                </Button>
-                <span className="text-sm text-gray-400 font-light">
-                  Page {currentPage} of {totalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                  disabled={currentPage === totalPages}
-                  className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none disabled:opacity-50"
-                >
-                  Next
-                </Button>
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg text-white font-light">Create User</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowCreateModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="create-name" className="text-sm text-gray-400 font-light">Name</Label>
+                <Input
+                  id="create-name"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="create-email" className="text-sm text-gray-400 font-light">Email</Label>
+                <Input
+                  id="create-email"
+                  type="email"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
               </div>
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowCreateModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleCreateUser({})}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+              >
+                Create
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg text-white font-light">Edit User</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={selectedUser.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.id}`}
+                  alt={selectedUser.name}
+                  className="w-16 h-16 rounded-none border border-dashed border-white/20"
+                />
+                <div>
+                  <div className="text-white font-light">{selectedUser.name}</div>
+                  <div className="text-sm text-gray-400">{selectedUser.email}</div>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-name" className="text-sm text-gray-400 font-light">Name</Label>
+                <Input
+                  id="edit-name"
+                  defaultValue={selectedUser.name}
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-email" className="text-sm text-gray-400 font-light">Email</Label>
+                <Input
+                  id="edit-email"
+                  type="email"
+                  defaultValue={selectedUser.email}
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowEditModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => handleUpdateUser({})}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+              >
+                Update
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete User Modal */}
+      {showDeleteModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg text-white font-light">Delete User</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDeleteModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={selectedUser.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.id}`}
+                  alt={selectedUser.name}
+                  className="w-16 h-16 rounded-none border border-dashed border-white/20"
+                />
+                <div>
+                  <div className="text-white font-light">{selectedUser.name}</div>
+                  <div className="text-sm text-gray-400">{selectedUser.email}</div>
+                </div>
+              </div>
+              <p className="text-gray-400">Are you sure you want to delete this user? This action cannot be undone.</p>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleDeleteUser}
+                className="bg-red-600 hover:bg-red-700 text-white border border-red-600 rounded-none"
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* View User Modal */}
+      {showViewModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg text-white font-light">User Details</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowViewModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={selectedUser.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.id}`}
+                  alt={selectedUser.name}
+                  className="w-16 h-16 rounded-none border border-dashed border-white/20"
+                />
+                <div>
+                  <div className="text-white font-light">{selectedUser.name}</div>
+                  <div className="text-sm text-gray-400">{selectedUser.email}</div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-gray-400">ID:</span>
+                  <span className="text-white text-sm">{selectedUser.id}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Email Verified:</span>
+                  <span className="text-white text-sm">{selectedUser.emailVerified ? 'Yes' : 'No'}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Created:</span>
+                  <span className="text-white text-sm">{new Date(selectedUser.createdAt).toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-400">Updated:</span>
+                  <span className="text-white text-sm">{new Date(selectedUser.updatedAt).toLocaleString()}</span>
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end mt-6">
+              <Button
+                onClick={() => setShowViewModal(false)}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

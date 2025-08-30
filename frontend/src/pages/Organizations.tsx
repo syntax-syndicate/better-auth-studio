@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import {
-  Database,
+  Building2,
   Search,
   Filter,
   Edit,
@@ -8,15 +8,15 @@ import {
   Plus,
   Eye,
   X,
-  User
+  Database
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Select, SelectItem } from '../components/ui/select'
-import { useSessions, useSeedSessions, useSeedAccounts, Session } from '../hooks/useData'
+import { useOrganizations, useSeedOrganizations, useSeedTeams, Organization } from '../hooks/useData'
 
-export default function Sessions() {
+export default function Organizations() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -24,94 +24,92 @@ export default function Sessions() {
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showViewModal, setShowViewModal] = useState(false)
   const [showSeedModal, setShowSeedModal] = useState(false)
-  const [selectedSession, setSelectedSession] = useState<Session | null>(null)
+  const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null)
   const [seedingLogs, setSeedingLogs] = useState<string[]>([])
 
   // React Query hooks
-  const { data: sessionsData, isLoading, error } = useSessions()
-  const seedSessionsMutation = useSeedSessions()
-  const seedAccountsMutation = useSeedAccounts()
+  const { data: organizationsData, isLoading, error } = useOrganizations()
+  const seedOrganizationsMutation = useSeedOrganizations()
+  const seedTeamsMutation = useSeedTeams()
 
-  const sessions = sessionsData?.sessions || []
+  const organizations = organizationsData?.organizations || []
 
-  const handleSeedSessions = async (count: number) => {
+  const handleSeedOrganizations = async (count: number) => {
     setSeedingLogs([])
     
     try {
-      const result = await seedSessionsMutation.mutateAsync({ count })
+      const result = await seedOrganizationsMutation.mutateAsync({ count })
       
       if (result.success) {
         setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created session: ${r.session.id}`
+          `✅ Created organization: ${r.organization.name} (${r.organization.slug})`
         ))
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error seeding sessions: ${error}`])
+      setSeedingLogs([`❌ Error seeding organizations: ${error}`])
     }
   }
 
-  const handleSeedAccounts = async (count: number) => {
+  const handleSeedTeams = async (count: number) => {
     setSeedingLogs([])
     
     try {
-      const result = await seedAccountsMutation.mutateAsync({ count })
+      const result = await seedTeamsMutation.mutateAsync({ count })
       
       if (result.success) {
         setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created account: ${r.account.provider}`
+          `✅ Created team: ${r.team.name}`
         ))
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error seeding accounts: ${error}`])
+      setSeedingLogs([`❌ Error seeding teams: ${error}`])
     }
   }
 
-  const openViewModal = (session: Session) => {
-    setSelectedSession(session)
+  const openViewModal = (organization: Organization) => {
+    setSelectedOrganization(organization)
     setShowViewModal(true)
   }
 
-  const openEditModal = (session: Session) => {
-    setSelectedSession(session)
+  const openEditModal = (organization: Organization) => {
+    setSelectedOrganization(organization)
     setShowEditModal(true)
   }
 
-  const openDeleteModal = (session: Session) => {
-    setSelectedSession(session)
+  const openDeleteModal = (organization: Organization) => {
+    setSelectedOrganization(organization)
     setShowDeleteModal(true)
   }
 
-  const handleCreateSession = async (sessionData: any) => {
-    // Implementation for creating session
-    console.log('Creating session:', sessionData)
+  const handleCreateOrganization = async (organizationData: any) => {
+    // Implementation for creating organization
+    console.log('Creating organization:', organizationData)
     setShowCreateModal(false)
   }
 
-  const handleUpdateSession = async (sessionData: any) => {
-    // Implementation for updating session
-    console.log('Updating session:', sessionData)
+  const handleUpdateOrganization = async (organizationData: any) => {
+    // Implementation for updating organization
+    console.log('Updating organization:', organizationData)
     setShowEditModal(false)
   }
 
-  const handleDeleteSession = async () => {
-    // Implementation for deleting session
-    console.log('Deleting session:', selectedSession?.id)
+  const handleDeleteOrganization = async () => {
+    // Implementation for deleting organization
+    console.log('Deleting organization:', selectedOrganization?.id)
     setShowDeleteModal(false)
   }
 
-  const filteredSessions = sessions.filter(session => {
-    const matchesSearch = session.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         session.userId.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesFilter = filter === 'all' || 
-      (filter === 'active' && new Date(session.expiresAt) > new Date()) ||
-      (filter === 'expired' && new Date(session.expiresAt) <= new Date())
+  const filteredOrganizations = organizations.filter(organization => {
+    const matchesSearch = organization.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         organization.slug.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesFilter = filter === 'all' || organization.metadata?.status === filter
     return matchesSearch && matchesFilter
   })
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading sessions...</div>
+        <div className="text-white">Loading organizations...</div>
       </div>
     )
   }
@@ -119,7 +117,7 @@ export default function Sessions() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-red-400">Error loading sessions: {error.message}</div>
+        <div className="text-red-400">Error loading organizations: {error.message}</div>
       </div>
     )
   }
@@ -129,8 +127,8 @@ export default function Sessions() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl text-white font-light">Sessions</h1>
-          <p className="text-gray-400 mt-1">Manage user sessions and accounts</p>
+          <h1 className="text-2xl text-white font-light">Organizations</h1>
+          <p className="text-gray-400 mt-1">Manage your organizations and teams</p>
         </div>
         <div className="flex items-center space-x-3">
           <Button
@@ -145,7 +143,7 @@ export default function Sessions() {
             onClick={() => setShowCreateModal(true)}
           >
             <Plus className="w-4 h-4 mr-2" />
-            Add Session
+            Add Organization
           </Button>
         </div>
       </div>
@@ -155,7 +153,7 @@ export default function Sessions() {
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
-            placeholder="Search sessions..."
+            placeholder="Search organizations..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
@@ -167,53 +165,47 @@ export default function Sessions() {
           <Select value={filter} onChange={(e) => setFilter(e.target.value)}>
             <SelectItem value="all">All</SelectItem>
             <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
           </Select>
         </div>
       </div>
 
-      {/* Sessions Table */}
+      {/* Organizations Table */}
       <div className="bg-black/30 border border-dashed border-white/20 rounded-none">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-dashed border-white/10">
-                <th className="text-left py-4 px-4 text-white font-light">Session</th>
-                <th className="text-left py-4 px-4 text-white font-light">User ID</th>
+                <th className="text-left py-4 px-4 text-white font-light">Organization</th>
+                <th className="text-left py-4 px-4 text-white font-light">Slug</th>
                 <th className="text-left py-4 px-4 text-white font-light">Status</th>
-                <th className="text-left py-4 px-4 text-white font-light">Expires</th>
+                <th className="text-left py-4 px-4 text-white font-light">Created</th>
                 <th className="text-right py-4 px-4 text-white font-light">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {filteredSessions.map((session) => (
-                <tr key={session.id} className="border-b border-dashed border-white/5 hover:bg-white/5">
+              {filteredOrganizations.map((organization) => (
+                <tr key={organization.id} className="border-b border-dashed border-white/5 hover:bg-white/5">
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
-                        <Database className="w-5 h-5 text-white" />
+                        <Building2 className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <div className="text-white font-light">Session {session.id.slice(0, 8)}...</div>
-                        <div className="text-sm text-gray-400">ID: {session.id}</div>
+                        <div className="text-white font-light">{organization.name}</div>
+                        <div className="text-sm text-gray-400">ID: {organization.id}</div>
                       </div>
                     </div>
                   </td>
-                  <td className="py-4 px-4 text-white">{session.userId}</td>
+                  <td className="py-4 px-4 text-white">{organization.slug}</td>
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
-                      {new Date(session.expiresAt) > new Date() ? (
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                      ) : (
-                        <div className="w-2 h-2 bg-red-400 rounded-full"></div>
-                      )}
-                      <span className="text-sm text-gray-400">
-                        {new Date(session.expiresAt) > new Date() ? 'Active' : 'Expired'}
-                      </span>
+                      <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                      <span className="text-sm text-gray-400">Active</span>
                     </div>
                   </td>
                   <td className="py-4 px-4 text-sm text-gray-400">
-                    {new Date(session.expiresAt).toLocaleDateString()}
+                    {new Date(organization.createdAt).toLocaleDateString()}
                   </td>
                   <td className="py-4 px-4 text-right">
                     <div className="flex items-center justify-end space-x-2">
@@ -221,7 +213,7 @@ export default function Sessions() {
                         variant="ghost"
                         size="sm"
                         className="text-gray-400 hover:text-white rounded-none"
-                        onClick={() => openViewModal(session)}
+                        onClick={() => openViewModal(organization)}
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
@@ -229,7 +221,7 @@ export default function Sessions() {
                         variant="ghost"
                         size="sm"
                         className="text-gray-400 hover:text-white rounded-none"
-                        onClick={() => openEditModal(session)}
+                        onClick={() => openEditModal(organization)}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -237,7 +229,7 @@ export default function Sessions() {
                         variant="ghost"
                         size="sm"
                         className="text-red-400 hover:text-red-300 rounded-none"
-                        onClick={() => openDeleteModal(session)}
+                        onClick={() => openDeleteModal(organization)}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -266,17 +258,17 @@ export default function Sessions() {
               </Button>
             </div>
             <div className="space-y-6">
-              {/* Session Seeding */}
+              {/* Organization Seeding */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
-                  <Database className="w-5 h-5 text-white" />
-                  <h4 className="text-white font-light">Seed Sessions</h4>
+                  <Building2 className="w-5 h-5 text-white" />
+                  <h4 className="text-white font-light">Seed Organizations</h4>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="flex-1">
-                    <Label htmlFor="session-count" className="text-sm text-gray-400 font-light">Number of sessions</Label>
+                    <Label htmlFor="organization-count" className="text-sm text-gray-400 font-light">Number of organizations</Label>
                     <Input
-                      id="session-count"
+                      id="organization-count"
                       type="number"
                       min="1"
                       max="100"
@@ -286,28 +278,28 @@ export default function Sessions() {
                   </div>
                   <Button
                     onClick={() => {
-                      const count = parseInt((document.getElementById('session-count') as HTMLInputElement)?.value || '5')
-                      handleSeedSessions(count)
+                      const count = parseInt((document.getElementById('organization-count') as HTMLInputElement)?.value || '5')
+                      handleSeedOrganizations(count)
                     }}
-                    disabled={seedSessionsMutation.isPending}
+                    disabled={seedOrganizationsMutation.isPending}
                     className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
                   >
-                    {seedSessionsMutation.isPending ? 'Seeding...' : 'Seed Sessions'}
+                    {seedOrganizationsMutation.isPending ? 'Seeding...' : 'Seed Organizations'}
                   </Button>
                 </div>
               </div>
               
-              {/* Account Seeding */}
+              {/* Team Seeding */}
               <div className="space-y-4">
                 <div className="flex items-center space-x-2">
-                  <User className="w-5 h-5 text-white" />
-                  <h4 className="text-white font-light">Seed Accounts</h4>
+                  <Plus className="w-5 h-5 text-white" />
+                  <h4 className="text-white font-light">Seed Teams</h4>
                 </div>
                 <div className="flex items-center space-x-3">
                   <div className="flex-1">
-                    <Label htmlFor="account-count" className="text-sm text-gray-400 font-light">Number of accounts</Label>
+                    <Label htmlFor="team-count" className="text-sm text-gray-400 font-light">Number of teams</Label>
                     <Input
-                      id="account-count"
+                      id="team-count"
                       type="number"
                       min="1"
                       max="100"
@@ -317,13 +309,13 @@ export default function Sessions() {
                   </div>
                   <Button
                     onClick={() => {
-                      const count = parseInt((document.getElementById('account-count') as HTMLInputElement)?.value || '5')
-                      handleSeedAccounts(count)
+                      const count = parseInt((document.getElementById('team-count') as HTMLInputElement)?.value || '5')
+                      handleSeedTeams(count)
                     }}
-                    disabled={seedAccountsMutation.isPending}
+                    disabled={seedTeamsMutation.isPending}
                     className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
                   >
-                    {seedAccountsMutation.isPending ? 'Seeding...' : 'Seed Accounts'}
+                    {seedTeamsMutation.isPending ? 'Seeding...' : 'Seed Teams'}
                   </Button>
                 </div>
               </div>
@@ -331,9 +323,8 @@ export default function Sessions() {
               {/* Seeding Logs */}
               {seedingLogs.length > 0 && (
                 <div className="mt-6">
-                  <div className="flex items-center flex-col mb-3">
-                    <h5 className="text-sm text-white font-light">Seeding Logs</h5>
-                    <br /> 
+                  <div className="flex items-center justify-between mb-3">
+                    <h5 className="text-sm text-white font-light">Seeding Log</h5>
                     <details className="group">
                       <summary className="cursor-pointer text-sm text-gray-400 font-light hover:text-white">
                         View Details ({seedingLogs.length} items)
@@ -366,12 +357,12 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* Create Session Modal */}
+      {/* Create Organization Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Create Session</h3>
+              <h3 className="text-lg text-white font-light">Create Organization</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -383,17 +374,16 @@ export default function Sessions() {
             </div>
             <div className="space-y-4">
               <div>
-                <Label htmlFor="create-user-id" className="text-sm text-gray-400 font-light">User ID</Label>
+                <Label htmlFor="create-name" className="text-sm text-gray-400 font-light">Name</Label>
                 <Input
-                  id="create-user-id"
+                  id="create-name"
                   className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
               <div>
-                <Label htmlFor="create-expires" className="text-sm text-gray-400 font-light">Expires At</Label>
+                <Label htmlFor="create-slug" className="text-sm text-gray-400 font-light">Slug</Label>
                 <Input
-                  id="create-expires"
-                  type="datetime-local"
+                  id="create-slug"
                   className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
@@ -407,7 +397,7 @@ export default function Sessions() {
                 Cancel
               </Button>
               <Button
-                onClick={() => handleCreateSession({})}
+                onClick={() => handleCreateOrganization({})}
                 className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
               >
                 Create
@@ -417,12 +407,12 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* Edit Session Modal */}
-      {showEditModal && selectedSession && (
+      {/* Edit Organization Modal */}
+      {showEditModal && selectedOrganization && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Edit Session</h3>
+              <h3 className="text-lg text-white font-light">Edit Organization</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -435,27 +425,26 @@ export default function Sessions() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-16 h-16 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
-                  <Database className="w-8 h-8 text-white" />
+                  <Building2 className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <div className="text-white font-light">Session {selectedSession.id.slice(0, 8)}...</div>
-                  <div className="text-sm text-gray-400">{selectedSession.userId}</div>
+                  <div className="text-white font-light">{selectedOrganization.name}</div>
+                  <div className="text-sm text-gray-400">{selectedOrganization.slug}</div>
                 </div>
               </div>
               <div>
-                <Label htmlFor="edit-user-id" className="text-sm text-gray-400 font-light">User ID</Label>
+                <Label htmlFor="edit-name" className="text-sm text-gray-400 font-light">Name</Label>
                 <Input
-                  id="edit-user-id"
-                  defaultValue={selectedSession.userId}
+                  id="edit-name"
+                  defaultValue={selectedOrganization.name}
                   className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
               <div>
-                <Label htmlFor="edit-expires" className="text-sm text-gray-400 font-light">Expires At</Label>
+                <Label htmlFor="edit-slug" className="text-sm text-gray-400 font-light">Slug</Label>
                 <Input
-                  id="edit-expires"
-                  type="datetime-local"
-                  defaultValue={new Date(selectedSession.expiresAt).toISOString().slice(0, 16)}
+                  id="edit-slug"
+                  defaultValue={selectedOrganization.slug}
                   className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
@@ -469,7 +458,7 @@ export default function Sessions() {
                 Cancel
               </Button>
               <Button
-                onClick={() => handleUpdateSession({})}
+                onClick={() => handleUpdateOrganization({})}
                 className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
               >
                 Update
@@ -479,12 +468,12 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* Delete Session Modal */}
-      {showDeleteModal && selectedSession && (
+      {/* Delete Organization Modal */}
+      {showDeleteModal && selectedOrganization && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Delete Session</h3>
+              <h3 className="text-lg text-white font-light">Delete Organization</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -497,14 +486,14 @@ export default function Sessions() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-16 h-16 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
-                  <Database className="w-8 h-8 text-white" />
+                  <Building2 className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <div className="text-white font-light">Session {selectedSession.id.slice(0, 8)}...</div>
-                  <div className="text-sm text-gray-400">{selectedSession.userId}</div>
+                  <div className="text-white font-light">{selectedOrganization.name}</div>
+                  <div className="text-sm text-gray-400">{selectedOrganization.slug}</div>
                 </div>
               </div>
-              <p className="text-gray-400">Are you sure you want to delete this session? This action cannot be undone.</p>
+              <p className="text-gray-400">Are you sure you want to delete this organization? This action cannot be undone.</p>
             </div>
             <div className="flex justify-end space-x-3 mt-6">
               <Button
@@ -515,7 +504,7 @@ export default function Sessions() {
                 Cancel
               </Button>
               <Button
-                onClick={handleDeleteSession}
+                onClick={handleDeleteOrganization}
                 className="bg-red-600 hover:bg-red-700 text-white border border-red-600 rounded-none"
               >
                 Delete
@@ -525,12 +514,12 @@ export default function Sessions() {
         </div>
       )}
 
-      {/* View Session Modal */}
-      {showViewModal && selectedSession && (
+      {/* View Organization Modal */}
+      {showViewModal && selectedOrganization && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Session Details</h3>
+              <h3 className="text-lg text-white font-light">Organization Details</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -543,39 +532,25 @@ export default function Sessions() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-16 h-16 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
-                  <Database className="w-8 h-8 text-white" />
+                  <Building2 className="w-8 h-8 text-white" />
                 </div>
                 <div>
-                  <div className="text-white font-light">Session {selectedSession.id.slice(0, 8)}...</div>
-                  <div className="text-sm text-gray-400">{selectedSession.userId}</div>
+                  <div className="text-white font-light">{selectedOrganization.name}</div>
+                  <div className="text-sm text-gray-400">{selectedOrganization.slug}</div>
                 </div>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span className="text-gray-400">ID:</span>
-                  <span className="text-white text-sm">{selectedSession.id}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">User ID:</span>
-                  <span className="text-white text-sm">{selectedSession.userId}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Status:</span>
-                  <span className="text-white text-sm">
-                    {new Date(selectedSession.expiresAt) > new Date() ? 'Active' : 'Expired'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Expires:</span>
-                  <span className="text-white text-sm">{new Date(selectedSession.expiresAt).toLocaleString()}</span>
+                  <span className="text-white text-sm">{selectedOrganization.id}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Created:</span>
-                  <span className="text-white text-sm">{new Date(selectedSession.createdAt).toLocaleString()}</span>
+                  <span className="text-white text-sm">{new Date(selectedOrganization.createdAt).toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Updated:</span>
-                  <span className="text-white text-sm">{new Date(selectedSession.updatedAt).toLocaleString()}</span>
+                  <span className="text-white text-sm">{new Date(selectedOrganization.updatedAt).toLocaleString()}</span>
                 </div>
               </div>
             </div>

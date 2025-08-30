@@ -64,15 +64,15 @@ export default function Layout({ children }: LayoutProps) {
       <div className="flex">
         {/* Sidebar */}
         <div className="w-64 bg-black/70 border-r border-white/15 min-h-screen">
-          <div className="p-6">
-            <nav className="space-y-2">
+          <div className="">
+            <nav className="mt-2">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href
                 return (
                   <Link
                     key={item.name}
                     to={item.href}
-                    className={`flex items-center justify-between px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 group ${
+                    className={`flex items-center justify-between px-3 py-2 text-sm font-medium rounded-none border-b border-dashed transition-all duration-200 group ${
                       isActive
                         ? 'bg-white text-black shadow-sm'
                         : 'text-gray-300 hover:bg-white/90 hover:text-black/90'

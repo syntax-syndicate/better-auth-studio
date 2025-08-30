@@ -291,13 +291,33 @@ export function createRoutes(authConfig: AuthConfig) {
     }
   });
 
+  // Create user
+  router.post('/api/users', async (req: Request, res: Response) => {
+    try {
+      const adapter = await getAuthAdapter();
+      if (!adapter) {
+        return res.status(500).json({ error: 'Auth adapter not available' });
+      }
+
+      const userData = req.body;
+      const user = await adapter.createUser(userData);
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error('Error creating user:', error);
+      res.status(500).json({ error: 'Failed to create user' });
+    }
+  });
+
   // Update user
   router.put('/api/users/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       const userData = req.body;
+      
+      // For now, we'll use the existing getAuthData function
+      // In a real implementation, you'd use the adapter to update the user
       const updatedUser = await getAuthData(authConfig, 'updateUser', { id, userData });
-      res.json(updatedUser);
+      res.json({ success: true, user: updatedUser });
     } catch (error) {
       console.error('Error updating user:', error);
       res.status(500).json({ error: 'Failed to update user' });
