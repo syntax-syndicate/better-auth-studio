@@ -226,7 +226,6 @@ export function createRoutes(authConfig: AuthConfig) {
           const endIndex = startIndex + limit;
           const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
           
-          // Transform the data to match frontend expectations
           const transformedUsers = paginatedUsers.map((user: any) => ({
             id: user.id,
             email: user.email,
