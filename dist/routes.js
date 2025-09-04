@@ -440,34 +440,50 @@ function createRoutes(authConfig) {
             res.status(500).json({ error: 'Failed to create organization' });
         }
     });
-    // Update organization
     router.put('/api/organizations/:id', async (req, res) => {
         try {
             const { id } = req.params;
             const orgData = req.body;
-            // Generate slug from name if name is being updated
+            const adapter = await (0, auth_adapter_1.getAuthAdapter)();
+            if (!adapter) {
+                return res.status(500).json({ error: 'Auth adapter not available' });
+            }
             if (orgData.name && !orgData.slug) {
                 orgData.slug = orgData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
             }
-            // For now, we'll simulate the update since the adapter might not have update methods
             const updatedOrganization = {
                 id,
                 ...orgData,
                 updatedAt: new Date().toISOString()
             };
-            res.json({ success: true, organization: updatedOrganization });
+            const updatedOrg = await adapter.update({
+                model: 'organization',
+                where: [
+                    { field: 'id', value: id }
+                ],
+                update: updatedOrganization
+            });
+            res.json({ success: true, organization: updatedOrg });
         }
         catch (error) {
             console.error('Error updating organization:', error);
             res.status(500).json({ error: 'Failed to update organization' });
         }
     });
-    // Delete organization
     router.delete('/api/organizations/:id', async (req, res) => {
         try {
             const { id } = req.params;
-            // For now, we'll simulate the deletion
-            res.json({ success: true });
+            const adapter = await (0, auth_adapter_1.getAuthAdapter)();
+            if (!adapter) {
+                return res.status(500).json({ error: 'Auth adapter not available' });
+            }
+            const deletedOrg = await adapter.delete({
+                model: 'organization',
+                where: [
+                    { field: 'id', value: id }
+                ]
+            });
+            res.json({ success: true, organization: deletedOrg });
         }
         catch (error) {
             console.error('Error deleting organization:', error);
