@@ -3,9 +3,9 @@ import { Link, useLocation } from 'react-router-dom'
 import { 
   LayoutDashboard, 
   Users, 
+  Building2,
   Shield, 
   Settings, 
-  ChevronRight,
   Search
 } from 'lucide-react'
 import { Button } from './ui/button'
@@ -18,6 +18,7 @@ interface LayoutProps {
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Users', href: '/users', icon: Users, badge: '1,247' },
+  { name: 'Organizations', href: '/organizations', icon: Building2, badge: '12' },
   { name: 'Sessions', href: '/sessions', icon: Shield, badge: '3,456' },
   { name: 'Settings', href: '/settings', icon: Settings },
 ]
@@ -61,69 +62,39 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </div>
 
-      <div className="flex">
-        {/* Sidebar */}
-        <div className="w-64 bg-black/70 border-r border-white/15 min-h-screen">
-          <div className="">
-            <nav className="mt-2">
-              {navigation.map((item) => {
-                const isActive = location.pathname === item.href
-                return (
-                  <Link
-                    key={item.name}
-                    to={item.href}
-                    className={`flex items-center justify-between px-3 py-2 text-sm font-medium rounded-none border-b border-dashed transition-all duration-200 group ${
-                      isActive
-                        ? 'bg-white text-black shadow-sm'
-                        : 'text-gray-300 hover:bg-white/90 hover:text-black/90'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <item.icon className={`w-5 h-5 ${
-                        isActive ? 'text-black' : 'text-gray-400 group-hover:text-black/90'
-                      }`} />
-                      <span>{item.name}</span>
-                    </div>
-                    {item.badge && (
-                      <Badge variant="secondary" className="text-xs group-hover:bg-white group-hover:border-black group-hover:text-black bg-black/70 border border-white/15 rounded-none border-dashed">
-                        {item.badge}
-                      </Badge>
-                    )}
-                    {isActive && (
-                      <ChevronRight className="w-4 h-4 text-black" />
-                    )}
-                  </Link>
-                )
-              })}
-            </nav>
-
-            {/* Quick Stats */}
-            <div className="mt-8 pt-8 border-t border-white/15">
-              <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                QUICK STATS
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Active Users</span>
-                  <span className="text-sm font-medium text-white">892</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Total Sessions</span>
-                  <span className="text-sm font-medium text-white">1,234</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-400">Success Rate</span>
-                  <span className="text-sm font-medium text-green-400">99.8%</span>
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Top Navigation Tabs */}
+      <div className="bg-black/50 border-b border-white/10">
+        <div className="px-6">
+          <nav className="flex space-x-8">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center space-x-2 px-3 py-4 text-sm font-medium border-b-2 transition-all duration-200 ${
+                    isActive
+                      ? 'border-white text-white'
+                      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <Badge variant="secondary" className="text-xs bg-white/10 border border-white/20 rounded-sm">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
         </div>
+      </div>
 
-        {/* Main Content */}
-        <div className="flex-1 p-0">
-            {children}
-        </div>
+      {/* Main Content */}
+      <div className="flex-1 p-0">
+        {children}
       </div>
     </div>
   )

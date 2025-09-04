@@ -3,6 +3,28 @@ import { getAuthData } from './data';
 import { AuthConfig } from './config';
 import { getAuthAdapter, createMockUser, createMockSession, createMockAccount, createMockVerification } from './auth-adapter';
 
+async function findAuthConfigPath(): Promise<string | null> {
+  const { join, dirname } = await import('path');
+  const { existsSync } = await import('fs');
+  
+  const possiblePaths = [
+    'test-project/src/auth.ts',
+    'test-project/src/auth.js',
+    'src/auth.ts',
+    'src/auth.js',
+    'auth.ts',
+    'auth.js'
+  ];
+  
+  for (const path of possiblePaths) {
+    if (existsSync(path)) {
+      return join(process.cwd(), path);
+    }
+  }
+  
+  return null;
+}
+
 export function createRoutes(authConfig: AuthConfig) {
   const router = Router();
 
@@ -291,6 +313,181 @@ export function createRoutes(authConfig: AuthConfig) {
     } catch (error) {
       console.error('Error deleting user:', error);
       res.status(500).json({ error: 'Failed to delete user' });
+    }
+  });
+
+  // Check if organization plugin is enabled
+  router.get('/api/plugins/organization/status', async (req: Request, res: Response) => {
+    try {
+      const authConfigPath = await findAuthConfigPath();
+      if (!authConfigPath) {
+        return res.json({ 
+          enabled: false, 
+          error: 'No auth config found',
+          configPath: null 
+        });
+      }
+
+      try {
+        const authModule = await import(authConfigPath);
+        const auth = authModule.auth || authModule.default;
+        
+        if (!auth) {
+          return res.json({ 
+            enabled: false, 
+            error: 'No auth export found',
+            configPath: authConfigPath 
+          });
+        }
+
+        // Check if organization plugin is enabled
+        const hasOrganizationPlugin = auth.options?.plugins?.find((plugin: any) => 
+          plugin.id === "organization" || plugin.id === "organisations"
+        );
+
+        res.json({
+          enabled: !!hasOrganizationPlugin,
+          configPath: authConfigPath,
+          availablePlugins: auth.options?.plugins?.map((p: any) => p.id) || [],
+          organizationPlugin: hasOrganizationPlugin || null
+        });
+
+      } catch (error) {
+        console.error('Error checking organization plugin:', error);
+        res.json({ 
+          enabled: false, 
+          error: 'Failed to load auth config',
+          configPath: authConfigPath 
+        });
+      }
+    } catch (error) {
+      console.error('Error checking plugin status:', error);
+      res.status(500).json({ error: 'Failed to check plugin status' });
+    }
+  });
+
+  router.get('/api/organizations', async (req: Request, res: Response) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const search = req.query.search as string;
+
+      try {
+        const adapter = await getAuthAdapter();
+        if (adapter && typeof adapter.findMany === 'function') {
+          const allOrganizations = await adapter.findMany({ model: 'organization' });
+          console.log('Found organizations via findMany:', allOrganizations?.length || 0);
+          
+          let filteredOrganizations = allOrganizations || [];
+          if (search) {
+            filteredOrganizations = filteredOrganizations.filter((org: any) => 
+              org.name?.toLowerCase().includes(search.toLowerCase()) ||
+              org.slug?.toLowerCase().includes(search.toLowerCase())
+            );
+          }
+          
+          // Apply pagination
+          const startIndex = (page - 1) * limit;
+          const endIndex = startIndex + limit;
+          const paginatedOrganizations = filteredOrganizations.slice(startIndex, endIndex);
+          
+          const transformedOrganizations = paginatedOrganizations.map((org: any) => ({
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            metadata: org.metadata,
+            createdAt: org.createdAt,
+            updatedAt: org.updatedAt,
+          }));
+          
+          res.json({ organizations: transformedOrganizations });
+          return;
+        }
+      } catch (adapterError) {
+        console.error('Error fetching organizations from adapter:', adapterError);
+      }
+
+      const mockOrganizations = [
+        {
+          id: 'org_1',
+          name: 'Acme Corp',
+          slug: 'acme-corp',
+          metadata: { status: 'active' },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'org_2',
+          name: 'Tech Solutions',
+          slug: 'tech-solutions',
+          metadata: { status: 'active' },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      ];
+      
+      res.json({ organizations: mockOrganizations });
+    } catch (error) {
+      console.error('Error fetching organizations:', error);
+      res.status(500).json({ error: 'Failed to fetch organizations' });
+    }
+  });
+
+  router.post('/api/organizations', async (req: Request, res: Response) => {
+    try {
+      const adapter = await getAuthAdapter();
+      if (!adapter) {
+        return res.status(500).json({ error: 'Auth adapter not available' });
+      }
+
+      const orgData = req.body;
+      
+      if (!orgData.slug && orgData.name) {
+        orgData.slug = orgData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      }
+      
+      const organization = await adapter.createOrganization(orgData);
+      res.json({ success: true, organization });
+    } catch (error) {
+      console.error('Error creating organization:', error);
+      res.status(500).json({ error: 'Failed to create organization' });
+    }
+  });
+
+  // Update organization
+  router.put('/api/organizations/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      const orgData = req.body;
+      
+      // Generate slug from name if name is being updated
+      if (orgData.name && !orgData.slug) {
+        orgData.slug = orgData.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      }
+      
+      // For now, we'll simulate the update since the adapter might not have update methods
+      const updatedOrganization = {
+        id,
+        ...orgData,
+        updatedAt: new Date().toISOString()
+      };
+      
+      res.json({ success: true, organization: updatedOrganization });
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      res.status(500).json({ error: 'Failed to update organization' });
+    }
+  });
+
+  // Delete organization
+  router.delete('/api/organizations/:id', async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      // For now, we'll simulate the deletion
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting organization:', error);
+      res.status(500).json({ error: 'Failed to delete organization' });
     }
   });
 

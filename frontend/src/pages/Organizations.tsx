@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import {
   Building2,
   Search,
@@ -24,9 +25,18 @@ interface Organization {
   updatedAt: string
 }
 
+interface PluginStatus {
+  enabled: boolean
+  error?: string
+  configPath?: string | null
+  availablePlugins?: string[]
+  organizationPlugin?: any
+}
+
 export default function Organizations() {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
+  const [pluginStatus, setPluginStatus] = useState<PluginStatus | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -38,33 +48,36 @@ export default function Organizations() {
   const [seedingLogs, setSeedingLogs] = useState<string[]>([])
 
   useEffect(() => {
-    fetchOrganizations()
+    checkPluginStatus()
   }, [])
+
+  const checkPluginStatus = async () => {
+    try {
+      const response = await fetch('/api/plugins/organization/status')
+      const status = await response.json()
+      setPluginStatus(status)
+      
+      if (status.enabled) {
+        await fetchOrganizations()
+      } else {
+        setLoading(false)
+      }
+    } catch (error) {
+      console.error('Failed to check plugin status:', error)
+      setPluginStatus({ enabled: false, error: 'Failed to check plugin status' })
+      setLoading(false)
+    }
+  }
 
   const fetchOrganizations = async () => {
     try {
-      // For now, we'll use mock data since we don't have an organizations API yet
-      const mockOrganizations = [
-        {
-          id: 'org_1',
-          name: 'Acme Corp',
-          slug: 'acme-corp',
-          metadata: { status: 'active' },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        },
-        {
-          id: 'org_2',
-          name: 'Tech Solutions',
-          slug: 'tech-solutions',
-          metadata: { status: 'active' },
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      ]
-      setOrganizations(mockOrganizations)
+      // Request all organizations by setting a high limit
+      const response = await fetch('/api/organizations?limit=10000')
+      const data = await response.json()
+      setOrganizations(data.organizations || [])
     } catch (error) {
       console.error('Failed to fetch organizations:', error)
+      toast.error('Failed to fetch organizations')
     } finally {
       setLoading(false)
     }
@@ -137,22 +150,112 @@ export default function Organizations() {
     setShowDeleteModal(true)
   }
 
-  const handleCreateOrganization = async (organizationData: any) => {
-    // Implementation for creating organization
-    console.log('Creating organization:', organizationData)
-    setShowCreateModal(false)
+  const handleCreateOrganization = async () => {
+    const name = (document.getElementById('create-name') as HTMLInputElement)?.value
+    const slug = (document.getElementById('create-slug') as HTMLInputElement)?.value
+
+    if (!name) {
+      toast.error('Please fill in the organization name')
+      return
+    }
+
+    const toastId = toast.loading('Creating organization...')
+    
+    try {
+      const response = await fetch('/api/organizations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Refresh the organizations list to show the new organization
+        await fetchOrganizations()
+        setShowCreateModal(false)
+        // Clear the form
+        ;(document.getElementById('create-name') as HTMLInputElement).value = ''
+        ;(document.getElementById('create-slug') as HTMLInputElement).value = ''
+        toast.success('Organization created successfully!', { id: toastId })
+      } else {
+        toast.error(`Error creating organization: ${result.error || 'Unknown error'}`, { id: toastId })
+      }
+    } catch (error) {
+      console.error('Error creating organization:', error)
+      toast.error('Error creating organization', { id: toastId })
+    }
   }
 
-  const handleUpdateOrganization = async (organizationData: any) => {
-    // Implementation for updating organization
-    console.log('Updating organization:', organizationData)
-    setShowEditModal(false)
+  const handleUpdateOrganization = async () => {
+    if (!selectedOrganization) {
+      toast.error('No organization selected')
+      return
+    }
+
+    const name = (document.getElementById('edit-name') as HTMLInputElement)?.value
+    const slug = (document.getElementById('edit-slug') as HTMLInputElement)?.value
+
+    if (!name) {
+      toast.error('Please fill in the organization name')
+      return
+    }
+
+    const toastId = toast.loading('Updating organization...')
+    
+    try {
+      const response = await fetch(`/api/organizations/${selectedOrganization.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, slug })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Refresh the organizations list to show the updated organization
+        await fetchOrganizations()
+        setShowEditModal(false)
+        setSelectedOrganization(null)
+        toast.success('Organization updated successfully!', { id: toastId })
+      } else {
+        toast.error(`Error updating organization: ${result.error || 'Unknown error'}`, { id: toastId })
+      }
+    } catch (error) {
+      console.error('Error updating organization:', error)
+      toast.error('Error updating organization', { id: toastId })
+    }
   }
 
   const handleDeleteOrganization = async () => {
-    // Implementation for deleting organization
-    console.log('Deleting organization:', selectedOrganization?.id)
-    setShowDeleteModal(false)
+    if (!selectedOrganization) {
+      toast.error('No organization selected')
+      return
+    }
+
+    const toastId = toast.loading('Deleting organization...')
+    
+    try {
+      const response = await fetch(`/api/organizations/${selectedOrganization.id}`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        // Refresh the organizations list to remove the deleted organization
+        await fetchOrganizations()
+        setShowDeleteModal(false)
+        setSelectedOrganization(null)
+        toast.success('Organization deleted successfully!', { id: toastId })
+      } else {
+        toast.error(`Error deleting organization: ${result.error || 'Unknown error'}`, { id: toastId })
+      }
+    } catch (error) {
+      console.error('Error deleting organization:', error)
+      toast.error('Error deleting organization', { id: toastId })
+    }
   }
 
   const filteredOrganizations = organizations.filter(organization => {
@@ -165,7 +268,90 @@ export default function Organizations() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading organizations...</div>
+        <div className="text-white">Loading all organizations from database...</div>
+      </div>
+    )
+  }
+
+  // Show plugin setup prompt if organization plugin is not enabled
+  if (pluginStatus && !pluginStatus.enabled) {
+    return (
+      <div className="space-y-6 p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl text-white font-light">Organizations</h1>
+            <p className="text-gray-400 mt-1">Manage your application organizations</p>
+          </div>
+        </div>
+
+        {/* Plugin Setup Card */}
+        <div className="bg-black/30 border border-dashed border-white/50 rounded-none p-8">
+          <div className="flex items-start space-x-4">
+            <div className="flex-shrink-0">
+              <Building2 className="w-12 h-12 text-white" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl text-white font-light mb-2">Organization Plugin Required</h3>
+              <p className="text-gray-300 mb-6">
+                To use Organizations in Better Auth Studio, you need to enable the organization plugin in your Better Auth configuration.
+              </p>
+              
+              <div className="bg-black/50 border border-dashed border-white/20 rounded-none p-4 mb-6">
+                <h4 className="text-white font-light mb-3">Follow these steps:</h4>
+                <ol className="text-gray-300 space-y-2 text-sm list-decimal list-inside">
+                  <li>Import the plugin in your auth configuration file{pluginStatus.configPath && (
+                    <span className="text-gray-400"> ({pluginStatus.configPath})</span>
+                  )}:</li>
+                </ol>
+                
+                <div className="mt-4 bg-black/70 border border-dashed border-white/10 rounded-none p-3 overflow-x-auto">
+                  <pre className="text-sm text-gray-300">
+<span className="text-blue-400">import</span> {`{ betterAuth }`} <span className="text-blue-400">from</span> <span className="text-green-400">"better-auth/plugin"</span> <br />
+<span className="text-blue-400">import</span> {`{ organization }`} <span className="text-blue-400">from</span> <span className="text-green-400">"better-auth/plugin"</span> <br />
+
+<span className="text-blue-400">export const</span> <span className="text-yellow-300">auth</span> = <span className="text-yellow-300">betterAuth</span>({`{`} <br />
+  <span className="text-gray-500 pl-10">// ... your existing configuration</span> <br />
+  <span className="text-red-300 pl-10">plugins</span>: [
+    <span className="text-yellow-300">organization</span>()] <br />
+{`}`}) <br />
+                  </pre>
+                </div>
+                
+                <div className="mt-4">
+                  <p className="text-gray-400 text-sm">2. Restart your application to apply the changes</p>
+                </div>
+              </div>
+
+              {pluginStatus.availablePlugins && pluginStatus.availablePlugins.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-gray-400 text-sm">
+                    Currently enabled plugins: {pluginStatus.availablePlugins.join(', ')}
+                  </p>
+                </div>
+              )}
+
+              <Button
+                onClick={() => window.location.reload()}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+              >
+                Check Again
+              </Button>
+              
+              <div className="mt-4 text-xs text-gray-500">
+                Need help? Check the{' '}
+                <a 
+                  href="https://better-auth.com/docs/plugins/organization" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-white hover:underline"
+                >
+                  Better Auth Organization Plugin Documentation
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -443,7 +629,7 @@ export default function Organizations() {
                 Cancel
               </Button>
               <Button
-                onClick={() => handleCreateOrganization({})}
+                onClick={handleCreateOrganization}
                 className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
               >
                 Create
@@ -504,7 +690,7 @@ export default function Organizations() {
                 Cancel
               </Button>
               <Button
-                onClick={() => handleUpdateOrganization({})}
+                onClick={handleUpdateOrganization}
                 className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
               >
                 Update

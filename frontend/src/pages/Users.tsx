@@ -7,11 +7,11 @@ import {
   Edit,
   Trash2,
   UserPlus,
-  Shield,
   Mail,
   Eye,
   X,
-  Database
+  Database,
+  Check
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -338,8 +338,8 @@ export default function Users() {
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
                       {user.emailVerified ? (
-                        <Shield className="w-4 h-4 text-green-400" />
-                      ) : (
+                        <Check className="w-4 h-4 text-green-400" />
+                       ) : (
                         <Mail className="w-4 h-4 text-yellow-400" />
                       )}
                       <span className="text-sm text-gray-400">
@@ -473,7 +473,7 @@ export default function Users() {
                       const count = parseInt((document.getElementById('user-count') as HTMLInputElement)?.value || '5')
                       handleSeedUsers(count)
                     }}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                    className="bg-transparent hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
                   >
                     Seed Users
                   </Button>

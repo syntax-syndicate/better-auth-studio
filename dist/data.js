@@ -148,7 +148,7 @@ async function deleteRealUser(adapter, userId) {
     try {
         // Use adapter's delete method if available
         if (adapter.delete) {
-            await adapter.delete({ model: 'user', where: { id: userId } });
+            await adapter.delete({ model: 'user', where: [{ field: 'id', value: userId }] });
         }
         else {
             console.warn('Delete method not available on adapter');
