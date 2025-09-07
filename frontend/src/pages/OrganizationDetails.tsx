@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import {
     Building2,
@@ -33,7 +33,6 @@ interface Organization {
 interface Team {
     id: string
     name: string
-    slug: string
     organizationId: string
     metadata?: any
     createdAt: string
@@ -84,6 +83,7 @@ interface Member {
 
 export default function OrganizationDetails() {
     const { orgId } = useParams<{ orgId: string }>()
+    const navigate = useNavigate()
     const [organization, setOrganization] = useState<Organization | null>(null)
     const [teams, setTeams] = useState<Team[]>([])
     const [invitations, setInvitations] = useState<Invitation[]>([])
@@ -102,7 +102,7 @@ export default function OrganizationDetails() {
     
     // Form states
     const [inviteEmail, setInviteEmail] = useState('')
-    const [teamFormData, setTeamFormData] = useState({ name: '', slug: '' })
+    const [teamFormData, setTeamFormData] = useState({ name: '' })
     const [seedingLogs, setSeedingLogs] = useState<string[]>([])
 
     useEffect(() => {
@@ -111,28 +111,35 @@ export default function OrganizationDetails() {
             checkTeamsEnabled()
             fetchInvitations()
             fetchMembers()
+            fetchTeams()
         }
     }, [orgId])
 
-    // Utility function to generate slug from team name
-    const generateSlug = (name: string): string => {
-        return name
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^a-z0-9-]/g, '')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '')
-    }
+    // Fetch teams when teams are enabled
+    useEffect(() => {
+        if (teamsEnabled && orgId) {
+            fetchTeams()
+        }
+    }, [])
 
-    // Handle team form name change with auto-slug generation
+    // Fetch data when tabs become active (teams are already fetched when enabled)
+    // Teams tab will use the already fetched data
+
+    useEffect(() => {
+        if (activeTab === 'members' && orgId) {
+            fetchMembers()
+        }
+    }, [activeTab, orgId])
+
+    useEffect(() => {
+        if (activeTab === 'invitations' && orgId) {
+            fetchInvitations()
+        }
+    }, [activeTab, orgId])
+
+    // Handle team form name change
     const handleTeamNameChange = (name: string) => {
-        const slug = generateSlug(name)
-        setTeamFormData({ name, slug })
-    }
-
-    // Handle team form slug change (manual override)
-    const handleTeamSlugChange = (slug: string) => {
-        setTeamFormData(prev => ({ ...prev, slug: generateSlug(slug) }))
+        setTeamFormData({ name })
     }
 
     const fetchOrganization = async () => {
@@ -142,9 +149,7 @@ export default function OrganizationDetails() {
 
             if (data.success) {
                 setOrganization(data.organization)
-                if (teamsEnabled) {
-                    await fetchTeams()
-                }
+                // Teams will be fetched when the teams tab becomes active
             } else {
                 toast.error('Organization not found')
             }
@@ -357,7 +362,6 @@ export default function OrganizationDetails() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
                     name: teamFormData.name,
-                    slug: teamFormData.slug,
                     organizationId: orgId
                 })
             })
@@ -367,7 +371,7 @@ export default function OrganizationDetails() {
             if (result.success) {
                 await fetchTeams()
                 setShowCreateTeamModal(false)
-                setTeamFormData({ name: '', slug: '' })
+                setTeamFormData({ name: '' })
                 toast.success('Team created successfully!', { id: toastId })
             } else {
                 toast.error(`Error creating team: ${result.error || 'Unknown error'}`, { id: toastId })
@@ -391,8 +395,7 @@ export default function OrganizationDetails() {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
-                    name: teamFormData.name,
-                    slug: teamFormData.slug
+                    name: teamFormData.name
                 })
             })
 
@@ -402,7 +405,7 @@ export default function OrganizationDetails() {
                 await fetchTeams()
                 setShowEditTeamModal(false)
                 setSelectedTeam(null)
-                setTeamFormData({ name: '', slug: '' })
+                setTeamFormData({ name: '' })
                 toast.success('Team updated successfully!', { id: toastId })
             } else {
                 toast.error(`Error updating team: ${result.error || 'Unknown error'}`, { id: toastId })
@@ -446,7 +449,7 @@ export default function OrganizationDetails() {
     // Modal handlers
     const openEditTeamModal = (team: Team) => {
         setSelectedTeam(team)
-        setTeamFormData({ name: team.name, slug: team.slug })
+        setTeamFormData({ name: team.name })
         setShowEditTeamModal(true)
     }
 
@@ -541,6 +544,9 @@ export default function OrganizationDetails() {
                     >
                         <Building2 className="w-4 h-4" />
                         <span>Details</span>
+                        <Badge variant="secondary" className="text-xs bg-white/10 border border-white/20 rounded-sm">
+                            {members.length + invitations.length + teams.length}
+                        </Badge>
                     </button>
                     <button
                         onClick={() => setActiveTab('members')}
@@ -629,7 +635,7 @@ export default function OrganizationDetails() {
                     </div>
 
                     {/* Organization Stats */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                         <div className="bg-black/30 border border-dashed border-white/20 rounded-none p-6">
                             <div className="flex items-center space-x-3">
                                 <Users className="w-8 h-8 text-white" />
@@ -645,6 +651,15 @@ export default function OrganizationDetails() {
                                 <div>
                                     <p className="text-2xl text-white font-light">{teams.length}</p>
                                     <p className="text-sm text-gray-400">Teams</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="bg-black/30 border border-dashed border-white/20 rounded-none p-6">
+                            <div className="flex items-center space-x-3">
+                                <Mail className="w-8 h-8 text-white" />
+                                <div>
+                                    <p className="text-2xl text-white font-light">{invitations.length}</p>
+                                    <p className="text-sm text-gray-400">Invitations</p>
                                 </div>
                             </div>
                         </div>
@@ -703,7 +718,7 @@ export default function OrganizationDetails() {
                                                         </div>
                                                         <div>
                                                             <div className="text-white font-light">{team.name}</div>
-                                                            <div className="text-sm text-gray-400">{team.slug}</div>
+                                                            <div className="text-sm text-gray-400">Team ID: {team.id}</div>
                                                         </div>
                                                     </div>
                                                 </td>
@@ -717,7 +732,7 @@ export default function OrganizationDetails() {
                                                             variant="outline"
                                                             size="sm"
                                                             className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-                                                            onClick={() => {/* Navigate to team details */}}
+                                                            onClick={() => navigate(`/teams/${team.id}`)}
                                                         >
                                                             <Eye className="w-4 h-4 mr-1" />
                                                             View
@@ -1049,7 +1064,7 @@ export default function OrganizationDetails() {
                                 size="sm"
                                 onClick={() => {
                                     setShowCreateTeamModal(false)
-                                    setTeamFormData({ name: '', slug: '' })
+                                    setTeamFormData({ name: '' })
                                 }}
                                 className="text-gray-400 hover:text-white rounded-none"
                             >
@@ -1067,26 +1082,13 @@ export default function OrganizationDetails() {
                                     className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                                 />
                             </div>
-                            <div>
-                                <Label htmlFor="team-slug" className="text-sm text-gray-400 font-light">Team Slug</Label>
-                                <Input
-                                    id="team-slug"
-                                    value={teamFormData.slug}
-                                    onChange={(e) => handleTeamSlugChange(e.target.value)}
-                                    placeholder="e.g. development-team"
-                                    className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Auto-generated from name. You can edit it manually.
-                                </p>
-                            </div>
                         </div>
                         <div className="flex justify-end space-x-3 mt-6">
                             <Button
                                 variant="outline"
                                 onClick={() => {
                                     setShowCreateTeamModal(false)
-                                    setTeamFormData({ name: '', slug: '' })
+                                    setTeamFormData({ name: '' })
                                 }}
                                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
                             >
@@ -1114,7 +1116,7 @@ export default function OrganizationDetails() {
                                 size="sm"
                                 onClick={() => {
                                     setShowEditTeamModal(false)
-                                    setTeamFormData({ name: '', slug: '' })
+                                    setTeamFormData({ name: '' })
                                 }}
                                 className="text-gray-400 hover:text-white rounded-none"
                             >
@@ -1128,7 +1130,7 @@ export default function OrganizationDetails() {
                                 </div>
                                 <div>
                                     <div className="text-white font-light">{selectedTeam.name}</div>
-                                    <div className="text-sm text-gray-400">{selectedTeam.slug}</div>
+                                    <div className="text-sm text-gray-400">Team ID: {selectedTeam.id}</div>
                                 </div>
                             </div>
                             <div>
@@ -1141,26 +1143,13 @@ export default function OrganizationDetails() {
                                     className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                                 />
                             </div>
-                            <div>
-                                <Label htmlFor="edit-team-slug" className="text-sm text-gray-400 font-light">Team Slug</Label>
-                                <Input
-                                    id="edit-team-slug"
-                                    value={teamFormData.slug}
-                                    onChange={(e) => handleTeamSlugChange(e.target.value)}
-                                    placeholder="e.g. development-team"
-                                    className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    Auto-generated from name. You can edit it manually.
-                                </p>
-                            </div>
                         </div>
                         <div className="flex justify-end space-x-3 mt-6">
                             <Button
                                 variant="outline"
                                 onClick={() => {
                                     setShowEditTeamModal(false)
-                                    setTeamFormData({ name: '', slug: '' })
+                                    setTeamFormData({ name: '' })
                                 }}
                                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
                             >
@@ -1199,7 +1188,7 @@ export default function OrganizationDetails() {
                                 </div>
                                 <div>
                                     <div className="text-white font-light">{selectedTeam.name}</div>
-                                    <div className="text-sm text-gray-400">{selectedTeam.slug}</div>
+                                    <div className="text-sm text-gray-400">Team ID: {selectedTeam.id}</div>
                                 </div>
                             </div>
                             <p className="text-gray-400">Are you sure you want to delete this team? This action cannot be undone.</p>

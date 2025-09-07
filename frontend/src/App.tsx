@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Users from './pages/Users'
 import Organizations from './pages/Organizations'
 import OrganizationDetails from './pages/OrganizationDetails'
+import TeamDetails from './pages/TeamDetails'
 import Sessions from './pages/Sessions'
 import Settings from './pages/Settings'
 
@@ -17,6 +18,7 @@ function App() {
           <Route path="/users" element={<Users />} />
           <Route path="/organizations" element={<Organizations />} />
           <Route path="/organizations/:orgId" element={<OrganizationDetails />} />
+          <Route path="/teams/:teamId" element={<TeamDetails />} />
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>

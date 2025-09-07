@@ -569,37 +569,38 @@ function createRoutes(authConfig) {
             if (!adapter) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
             }
-            // Get existing users to add as members
             if (!adapter.findMany || !adapter.create) {
                 return res.status(500).json({ error: 'Adapter findMany method not available' });
             }
-            const users = await adapter.findMany({ model: 'user', limit: 10000 });
-            if (!users || users.length === 0) {
-                return res.json({ success: false, error: 'No users available to add as members' });
-            }
-            // Get existing members to avoid duplicates
-            let existingMembers = [];
-            try {
-                if (adapter.findMany) {
-                    existingMembers = await adapter.findMany({
-                        model: 'member',
-                        where: [{ field: 'organizationId', value: orgId }],
-                        limit: 10000
-                    }) || [];
+            // Generate random string for unique emails
+            const generateRandomString = (length) => {
+                const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+                let result = '';
+                for (let i = 0; i < length; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
                 }
-            }
-            catch (error) {
-                console.log('No existing members or member model not available');
-            }
-            const existingUserIds = existingMembers.map((m) => m.userId);
-            const availableUsers = users.filter((user) => !existingUserIds.includes(user.id));
-            if (availableUsers.length === 0) {
-                return res.json({ success: false, error: 'All users are already members of this organization' });
-            }
+                return result;
+            };
             const results = [];
-            const usersToAdd = availableUsers.slice(0, count);
-            for (const user of usersToAdd) {
+            for (let i = 0; i < count; i++) {
                 try {
+                    // Generate random email and user data
+                    const randomString = generateRandomString(8);
+                    const email = `user${randomString}@example.com`;
+                    const name = `User ${randomString}`;
+                    // Create user first
+                    const userData = {
+                        name,
+                        email,
+                        emailVerified: false,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    };
+                    const user = await adapter.create({
+                        model: 'user',
+                        data: userData
+                    });
+                    // Create member
                     const memberData = {
                         organizationId: orgId,
                         userId: user.id,
@@ -615,8 +616,8 @@ function createRoutes(authConfig) {
                         member: {
                             userId: user.id,
                             user: {
-                                name: user.name,
-                                email: user.email
+                                name,
+                                email
                             }
                         }
                     });
@@ -769,17 +770,27 @@ function createRoutes(authConfig) {
                 try {
                     const teams = await adapter.findMany({
                         model: 'team',
-                        where: [{ organizationId: orgId }],
+                        where: [{ field: 'organizationId', value: orgId }],
                         limit: 10000
                     });
-                    const transformedTeams = (teams || []).map((team) => ({
-                        id: team.id,
-                        name: team.name,
-                        organizationId: team.organizationId,
-                        metadata: team.metadata,
-                        createdAt: team.createdAt,
-                        updatedAt: team.updatedAt,
-                        memberCount: team.memberCount || 0
+                    const transformedTeams = await Promise.all((teams || []).map(async (team) => {
+                        if (!adapter.findMany) {
+                            return null;
+                        }
+                        const teamMembers = await adapter.findMany({
+                            model: 'teamMember',
+                            where: [{ field: 'teamId', value: team.id }],
+                            limit: 10000
+                        });
+                        return {
+                            id: team.id,
+                            name: team.name,
+                            organizationId: team.organizationId,
+                            metadata: team.metadata,
+                            createdAt: team.createdAt,
+                            updatedAt: team.updatedAt,
+                            memberCount: teamMembers ? teamMembers.length : 0
+                        };
                     }));
                     res.json({ success: true, teams: transformedTeams });
                     return;
@@ -799,14 +810,13 @@ function createRoutes(authConfig) {
     router.post('/api/organizations/:orgId/teams', async (req, res) => {
         try {
             const { orgId } = req.params;
-            const { name, slug } = req.body;
+            const { name } = req.body;
             const adapter = await (0, auth_adapter_1.getAuthAdapter)();
             if (!adapter) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
             }
             const teamData = {
                 name,
-                slug,
                 organizationId: orgId,
                 createdAt: new Date(),
                 updatedAt: new Date(),
@@ -836,10 +846,188 @@ function createRoutes(authConfig) {
             res.status(500).json({ error: 'Failed to create team' });
         }
     });
+    // Get single team with organization info
+    router.get('/api/teams/:id', async (req, res) => {
+        try {
+            const { id } = req.params;
+            const adapter = await (0, auth_adapter_1.getAuthAdapter)();
+            if (adapter && typeof adapter.findMany === 'function') {
+                try {
+                    const teams = await adapter.findMany({
+                        model: 'team',
+                        where: [{ field: 'id', value: id }],
+                        limit: 1
+                    });
+                    const team = teams?.[0];
+                    if (team) {
+                        // Get organization info
+                        let organization = null;
+                        try {
+                            const orgs = await adapter.findMany({
+                                model: 'organization',
+                                where: [{ field: 'id', value: team.organizationId }],
+                                limit: 1
+                            });
+                            organization = orgs?.[0];
+                        }
+                        catch (error) {
+                            console.error('Error fetching organization for team:', error);
+                        }
+                        const transformedTeam = {
+                            id: team.id,
+                            name: team.name,
+                            organizationId: team.organizationId,
+                            metadata: team.metadata,
+                            createdAt: team.createdAt,
+                            updatedAt: team.updatedAt,
+                            memberCount: team.memberCount || 0,
+                            organization: organization ? {
+                                id: organization.id,
+                                name: organization.name
+                            } : null
+                        };
+                        res.json({ success: true, team: transformedTeam });
+                        return;
+                    }
+                }
+                catch (error) {
+                    console.error('Error fetching team from adapter:', error);
+                }
+            }
+            res.status(404).json({ success: false, error: 'Team not found' });
+        }
+        catch (error) {
+            console.error('Error fetching team:', error);
+            res.status(500).json({ error: 'Failed to fetch team' });
+        }
+    });
+    // Get team members
+    router.get('/api/teams/:teamId/members', async (req, res) => {
+        try {
+            const { teamId } = req.params;
+            const adapter = await (0, auth_adapter_1.getAuthAdapter)();
+            if (adapter && typeof adapter.findMany === 'function') {
+                try {
+                    const teamMembers = await adapter.findMany({
+                        model: 'teamMember',
+                        where: [{ field: 'teamId', value: teamId }],
+                        limit: 10000
+                    });
+                    // Get user details for each team member
+                    const membersWithUsers = await Promise.all((teamMembers || []).map(async (member) => {
+                        try {
+                            if (adapter.findMany) {
+                                const users = await adapter.findMany({
+                                    model: 'user',
+                                    where: [{ field: 'id', value: member.userId }],
+                                    limit: 1
+                                });
+                                const user = users?.[0];
+                                return {
+                                    id: member.id,
+                                    userId: member.userId,
+                                    teamId: member.teamId,
+                                    role: member.role || 'member',
+                                    joinedAt: member.joinedAt || member.createdAt,
+                                    user: user ? {
+                                        id: user.id,
+                                        name: user.name,
+                                        email: user.email,
+                                        image: user.image,
+                                        emailVerified: user.emailVerified
+                                    } : null
+                                };
+                            }
+                            return null;
+                        }
+                        catch (error) {
+                            console.error('Error fetching user for team member:', error);
+                            return null;
+                        }
+                    }));
+                    const validMembers = membersWithUsers.filter(member => member && member.user);
+                    res.json({ success: true, members: validMembers });
+                    return;
+                }
+                catch (error) {
+                    console.error('Error fetching team members from adapter:', error);
+                }
+            }
+            res.json({ success: true, members: [] });
+        }
+        catch (error) {
+            console.error('Error fetching team members:', error);
+            res.status(500).json({ error: 'Failed to fetch team members' });
+        }
+    });
+    // Add members to team
+    router.post('/api/teams/:teamId/members', async (req, res) => {
+        try {
+            const { teamId } = req.params;
+            const { userIds } = req.body;
+            if (!Array.isArray(userIds) || userIds.length === 0) {
+                return res.status(400).json({ error: 'userIds array is required' });
+            }
+            const adapter = await (0, auth_adapter_1.getAuthAdapter)();
+            if (!adapter || !adapter.create) {
+                return res.status(500).json({ error: 'Adapter not available' });
+            }
+            const results = [];
+            for (const userId of userIds) {
+                try {
+                    await adapter.create({
+                        model: 'teamMember',
+                        data: {
+                            teamId,
+                            userId,
+                            role: 'member',
+                            createdAt: new Date()
+                        }
+                    });
+                    results.push({ success: true, userId });
+                }
+                catch (error) {
+                    results.push({
+                        success: false,
+                        userId,
+                        error: error instanceof Error ? error.message : 'Unknown error'
+                    });
+                }
+            }
+            res.json({
+                success: true,
+                message: `Added ${results.filter(r => r.success).length} members`,
+                results
+            });
+        }
+        catch (error) {
+            console.error('Error adding team members:', error);
+            res.status(500).json({ error: 'Failed to add team members' });
+        }
+    });
+    // Remove team member
+    router.delete('/api/team-members/:id', async (req, res) => {
+        try {
+            const { id } = req.params;
+            const adapter = await (0, auth_adapter_1.getAuthAdapter)();
+            if (!adapter || !adapter.delete) {
+                return res.status(500).json({ error: 'Adapter not available' });
+            }
+            await adapter.delete({
+                model: 'teamMember',
+                where: [{ field: 'id', value: id }]
+            });
+            res.json({ success: true });
+        }
+        catch (error) {
+            console.error('Error removing team member:', error);
+            res.status(500).json({ error: 'Failed to remove team member' });
+        }
+    });
     router.put('/api/teams/:id', async (req, res) => {
         try {
             const { id } = req.params;
-            const { name, slug } = req.body;
+            const { name } = req.body;
             const adapter = await (0, auth_adapter_1.getAuthAdapter)();
             if (!adapter) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
@@ -847,7 +1035,6 @@ function createRoutes(authConfig) {
             const updatedTeam = {
                 id,
                 name,
-                slug,
                 updatedAt: new Date().toISOString()
             };
             if (!adapter.update) {
@@ -855,7 +1042,7 @@ function createRoutes(authConfig) {
             }
             await adapter.update({
                 model: 'team',
-                where: [{ id }],
+                where: [{ field: 'id', value: id }],
                 update: {
                     name: updatedTeam.name,
                     updatedAt: updatedTeam.updatedAt
@@ -880,7 +1067,7 @@ function createRoutes(authConfig) {
             }
             await adapter.delete({
                 model: 'team',
-                where: [{ id }],
+                where: [{ field: 'id', value: id }],
             });
             res.json({ success: true });
         }
