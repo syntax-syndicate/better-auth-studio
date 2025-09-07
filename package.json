@@ -1,7 +1,7 @@
 {
   "name": "better-auth-studio",
   "version": "1.0.0",
-  "description": "A GUI dashboard for Better Auth - view and manage your authentication data",
+  "description": "Studio for Better Auth",
   "main": "dist/index.js",
   "bin": {
     "better-auth-studio": "./dist/cli.js"
