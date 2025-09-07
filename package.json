@@ -16,7 +16,12 @@
     "prepublishOnly": "npm run clean && npm run build",
     "frontend:dev": "cd frontend && npm run dev",
     "frontend:build": "cd frontend && npm run build",
-    "frontend:preview": "cd frontend && npm run preview"
+    "frontend:preview": "cd frontend && npm run preview",
+    "release": "pnpm build && bumpp && pnpm publish --access public --no-git-checks",
+    "release:beta": "pnpm build && bumpp --preid beta && pnpm publish --access public --tag beta --no-git-checks",
+    "release:no-build": "bumpp && pnpm publish --access public --no-git-checks --tag next",
+    "release:canary": "pnpm build && bumpp --preid canary --no-commit --no-tag --no-push && pnpm publish --access public --tag canary --no-git-checks",
+    "bump": "bumpp"
   },
   "keywords": [
     "better-auth",
