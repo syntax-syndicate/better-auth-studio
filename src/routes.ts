@@ -28,7 +28,6 @@ async function findAuthConfigPath(): Promise<string | null> {
 export function createRoutes(authConfig: AuthConfig) {
   const router = Router();
 
-  // Health check with comprehensive system info
   router.get('/api/health', (req: Request, res: Response) => {
     const uptime = process.uptime();
     const hours = Math.floor(uptime / 3600);
@@ -55,19 +54,15 @@ export function createRoutes(authConfig: AuthConfig) {
     });
   });
 
-  // Get comprehensive Better Auth configuration
   router.get('/api/config', (req: Request, res: Response) => {
     console.log('Raw authConfig:', JSON.stringify(authConfig, null, 2));
 
-    // Extract comprehensive configuration from Better Auth config
     const config = {
-      // Basic application settings
       appName: authConfig.appName || 'Better Auth',
       baseURL: authConfig.baseURL || process.env.BETTER_AUTH_URL,
       basePath: authConfig.basePath || '/api/auth',
       secret: authConfig.secret ? 'Configured' : 'Not set',
 
-      // Database configuration
       database: {
         type: authConfig.database?.type || 'unknown',
         dialect: authConfig.database?.dialect,
@@ -76,7 +71,6 @@ export function createRoutes(authConfig: AuthConfig) {
         url: authConfig.database?.url
       },
 
-      // Email verification settings
       emailVerification: {
         sendOnSignUp: authConfig.emailVerification?.sendOnSignUp || false,
         sendOnSignIn: authConfig.emailVerification?.sendOnSignIn || false,
@@ -84,7 +78,6 @@ export function createRoutes(authConfig: AuthConfig) {
         expiresIn: authConfig.emailVerification?.expiresIn || 3600
       },
 
-      // Email and password authentication - IMPORTANT: Use the actual config values
       emailAndPassword: {
         enabled: authConfig.emailAndPassword?.enabled ?? false,
         disableSignUp: authConfig.emailAndPassword?.disableSignUp ?? false,
@@ -96,7 +89,6 @@ export function createRoutes(authConfig: AuthConfig) {
         revokeSessionsOnPasswordReset: authConfig.emailAndPassword?.revokeSessionsOnPasswordReset ?? false
       },
 
-      // Social providers - Convert from object to array format
       socialProviders: authConfig.socialProviders ?
         Object.entries(authConfig.socialProviders).map(([provider, config]: [string, any]) => ({
           type: provider,
@@ -107,7 +99,6 @@ export function createRoutes(authConfig: AuthConfig) {
         })) :
         (authConfig.providers || []),
 
-      // User configuration
       user: {
         modelName: authConfig.user?.modelName || 'user',
         changeEmail: {
@@ -119,7 +110,6 @@ export function createRoutes(authConfig: AuthConfig) {
         }
       },
 
-      // Session configuration - Use actual config values
       session: {
         modelName: authConfig.session?.modelName || 'session',
         expiresIn: authConfig.session?.expiresIn || 604800, // 7 days
@@ -134,7 +124,6 @@ export function createRoutes(authConfig: AuthConfig) {
         freshAge: authConfig.session?.freshAge || 86400
       },
 
-      // Account configuration
       account: {
         modelName: authConfig.account?.modelName || 'account',
         updateAccountOnSignIn: authConfig.account?.updateAccountOnSignIn !== false, // defaults to true
@@ -148,16 +137,13 @@ export function createRoutes(authConfig: AuthConfig) {
         encryptOAuthTokens: authConfig.account?.encryptOAuthTokens || false
       },
 
-      // Verification configuration
       verification: {
         modelName: authConfig.verification?.modelName || 'verification',
         disableCleanup: authConfig.verification?.disableCleanup || false
       },
 
-      // Trusted origins
       trustedOrigins: Array.isArray(authConfig.trustedOrigins) ? authConfig.trustedOrigins : [],
 
-      // Rate limiting - Use actual config values
       rateLimit: {
         enabled: authConfig.rateLimit?.enabled ?? false,
         window: authConfig.rateLimit?.window || 10,
@@ -166,7 +152,6 @@ export function createRoutes(authConfig: AuthConfig) {
         modelName: authConfig.rateLimit?.modelName || 'rateLimit'
       },
 
-      // Advanced options
       advanced: {
         ipAddress: {
           ipAddressHeaders: authConfig.advanced?.ipAddress?.ipAddressHeaders || [],
@@ -188,16 +173,13 @@ export function createRoutes(authConfig: AuthConfig) {
         }
       },
 
-      // Disabled paths
       disabledPaths: authConfig.disabledPaths || [],
 
-      // Telemetry - Use actual config values
       telemetry: {
         enabled: authConfig.telemetry?.enabled ?? false,
         debug: authConfig.telemetry?.debug || false
       },
 
-      // Studio information
       studio: {
         version: '1.0.0',
         nodeVersion: process.version,
