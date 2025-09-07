@@ -407,7 +407,7 @@ export default function Organizations() {
         </div>
         <div className="flex items-center space-x-3">
           <Button
-            className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+            className="border border-dashed border-white/20 text-white hover:bg-white/10 bg-transparent rounded-none"
             onClick={() => setShowSeedModal(true)}
           >
             <Database className="w-4 h-4 mr-2" />

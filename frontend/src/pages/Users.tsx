@@ -86,27 +86,6 @@ export default function Users() {
     }
   }
 
-  const handleSeedInvitations = async (count: number) => {
-    setSeedingLogs([])
-    
-    try {
-      // Mock implementation for now
-      const mockResults = Array.from({ length: count }, (_, i) => ({
-        invitation: {
-          id: `inv_${Date.now()}_${i}`,
-          email: `invited${i + 1}@example.com`,
-          role: 'member'
-        }
-      }))
-      
-      setSeedingLogs(mockResults.map((r: any) =>
-        `✅ Created invitation: ${r.invitation.email}`
-      ))
-    } catch (error) {
-      setSeedingLogs([`❌ Error: ${error}`])
-    }
-  }
-
   const openViewModal = (user: User) => {
     setSelectedUser(user)
     setShowViewModal(true)
@@ -267,7 +246,7 @@ export default function Users() {
         </div>
         <div className="flex items-center space-x-3">
           <Button
-            className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+            className="border border-dashed border-white/20 text-white hover:bg-white/10 bg-transparent rounded-none"
             onClick={() => setShowSeedModal(true)}
           >
             <Database className="w-4 h-4 mr-2" />
@@ -473,44 +452,13 @@ export default function Users() {
                       const count = parseInt((document.getElementById('user-count') as HTMLInputElement)?.value || '5')
                       handleSeedUsers(count)
                     }}
-                    className="bg-transparent hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                    className="bg-transparent hover:bg-white/90 bg-white text-black border border-white/20 rounded-none mt-6"
                   >
                     Seed Users
                   </Button>
                 </div>
               </div>
               
-              {/* Invitation Seeding */}
-              <div className="space-y-4">
-                <div className="flex items-center space-x-2">
-                  <Mail className="w-5 h-5 text-white" />
-                  <h4 className="text-white font-light">Seed Invitations</h4>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex-1">
-                    <Label htmlFor="invitation-count" className="text-sm text-gray-400 font-light">Number of invitations</Label>
-                    <Input
-                      id="invitation-count"
-                      type="number"
-                      min="1"
-                      max="100"
-                      defaultValue="5"
-                      className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
-                    />
-                  </div>
-                  <Button
-                    onClick={() => {
-                      const count = parseInt((document.getElementById('invitation-count') as HTMLInputElement)?.value || '5')
-                      handleSeedInvitations(count)
-                    }}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
-                  >
-                    Seed Invitations
-                  </Button>
-                </div>
-              </div>
-
-              {/* Seeding Logs */}
               {seedingLogs.length > 0 && (
                 <div className="mt-6">
                   <h5 className="text-sm text-white font-light">Seeding Log</h5>

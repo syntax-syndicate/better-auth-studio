@@ -276,7 +276,7 @@ export default function TeamDetails() {
                 <div className="flex items-center space-x-3">
                     <Button 
                         onClick={openAddMemberModal}
-                        className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                        className="border border-dashed border-white/20 text-white hover:bg-white/10 bg-transparent rounded-none"
                     >
                         <UserPlus className="w-4 h-4 mr-2" />
                         Add Members
@@ -456,7 +456,7 @@ export default function TeamDetails() {
                                                 </td>
                                                 <td className="py-4 px-4 text-white">{member.user.email}</td>
                                                 <td className="py-4 px-4">
-                                                    <Badge variant="secondary" className="text-xs bg-blue-900/50 border border-blue-500/30 text-blue-400 rounded-sm capitalize">
+                                                    <Badge variant="secondary" className="text-xs bg-blue-900/10 border border-dashed border-blue-500/30 text-blue-400/70 rounded-none capitalize">
                                                         {member.role}
                                                     </Badge>
                                                 </td>

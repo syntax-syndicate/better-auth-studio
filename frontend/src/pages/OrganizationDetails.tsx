@@ -504,14 +504,14 @@ export default function OrganizationDetails() {
                 <div className="flex items-center space-x-3">
                     <Button 
                         onClick={() => setShowSeedMembersModal(true)}
-                        className="border border-dashed border-white/20 text-white hover:bg-transparent rounded-none"
+                        className="border border-dashed border-white/20 text-white bg-transparent hover:bg-white/10 rounded-none"
                     >
                         <Users className="w-4 h-4 mr-2" />
                         Seed Members
                     </Button>
                     <Button 
                         onClick={() => setShowInviteModal(true)}
-                        className="border border-dashed border-white/20 text-white hover:bg-transparent rounded-none"
+                        className="border border-dashed border-white/20 text-white bg-transparent hover:bg-white/10 rounded-none"
                     >
                         <Mail className="w-4 h-4 mr-2" />
                         Invite User
@@ -826,7 +826,7 @@ export default function OrganizationDetails() {
                                                 </td>
                                                 <td className="py-4 px-4 text-white">{member.user.email}</td>
                                                 <td className="py-4 px-4">
-                                                    <Badge variant="secondary" className="text-xs bg-blue-900/50 border border-blue-500/30 text-blue-400 rounded-sm capitalize">
+                                                    <Badge variant="secondary" className="text-xs bg-blue-900/10 border border-dashed rounded-none border-blue-500/30 text-blue-400/70 capitalize">
                                                         {member.role}
                                                     </Badge>
                                                 </td>
@@ -835,15 +835,6 @@ export default function OrganizationDetails() {
                                                 </td>
                                                 <td className="py-4 px-4 text-right">
                                                     <div className="flex items-center justify-end space-x-2">
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-                                                            onClick={() => {/* Change role - to be implemented */}}
-                                                        >
-                                                            <Edit className="w-4 h-4 mr-1" />
-                                                            Edit Role
-                                                        </Button>
                                                         <Button
                                                             variant="outline"
                                                             size="sm"
@@ -872,14 +863,14 @@ export default function OrganizationDetails() {
                                 <div className="flex items-center justify-center space-x-3">
                                     <Button 
                                         onClick={() => setShowSeedMembersModal(true)}
-                                        className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                                        className="border border-dashed border-white/20 text-white hover:bg-white/10 bg-transparent rounded-none"
                                     >
                                         <Users className="w-4 h-4 mr-2" />
                                         Seed Members
                                     </Button>
                                     <Button 
                                         onClick={() => setShowInviteModal(true)}
-                                        className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                                        className="bg-white hover:bg-white/90 bg-transparent text-black border border-white/20 rounded-none"
                                     >
                                         <Mail className="w-4 h-4 mr-2" />
                                         Invite User
@@ -933,12 +924,12 @@ export default function OrganizationDetails() {
                                                 <td className="py-4 px-4">
                                                     <Badge 
                                                         variant="secondary" 
-                                                        className={`text-xs rounded-sm flex items-center gap-1 w-fit ${
+                                                        className={`text-xs font-normal rounded-none border-dashed flex items-center gap-1 w-fit ${
                                                             invitation.status === 'pending' 
-                                                                ? 'bg-yellow-900/50 border border-yellow-500/30 text-yellow-400'
+                                                                ? 'bg-yellow-900/10 border border-yellow-500/30 text-yellow-400/70'
                                                                 : invitation.status === 'accepted'
-                                                                ? 'bg-green-900/50 border border-green-500/30 text-green-400'
-                                                                : 'bg-red-900/50 border border-red-500/30 text-red-400'
+                                                                ? 'bg-green-900/10 border border-green-500/30 text-green-400/70'
+                                                                : 'bg-red-900/10 border border-red-500/30 text-red-400/70'
                                                         }`}
                                                     >
                                                         {invitation.status === 'pending' && <Clock className="w-3 h-3" />}
