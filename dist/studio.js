@@ -21,14 +21,11 @@ async function startStudio(options) {
         origin: ['http://localhost:3000', 'http://localhost:3001'],
         credentials: true
     }));
-    // Body parsing middleware
     app.use(express_1.default.json());
     app.use(express_1.default.urlencoded({ extended: true }));
-    // WebSocket server for real-time updates
     const wss = new ws_1.WebSocketServer({ server });
     wss.on('connection', (ws) => {
         console.log(chalk_1.default.gray('🔌 WebSocket client connected'));
-        // Send heartbeat every 30 seconds
         const heartbeat = setInterval(() => {
             ws.ping();
         }, 30000);
@@ -41,15 +38,11 @@ async function startStudio(options) {
             clearInterval(heartbeat);
         });
     });
-    // API routes
     app.use((0, routes_1.createRoutes)(authConfig));
-    // Serve static files from the frontend build
     app.use(express_1.default.static((0, path_1.join)(__dirname, '../public')));
-    // Catch-all route to serve the React app
     app.get('*', (req, res) => {
         res.sendFile((0, path_1.join)(__dirname, '../public/index.html'));
     });
-    // Start the server
     server.listen(port, host, () => {
         const url = `http://${host}:${port}`;
         console.log(chalk_1.default.green('✅ Better Auth Studio is running!'));
@@ -57,7 +50,6 @@ async function startStudio(options) {
         console.log(chalk_1.default.gray(`📊 API: ${url}/api`));
         console.log(chalk_1.default.gray(`🔌 WebSocket: ws://${host}:${port}`));
         console.log(chalk_1.default.yellow('\nPress Ctrl+C to stop the server\n'));
-        // Open browser if requested
         if (openBrowser) {
             setTimeout(() => {
                 (0, open_1.default)(url).catch(() => {
@@ -66,7 +58,6 @@ async function startStudio(options) {
             }, 1000);
         }
     });
-    // Graceful shutdown
     process.on('SIGINT', () => {
         console.log(chalk_1.default.yellow('\n🛑 Shutting down Better Auth Studio...'));
         server.close(() => {

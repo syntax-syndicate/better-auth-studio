@@ -50,9 +50,8 @@ async function findAuthConfig() {
         'auth.config.js',
         'auth.config.json'
     ];
-    // Start from current directory and walk up
     let currentDir = process.cwd();
-    const maxDepth = 10; // Prevent infinite loops
+    const maxDepth = 10;
     let depth = 0;
     while (currentDir && depth < maxDepth) {
         for (const configFile of possibleConfigFiles) {
@@ -71,7 +70,7 @@ async function findAuthConfig() {
         }
         const parentDir = (0, path_1.dirname)(currentDir);
         if (parentDir === currentDir) {
-            break; // Reached root
+            break;
         }
         currentDir = parentDir;
         depth++;
@@ -96,21 +95,16 @@ async function loadConfig(configPath) {
 }
 async function loadTypeScriptConfig(configPath) {
     try {
-        // For TypeScript files, try to directly import the auth export
         if (configPath.endsWith('.ts')) {
             try {
-                // Try to import the auth configuration directly
                 const authModule = await Promise.resolve(`${configPath}`).then(s => __importStar(require(s)));
-                // Look for the auth export
                 if (authModule.auth) {
                     console.log('Found auth export, extracting configuration...');
-                    // Better Auth exports have the config under options
                     const config = authModule.auth.options || authModule.auth;
                     return extractBetterAuthFields(config);
                 }
                 else if (authModule.default) {
                     console.log('Found default export, extracting configuration...');
-                    // Better Auth exports have the config under options
                     const config = authModule.default.options || authModule.default;
                     return extractBetterAuthFields(config);
                 }
@@ -120,13 +114,11 @@ async function loadTypeScriptConfig(configPath) {
                 console.log('Falling back to regex extraction...');
             }
         }
-        // Fallback: try regex extraction
         const content = (0, fs_1.readFileSync)(configPath, 'utf-8');
         const authConfig = extractBetterAuthConfig(content);
         if (authConfig) {
             return authConfig;
         }
-        // Fallback: try to evaluate the file (for JS files)
         if (configPath.endsWith('.js')) {
             return await evaluateJSConfig(configPath);
         }
@@ -139,37 +131,21 @@ async function loadTypeScriptConfig(configPath) {
 }
 function extractBetterAuthConfig(content) {
     console.log('Extracting config from content:', content.substring(0, 500) + '...');
-    // Look for Better Auth configuration patterns
     const patterns = [
-        // Pattern 1: export const auth = betterAuth({...})
         /export\s+const\s+\w+\s*=\s*betterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 2: export const auth = BetterAuth({...})
         /export\s+const\s+\w+\s*=\s*BetterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 3: const auth = betterAuth({...})
         /const\s+\w+\s*=\s*betterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 4: const auth = BetterAuth({...})
         /const\s+\w+\s*=\s*BetterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 5: export default betterAuth({...})
         /export\s+default\s+betterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 6: export default BetterAuth({...})
         /export\s+default\s+BetterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 7: module.exports = betterAuth({...})
         /module\.exports\s*=\s*betterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 8: module.exports = BetterAuth({...})
         /module\.exports\s*=\s*BetterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 9: export default {...}
         /export\s+default\s*({[\s\S]*?});?$/m,
-        // Pattern 10: module.exports = {...}
         /module\.exports\s*=\s*({[\s\S]*?});?$/m,
-        // Pattern 11: betterAuth({...}) - more flexible
         /betterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 12: BetterAuth({...}) - more flexible
         /BetterAuth\s*\(\s*({[\s\S]*?})\s*\)/,
-        // Pattern 13: Any object with socialProviders
         /({[\s\S]*?"socialProviders"[\s\S]*?})/,
-        // Pattern 14: Any object with emailAndPassword
         /({[\s\S]*?"emailAndPassword"[\s\S]*?})/,
-        // Pattern 15: Any object with database
         /({[\s\S]*?"database"[\s\S]*?})/
     ];
     for (let i = 0; i < patterns.length; i++) {
@@ -179,9 +155,7 @@ function extractBetterAuthConfig(content) {
             console.log(`Pattern ${i + 1} matched!`);
             console.log('Matched content:', match[1].substring(0, 200) + '...');
             try {
-                // Clean up the matched content to make it valid JSON
                 let configStr = match[1];
-                // First, handle arithmetic expressions
                 configStr = configStr
                     .replace(/(\d+\s*\*\s*\d+\s*\*\s*\d+\s*\*\s*\d+)/g, (match) => {
                     try {
@@ -207,7 +181,6 @@ function extractBetterAuthConfig(content) {
                         return match;
                     }
                 });
-                // Replace TypeScript-specific syntax
                 configStr = configStr
                     .replace(/:\s*process\.env\.(\w+)(\s*\|\|\s*"[^"]*")?/g, ':"$1"') // Replace process.env.VAR || "default" with "VAR"
                     .replace(/:\s*`([^`]*)`/g, ':"$1"') // Replace template literals
@@ -225,7 +198,6 @@ function extractBetterAuthConfig(content) {
                     .replace(/:\s*null/g, ':null') // Keep null
                     .trim();
                 console.log('Cleaned config string:', configStr.substring(0, 300) + '...');
-                // Try to parse as JSON
                 let config;
                 try {
                     config = JSON.parse(configStr);
@@ -235,7 +207,6 @@ function extractBetterAuthConfig(content) {
                     console.warn('Config string that failed:', configStr.substring(0, 200) + '...');
                     return null;
                 }
-                // Extract Better Auth specific configuration
                 return extractBetterAuthFields(config);
             }
             catch (error) {
@@ -249,12 +220,9 @@ function extractBetterAuthConfig(content) {
 function extractBetterAuthFields(config) {
     console.log('Extracting fields from config:', JSON.stringify(config, null, 2));
     const authConfig = {};
-    // Extract database configuration
     if (config.database) {
-        // Detect SQLite database
         let dbType = 'postgresql'; // default
         let dbName = config.database.name;
-        // Check if it's a SQLite database instance
         if (config.database.constructor && config.database.constructor.name === 'Database') {
             dbType = 'sqlite';
             dbName = config.database.name || './better-auth.db';
@@ -276,10 +244,8 @@ function extractBetterAuthFields(config) {
             casing: config.database.casing
         };
     }
-    // Extract social providers - handle both object and array formats
     if (config.socialProviders) {
         if (typeof config.socialProviders === 'object' && !Array.isArray(config.socialProviders)) {
-            // Object format: { github: { clientId, clientSecret, ... } }
             authConfig.socialProviders = config.socialProviders;
             authConfig.providers = Object.entries(config.socialProviders).map(([provider, config]) => ({
                 type: provider,
@@ -290,12 +256,10 @@ function extractBetterAuthFields(config) {
             }));
         }
         else if (Array.isArray(config.socialProviders)) {
-            // Array format: [{ type: 'github', clientId, clientSecret, ... }]
             authConfig.socialProviders = config.socialProviders;
             authConfig.providers = config.socialProviders;
         }
     }
-    // Extract legacy providers format
     if (config.providers && Array.isArray(config.providers)) {
         authConfig.providers = config.providers.map((provider) => ({
             type: provider.type || provider.id,
@@ -304,11 +268,9 @@ function extractBetterAuthFields(config) {
             ...provider
         }));
     }
-    // Extract email and password configuration
     if (config.emailAndPassword) {
         authConfig.emailAndPassword = config.emailAndPassword;
     }
-    // Extract other Better Auth specific fields
     if (config.session) {
         authConfig.session = config.session;
     }
@@ -329,9 +291,7 @@ function extractBetterAuthFields(config) {
 }
 async function evaluateJSConfig(configPath) {
     try {
-        // For JS files, we can try to require them
         const config = require(configPath);
-        // Handle different export patterns
         if (config.default) {
             return extractBetterAuthFields(config.default);
         }

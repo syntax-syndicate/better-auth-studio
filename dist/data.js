@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAuthData = getAuthData;
 const auth_adapter_1 = require("./auth-adapter");
-// Fetch real data from Better Auth database using the adapter
 async function getAuthData(authConfig, type = 'stats', options) {
     try {
         const adapter = await (0, auth_adapter_1.getAuthAdapter)();
@@ -30,32 +29,27 @@ async function getAuthData(authConfig, type = 'stats', options) {
     }
     catch (error) {
         console.error(`Error fetching ${type} data:`, error);
-        // Fallback to mock data
         return getMockData(type, options);
     }
 }
 async function getRealStats(adapter) {
     try {
-        // Get users and sessions from adapter
         const users = adapter.getUsers ? await adapter.getUsers() : [];
         const sessions = adapter.getSessions ? await adapter.getSessions() : [];
         const now = new Date();
         const activeSessions = sessions.filter((s) => new Date(s.expiresAt || s.expires) > now);
         const activeUsers = new Set(activeSessions.map((s) => s.userId)).size;
-        // Group users by provider (simplified for now)
         const usersByProvider = {
-            email: users.length, // Assume all users have email/password
-            github: 0 // Will be updated if we have social providers
+            email: users.length,
+            github: 0
         };
-        // Get recent signups (last 5 users)
         const recentSignups = users
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 5)
             .map((user) => ({
             ...user,
-            provider: 'email' // Default provider
+            provider: 'email'
         }));
-        // Get recent logins (last 5 sessions)
         const recentLogins = activeSessions
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 5);
@@ -84,7 +78,6 @@ async function getRealUsers(adapter, options) {
                 filteredUsers = allUsers.filter((user) => user.email?.toLowerCase().includes(search.toLowerCase()) ||
                     user.name?.toLowerCase().includes(search.toLowerCase()));
             }
-            // Apply pagination
             const startIndex = (page - 1) * limit;
             const endIndex = startIndex + limit;
             const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
@@ -96,7 +89,6 @@ async function getRealUsers(adapter, options) {
                 totalPages: Math.ceil(filteredUsers.length / limit)
             };
         }
-        // Fallback to mock data if getUsers is not available
         return getMockData('users', options);
     }
     catch (error) {
@@ -107,10 +99,8 @@ async function getRealUsers(adapter, options) {
 async function getRealSessions(adapter, options) {
     const { page, limit } = options;
     try {
-        // Use the adapter's getSessions method if available
         if (adapter.getSessions) {
             const allSessions = await adapter.getSessions();
-            // Apply pagination
             const startIndex = (page - 1) * limit;
             const endIndex = startIndex + limit;
             const paginatedSessions = allSessions.slice(startIndex, endIndex);
@@ -122,7 +112,6 @@ async function getRealSessions(adapter, options) {
                 totalPages: Math.ceil(allSessions.length / limit)
             };
         }
-        // Fallback to mock data if getSessions is not available
         return getMockData('sessions', options);
     }
     catch (error) {
@@ -132,8 +121,6 @@ async function getRealSessions(adapter, options) {
 }
 async function getRealProviderStats(adapter) {
     try {
-        // For now, return a simplified provider stats
-        // In a real implementation, you'd query accounts from the adapter
         return [
             { type: 'email', users: 0, active: 0 },
             { type: 'github', users: 0, active: 0 }
@@ -179,7 +166,6 @@ async function updateRealUser(adapter, userId, userData) {
         throw error;
     }
 }
-// Mock data fallback
 function getMockData(type, options) {
     switch (type) {
         case 'stats':
