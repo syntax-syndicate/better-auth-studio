@@ -697,7 +697,6 @@ async function evaluateJSConfig(configPath: string): Promise<AuthConfig | null> 
   try {
     const config = require(configPath);
     
-    // Handle CommonJS exports like { auth }
     if (config.auth) {
       console.log('Found auth export in CommonJS module, extracting configuration...');
       const authConfig = config.auth.options || config.auth;
