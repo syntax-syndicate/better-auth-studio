@@ -14,13 +14,14 @@ import {
     X,
     Send,
     Clock,
-    CheckCircle
+    CheckCircle,
+    Loader
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Select, SelectItem } from '../components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 
 interface Organization {
     id: string
@@ -106,6 +107,7 @@ export default function OrganizationDetails() {
     const [selectedInviterId, setSelectedInviterId] = useState('')
     const [availableUsers, setAvailableUsers] = useState<User[]>([])
     const [teamFormData, setTeamFormData] = useState({ name: '' })
+    const [inviting, setInviting] = useState(false)
     const [seedingLogs, setSeedingLogs] = useState<string[]>([])
 
     interface User {
@@ -277,6 +279,7 @@ export default function OrganizationDetails() {
             return
         }
 
+        setInviting(true)
         const toastId = toast.loading('Sending invitation...')
         
         try {
@@ -304,6 +307,8 @@ export default function OrganizationDetails() {
         } catch (error) {
             console.error('Error sending invitation:', error)
             toast.error('Error sending invitation', { id: toastId })
+        } finally {
+            setInviting(false)
         }
     }
 
@@ -487,8 +492,11 @@ export default function OrganizationDetails() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-white">Loading organization details...</div>
+            <div className="flex items-center justify-center h-32">
+                <div className="flex flex-col items-center space-y-3">
+                    <Loader className="w-6 h-6 text-white animate-spin" />
+                    <div className="text-white text-sm">Loading organization details...</div>
+                </div>
             </div>
         )
     }
@@ -897,7 +905,7 @@ export default function OrganizationDetails() {
                                     </Button>
                                     <Button 
                                         onClick={openInviteModal}
-                                        className="bg-white hover:bg-white/90 bg-transparent text-black border border-white/20 rounded-none"
+                                        className="bg-white hover:bg-white/90 bg-transparent border border-white/20 rounded-none"
                                     >
                                         <Mail className="w-4 h-4 mr-2" />
                                         Invite User
@@ -1052,23 +1060,25 @@ export default function OrganizationDetails() {
                                 <Label htmlFor="inviter-select" className="text-sm text-gray-400 font-light">Inviter</Label>
                                 <Select
                                     value={selectedInviterId}
-                                    onChange={(e) => setSelectedInviterId(e.target.value)}
+                                    onValueChange={setSelectedInviterId}
                                 >
-                                    <SelectItem value="" className="text-gray-400">
-                                        Select an inviter...
-                                    </SelectItem>
-                                    {availableUsers.map((user) => (
-                                        <SelectItem key={user.id} value={user.id} className="text-white">
-                                            <div className="flex items-center space-x-2">
-                                                <img
-                                                    src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
-                                                    alt={user.name}
-                                                    className="w-6 h-6 rounded-none border border-dashed border-white/20"
-                                                />
-                                                <span>{user.name} ({user.email})</span>
-                                            </div>
-                                        </SelectItem>
-                                    ))}
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select an inviter..." />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableUsers.map((user) => (
+                                            <SelectItem key={user.id} value={user.id}>
+                                                <div className="flex items-center space-x-2">
+                                                    <img
+                                                        src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
+                                                        alt={user.name}
+                                                        className="w-6 h-6 rounded-none border border-dashed border-white/20"
+                                                    />
+                                                    <span>{user.name} ({user.email})</span>
+                                                </div>
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
                                 </Select>
                             </div>
                         </div>
@@ -1086,10 +1096,15 @@ export default function OrganizationDetails() {
                             </Button>
                             <Button
                                 onClick={handleInviteUser}
-                                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                                disabled={inviting}
+                                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
                             >
-                                <Send className="w-4 h-4 mr-2" />
-                                Send Invitation
+                                {inviting ? (
+                                    <Loader className="w-3 h-3 mr-2 animate-spin" />
+                                ) : (
+                                    <Send className="w-4 h-4 mr-2" />
+                                )}
+                                {inviting ? 'Sending...' : 'Send Invitation'}
                             </Button>
                         </div>
                     </div>
@@ -1258,7 +1273,7 @@ export default function OrganizationDetails() {
             {/* Seed Members Modal */}
             {showSeedMembersModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-                    <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-lg rounded-none">
+                    <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-2xl rounded-none">
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-lg text-white font-light">Seed Members</h3>
                             <Button

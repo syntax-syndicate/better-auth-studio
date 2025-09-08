@@ -8,12 +8,14 @@ import {
   Plus,
   Eye,
   X,
-  User
+  User,
+  Loader
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Select, SelectItem } from '../components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { Terminal } from '../components/Terminal'
 
 interface Session {
   id: string
@@ -34,7 +36,14 @@ export default function Sessions() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showSeedModal, setShowSeedModal] = useState(false)
   const [selectedSession, setSelectedSession] = useState<Session | null>(null)
-  const [seedingLogs, setSeedingLogs] = useState<string[]>([])
+  const [seedingLogs, setSeedingLogs] = useState<Array<{
+    id: string
+    type: 'info' | 'success' | 'error' | 'progress'
+    message: string
+    timestamp: Date
+    status?: 'pending' | 'running' | 'completed' | 'failed'
+  }>>([])
+  const [isSeeding, setIsSeeding] = useState(false)
 
   useEffect(() => {
     fetchSessions()
@@ -54,6 +63,15 @@ export default function Sessions() {
 
   const handleSeedSessions = async (count: number) => {
     setSeedingLogs([])
+    setIsSeeding(true)
+    
+    // Add initial info message
+    setSeedingLogs([{
+      id: 'start',
+      type: 'info',
+      message: `Starting session seeding process for ${count} sessions...`,
+      timestamp: new Date()
+    }])
     
     try {
       const response = await fetch('/api/seed/sessions', {
@@ -65,21 +83,70 @@ export default function Sessions() {
       const result = await response.json()
       
       if (result.success) {
-        setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created session: ${r.session.id}`
-        ))
+        // Add progress messages for each session
+        const progressLogs = result.results.map((r: any, index: number) => {
+          if (r.success) {
+            return {
+              id: `session-${index}`,
+              type: 'progress' as const,
+              message: `Creating session: ${r.session.id}`,
+              timestamp: new Date(),
+              status: 'completed' as const
+            }
+          } else {
+            return {
+              id: `session-${index}`,
+              type: 'error' as const,
+              message: `Failed to create session ${index + 1}: ${r.error}`,
+              timestamp: new Date()
+            }
+          }
+        })
+        
+        setSeedingLogs(prev => [...prev, ...progressLogs])
+        
+        // Add completion message
+        const successCount = result.results.filter((r: any) => r.success).length
+        setSeedingLogs(prev => [...prev, {
+          id: 'complete',
+          type: 'success',
+          message: `✅ Seeding completed! Created ${successCount}/${count} sessions successfully`,
+          timestamp: new Date()
+        }])
+        
         // Refresh the sessions list to show updated count
         await fetchSessions()
       } else {
-        setSeedingLogs([`❌ Error: ${result.error || 'Failed to seed sessions'}`])
+        setSeedingLogs(prev => [...prev, {
+          id: 'error',
+          type: 'error',
+          message: `❌ Seeding failed: ${result.error || 'Unknown error'}`,
+          timestamp: new Date()
+        }])
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error: ${error}`])
+      setSeedingLogs(prev => [...prev, {
+        id: 'error',
+        type: 'error',
+        message: `❌ Network error: ${error}`,
+        timestamp: new Date()
+      }])
+    } finally {
+      setIsSeeding(false)
     }
   }
 
   const handleSeedAccounts = async (count: number) => {
     setSeedingLogs([])
+    setIsSeeding(true)
+    
+    // Add initial info message
+    setSeedingLogs([{
+      id: 'start',
+      type: 'info',
+      message: `Starting account seeding process for ${count} accounts...`,
+      timestamp: new Date()
+    }])
     
     try {
       const response = await fetch('/api/seed/accounts', {
@@ -91,16 +158,56 @@ export default function Sessions() {
       const result = await response.json()
       
       if (result.success) {
-        setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created account: ${r.account.provider}`
-        ))
+        // Add progress messages for each account
+        const progressLogs = result.results.map((r: any, index: number) => {
+          if (r.success) {
+            return {
+              id: `account-${index}`,
+              type: 'progress' as const,
+              message: `Creating account: ${r.account.provider}`,
+              timestamp: new Date(),
+              status: 'completed' as const
+            }
+          } else {
+            return {
+              id: `account-${index}`,
+              type: 'error' as const,
+              message: `Failed to create account ${index + 1}: ${r.error}`,
+              timestamp: new Date()
+            }
+          }
+        })
+        
+        setSeedingLogs(prev => [...prev, ...progressLogs])
+        
+        // Add completion message
+        const successCount = result.results.filter((r: any) => r.success).length
+        setSeedingLogs(prev => [...prev, {
+          id: 'complete',
+          type: 'success',
+          message: `✅ Seeding completed! Created ${successCount}/${count} accounts successfully`,
+          timestamp: new Date()
+        }])
+        
         // Refresh the sessions list to show updated count
         await fetchSessions()
       } else {
-        setSeedingLogs([`❌ Error: ${result.error || 'Failed to seed accounts'}`])
+        setSeedingLogs(prev => [...prev, {
+          id: 'error',
+          type: 'error',
+          message: `❌ Seeding failed: ${result.error || 'Unknown error'}`,
+          timestamp: new Date()
+        }])
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error: ${error}`])
+      setSeedingLogs(prev => [...prev, {
+        id: 'error',
+        type: 'error',
+        message: `❌ Network error: ${error}`,
+        timestamp: new Date()
+      }])
+    } finally {
+      setIsSeeding(false)
     }
   }
 
@@ -148,8 +255,11 @@ export default function Sessions() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading sessions...</div>
+      <div className="flex items-center justify-center h-32">
+        <div className="flex flex-col items-center space-y-3">
+          <Loader className="w-6 h-6 text-white animate-spin" />
+          <div className="text-white text-sm">Loading sessions...</div>
+        </div>
       </div>
     )
   }
@@ -194,10 +304,15 @@ export default function Sessions() {
 
         <div className="flex items-center space-x-2">
           <Filter className="w-4 h-4 text-gray-400" />
-          <Select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="expired">Expired</SelectItem>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="expired">Expired</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>
@@ -283,7 +398,7 @@ export default function Sessions() {
       {/* Seed Modal */}
       {showSeedModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-lg rounded-none">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-2xl rounded-none">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg text-white font-light">Seed Data</h3>
               <Button
@@ -319,9 +434,20 @@ export default function Sessions() {
                       const count = parseInt((document.getElementById('session-count') as HTMLInputElement)?.value || '5')
                       handleSeedSessions(count)
                     }}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                    disabled={isSeeding}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6 disabled:opacity-50"
                   >
-                    Seed Sessions
+                    {isSeeding ? (
+                      <>
+                        <Loader className="w-3 h-3 mr-2 animate-spin" />
+                        Seeding...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-3 h-3 mr-2" />
+                        Seed Sessions
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -349,9 +475,20 @@ export default function Sessions() {
                       const count = parseInt((document.getElementById('account-count') as HTMLInputElement)?.value || '5')
                       handleSeedAccounts(count)
                     }}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                    disabled={isSeeding}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6 disabled:opacity-50"
                   >
-                    Seed Accounts
+                    {isSeeding ? (
+                      <>
+                        <Loader className="w-3 h-3 mr-2 animate-spin" />
+                        Seeding...
+                      </>
+                    ) : (
+                      <>
+                        <User className="w-3 h-3 mr-2" />
+                        Seed Accounts
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -359,25 +496,13 @@ export default function Sessions() {
               {/* Seeding Logs */}
               {seedingLogs.length > 0 && (
                 <div className="mt-6">
-                  <div className="flex items-center flex-col mb-3">
-                    <h5 className="text-sm text-white font-light">Seeding Logs</h5>
-                    <br /> 
-                    <details className="group">
-                      <summary className="cursor-pointer text-sm text-gray-400 font-light hover:text-white">
-                        View Details ({seedingLogs.length} items)
-                      </summary>
-                      <div className="mt-3 p-4 bg-black/50 border border-dashed border-white/20 rounded-none">
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {seedingLogs.map((log, index) => (
-                            <div key={index} className="text-xs font-mono text-gray-300 flex items-start space-x-2">
-                              <span className="text-green-400">✓</span>
-                              <span>{log}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </details>
-                  </div>
+                  <Terminal 
+                    title="Session Seeding Terminal"
+                    lines={seedingLogs}
+                    isRunning={isSeeding}
+                    className="w-full"
+                    defaultCollapsed={true}
+                  />
                 </div>
               )}
             </div>

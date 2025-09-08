@@ -435,9 +435,11 @@ function extractBetterAuthFields(config) {
             // This is likely a Prisma adapter function
             adapter = 'prisma';
             dbType = 'postgresql'; // Default for Prisma
+            console.log('Detected Prisma adapter function');
             // Try to extract provider from the adapter options if available
             if (config.database.options && config.database.options.provider) {
                 dbType = config.database.options.provider;
+                console.log('Found provider in adapter options:', dbType);
             }
         }
         else if (config.database.constructor && config.database.constructor.name === 'Database') {

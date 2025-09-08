@@ -331,8 +331,10 @@ async function findAuthConfigPath() {
     return null;
 }
 async function createMockUser(adapter, index) {
+    // Generate a random string for the email
+    const randomString = Math.random().toString(36).substring(2, 8);
     const userData = {
-        email: `user${index}@example.com`,
+        email: `user${randomString}@example.com`,
         name: `User ${index}`,
         emailVerified: true,
         image: `https://api.dicebear.com/7.x/avataaars/svg?seed=user${index}`,

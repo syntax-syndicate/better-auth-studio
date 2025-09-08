@@ -10,7 +10,8 @@ import {
     Trash2,
     Search,
     X,
-    Building2
+    Building2,
+    Loader
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
@@ -234,8 +235,11 @@ export default function TeamDetails() {
 
     if (loading) {
         return (
-            <div className="flex items-center justify-center h-64">
-                <div className="text-white">Loading team details...</div>
+            <div className="flex items-center justify-center h-32">
+                <div className="flex flex-col items-center space-y-3">
+                    <Loader className="w-6 h-6 text-white animate-spin" />
+                    <div className="text-white text-sm">Loading team details...</div>
+                </div>
             </div>
         )
     }

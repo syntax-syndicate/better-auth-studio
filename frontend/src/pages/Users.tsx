@@ -11,12 +11,14 @@ import {
   Eye,
   X,
   Database,
-  Check
+  Check,
+  Loader
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Select, SelectItem } from '../components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { Terminal } from '../components/Terminal'
 
 interface User {
   id: string
@@ -41,7 +43,14 @@ export default function Users() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showSeedModal, setShowSeedModal] = useState(false)
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
-  const [seedingLogs, setSeedingLogs] = useState<string[]>([])
+  const [seedingLogs, setSeedingLogs] = useState<Array<{
+    id: string
+    type: 'info' | 'success' | 'error' | 'progress'
+    message: string
+    timestamp: Date
+    status?: 'pending' | 'running' | 'completed' | 'failed'
+  }>>([])
+  const [isSeeding, setIsSeeding] = useState(false)
 
   useEffect(() => {
     fetchUsers()
@@ -62,6 +71,15 @@ export default function Users() {
 
   const handleSeedUsers = async (count: number) => {
     setSeedingLogs([])
+    setIsSeeding(true)
+    
+    // Add initial info message
+    setSeedingLogs([{
+      id: 'start',
+      type: 'info',
+      message: `Starting user seeding process for ${count} users...`,
+      timestamp: new Date()
+    }])
     
     try {
       const response = await fetch('/api/seed/users', {
@@ -73,16 +91,56 @@ export default function Users() {
       const result = await response.json()
       
       if (result.success) {
-        setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created user: ${r.user.name} (${r.user.email})`
-        ))
+        // Add progress messages for each user
+        const progressLogs = result.results.map((r: any, index: number) => {
+          if (r.success) {
+            return {
+              id: `user-${index}`,
+              type: 'progress' as const,
+              message: `Creating user: ${r.user.name} (${r.user.email})`,
+              timestamp: new Date(),
+              status: 'completed' as const
+            }
+          } else {
+            return {
+              id: `user-${index}`,
+              type: 'error' as const,
+              message: `Failed to create user ${index + 1}: ${r.error}`,
+              timestamp: new Date()
+            }
+          }
+        })
+        
+        setSeedingLogs(prev => [...prev, ...progressLogs])
+        
+        // Add completion message
+        const successCount = result.results.filter((r: any) => r.success).length
+        setSeedingLogs(prev => [...prev, {
+          id: 'complete',
+          type: 'success',
+          message: `✅ Seeding completed! Created ${successCount}/${count} users successfully`,
+          timestamp: new Date()
+        }])
+        
         // Refresh the users list to show updated count
         await fetchUsers()
       } else {
-        setSeedingLogs([`❌ Error: ${result.error || 'Failed to seed users'}`])
+        setSeedingLogs(prev => [...prev, {
+          id: 'error',
+          type: 'error',
+          message: `❌ Seeding failed: ${result.error || 'Unknown error'}`,
+          timestamp: new Date()
+        }])
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error: ${error}`])
+      setSeedingLogs(prev => [...prev, {
+        id: 'error',
+        type: 'error',
+        message: `❌ Network error: ${error}`,
+        timestamp: new Date()
+      }])
+    } finally {
+      setIsSeeding(false)
     }
   }
 
@@ -230,8 +288,11 @@ export default function Users() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading all users from database...</div>
+      <div className="flex items-center justify-center h-32">
+        <div className="flex flex-col items-center space-y-3">
+          <Loader className="w-6 h-6 text-white animate-spin" />
+          <div className="text-white text-sm">Loading users...</div>
+        </div>
       </div>
     )
   }
@@ -276,10 +337,15 @@ export default function Users() {
 
         <div className="flex items-center space-x-2">
           <Filter className="w-4 h-4 text-gray-400" />
-          <Select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>
@@ -455,7 +521,7 @@ export default function Users() {
       {/* Seed Modal */}
       {showSeedModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-lg rounded-none">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-2xl rounded-none">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg text-white font-light">Seed Data</h3>
               <Button
@@ -491,34 +557,33 @@ export default function Users() {
                       const count = parseInt((document.getElementById('user-count') as HTMLInputElement)?.value || '5')
                       handleSeedUsers(count)
                     }}
-                    className="bg-transparent hover:bg-white/90 bg-white text-black border border-white/20 rounded-none mt-6"
+                    disabled={isSeeding}
+                    className="bg-transparent hover:bg-white/90 bg-white text-black border border-white/20 rounded-none mt-6 disabled:opacity-50"
                   >
-                    Seed Users
+                    {isSeeding ? (
+                      <>
+                        <Loader className="w-3 h-3 mr-2 animate-spin" />
+                        Seeding...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-3 h-3 mr-2" />
+                        Seed Users
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
               
               {seedingLogs.length > 0 && (
                 <div className="mt-6">
-                  <h5 className="text-sm text-white font-light">Seeding Log</h5>
-                  <br />
-                  <div className="flex w-full mb-3">
-                    <details className="group w-full">
-                      <summary className="cursor-pointer text-sm text-gray-400 font-light hover:text-white">
-                        View Details ({seedingLogs.length} items)
-                      </summary>
-                      <div className="mt-3 p-4 bg-black/50 border border-dashed border-white/20 rounded-none">
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {seedingLogs.map((log, index) => (
-                            <div key={index} className="text-xs font-mono text-gray-300 flex items-start space-x-2">
-                              <span className="text-green-400">✓</span>
-                              <span>{log}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </details>
-                  </div>
+                  <Terminal 
+                    title="User Seeding Terminal"
+                    lines={seedingLogs}
+                    isRunning={isSeeding}
+                    className="w-full"
+                    defaultCollapsed={true}
+                  />
                 </div>
               )}
             </div>

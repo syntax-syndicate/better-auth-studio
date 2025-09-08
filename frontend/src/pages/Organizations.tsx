@@ -10,12 +10,14 @@ import {
   Plus,
   Eye,
   X,
-  Database
+  Database,
+  Loader
 } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
-import { Select, SelectItem } from '../components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
+import { Terminal } from '../components/Terminal'
 
 interface Organization {
   id: string
@@ -47,7 +49,14 @@ export default function Organizations() {
   const [showViewModal, setShowViewModal] = useState(false)
   const [showSeedModal, setShowSeedModal] = useState(false)
   const [selectedOrganization, setSelectedOrganization] = useState<Organization | null>(null)
-  const [seedingLogs, setSeedingLogs] = useState<string[]>([])
+  const [seedingLogs, setSeedingLogs] = useState<Array<{
+    id: string
+    type: 'info' | 'success' | 'error' | 'progress'
+    message: string
+    timestamp: Date
+    status?: 'pending' | 'running' | 'completed' | 'failed'
+  }>>([])
+  const [isSeeding, setIsSeeding] = useState(false)
   const [createFormData, setCreateFormData] = useState({ name: '', slug: '' })
   const [editFormData, setEditFormData] = useState({ name: '', slug: '' })
 
@@ -121,6 +130,15 @@ export default function Organizations() {
 
   const handleSeedOrganizations = async (count: number) => {
     setSeedingLogs([])
+    setIsSeeding(true)
+    
+    // Add initial info message
+    setSeedingLogs([{
+      id: 'start',
+      type: 'info',
+      message: `Starting organization seeding process for ${count} organizations...`,
+      timestamp: new Date()
+    }])
     
     try {
       const response = await fetch('/api/seed/organizations', {
@@ -132,21 +150,70 @@ export default function Organizations() {
       const result = await response.json()
       
       if (result.success) {
-        setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created organization: ${r.organization.name} (${r.organization.slug})`
-        ))
+        // Add progress messages for each organization
+        const progressLogs = result.results.map((r: any, index: number) => {
+          if (r.success) {
+            return {
+              id: `org-${index}`,
+              type: 'progress' as const,
+              message: `Creating organization: ${r.organization.name} (${r.organization.slug})`,
+              timestamp: new Date(),
+              status: 'completed' as const
+            }
+          } else {
+            return {
+              id: `org-${index}`,
+              type: 'error' as const,
+              message: `Failed to create organization ${index + 1}: ${r.error}`,
+              timestamp: new Date()
+            }
+          }
+        })
+        
+        setSeedingLogs(prev => [...prev, ...progressLogs])
+        
+        // Add completion message
+        const successCount = result.results.filter((r: any) => r.success).length
+        setSeedingLogs(prev => [...prev, {
+          id: 'complete',
+          type: 'success',
+          message: `✅ Seeding completed! Created ${successCount}/${count} organizations successfully`,
+          timestamp: new Date()
+        }])
+        
         // Refresh the organizations list to show updated count
         await fetchOrganizations()
       } else {
-        setSeedingLogs([`❌ Error: ${result.error || 'Failed to seed organizations'}`])
+        setSeedingLogs(prev => [...prev, {
+          id: 'error',
+          type: 'error',
+          message: `❌ Seeding failed: ${result.error || 'Unknown error'}`,
+          timestamp: new Date()
+        }])
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error: ${error}`])
+      setSeedingLogs(prev => [...prev, {
+        id: 'error',
+        type: 'error',
+        message: `❌ Network error: ${error}`,
+        timestamp: new Date()
+      }])
+    } finally {
+      setIsSeeding(false)
     }
   }
 
   const handleSeedTeams = async (count: number) => {
     setSeedingLogs([])
+    setIsSeeding(true)
+    
+    // Add initial info message
+    setSeedingLogs([{
+      id: 'start',
+      type: 'info',
+      message: `Starting team seeding process for ${count} teams...`,
+      timestamp: new Date()
+    }])
     
     try {
       const response = await fetch('/api/seed/teams', {
@@ -158,16 +225,56 @@ export default function Organizations() {
       const result = await response.json()
       
       if (result.success) {
-        setSeedingLogs(result.results.map((r: any) =>
-          `✅ Created team: ${r.team.name}`
-        ))
+        // Add progress messages for each team
+        const progressLogs = result.results.map((r: any, index: number) => {
+          if (r.success) {
+            return {
+              id: `team-${index}`,
+              type: 'progress' as const,
+              message: `Creating team: ${r.team.name}`,
+              timestamp: new Date(),
+              status: 'completed' as const
+            }
+          } else {
+            return {
+              id: `team-${index}`,
+              type: 'error' as const,
+              message: `Failed to create team ${index + 1}: ${r.error}`,
+              timestamp: new Date()
+            }
+          }
+        })
+        
+        setSeedingLogs(prev => [...prev, ...progressLogs])
+        
+        // Add completion message
+        const successCount = result.results.filter((r: any) => r.success).length
+        setSeedingLogs(prev => [...prev, {
+          id: 'complete',
+          type: 'success',
+          message: `✅ Seeding completed! Created ${successCount}/${count} teams successfully`,
+          timestamp: new Date()
+        }])
+        
         // Refresh the organizations list to show updated count
         await fetchOrganizations()
       } else {
-        setSeedingLogs([`❌ Error: ${result.error || 'Failed to seed teams'}`])
+        setSeedingLogs(prev => [...prev, {
+          id: 'error',
+          type: 'error',
+          message: `❌ Seeding failed: ${result.error || 'Unknown error'}`,
+          timestamp: new Date()
+        }])
       }
     } catch (error) {
-      setSeedingLogs([`❌ Error: ${error}`])
+      setSeedingLogs(prev => [...prev, {
+        id: 'error',
+        type: 'error',
+        message: `❌ Network error: ${error}`,
+        timestamp: new Date()
+      }])
+    } finally {
+      setIsSeeding(false)
     }
   }
 
@@ -304,8 +411,11 @@ export default function Organizations() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-white">Loading all organizations from database...</div>
+      <div className="flex items-center justify-center h-32">
+        <div className="flex flex-col items-center space-y-3">
+          <Loader className="w-6 h-6 text-white animate-spin" />
+          <div className="text-white text-sm">Loading organizations...</div>
+        </div>
       </div>
     )
   }
@@ -437,10 +547,15 @@ export default function Organizations() {
 
         <div className="flex items-center space-x-2">
           <Filter className="w-4 h-4 text-gray-400" />
-          <Select value={filter} onChange={(e) => setFilter(e.target.value)}>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="inactive">Inactive</SelectItem>
+          <Select value={filter} onValueChange={setFilter}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+            </SelectContent>
           </Select>
         </div>
       </div>
@@ -568,7 +683,7 @@ export default function Organizations() {
       {/* Seed Modal */}
       {showSeedModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-lg rounded-none">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-2xl rounded-none">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg text-white font-light">Seed Data</h3>
               <Button
@@ -604,9 +719,20 @@ export default function Organizations() {
                       const count = parseInt((document.getElementById('organization-count') as HTMLInputElement)?.value || '5')
                       handleSeedOrganizations(count)
                     }}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                    disabled={isSeeding}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6 disabled:opacity-50"
                   >
-                    Seed Organizations
+                    {isSeeding ? (
+                      <>
+                        <Loader className="w-3 h-3 mr-2 animate-spin" />
+                        Seeding...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-3 h-3 mr-2" />
+                        Seed Organizations
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -634,9 +760,20 @@ export default function Organizations() {
                       const count = parseInt((document.getElementById('team-count') as HTMLInputElement)?.value || '5')
                       handleSeedTeams(count)
                     }}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6"
+                    disabled={isSeeding}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none mt-6 disabled:opacity-50"
                   >
-                    Seed Teams
+                    {isSeeding ? (
+                      <>
+                        <Loader className="w-3 h-3 mr-2 animate-spin" />
+                        Seeding...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-3 h-3 mr-2" />
+                        Seed Teams
+                      </>
+                    )}
                   </Button>
                 </div>
               </div>
@@ -644,24 +781,13 @@ export default function Organizations() {
               {/* Seeding Logs */}
               {seedingLogs.length > 0 && (
                 <div className="mt-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h5 className="text-sm text-white font-light">Seeding Log</h5>
-                    <details className="group">
-                      <summary className="cursor-pointer text-sm text-gray-400 font-light hover:text-white">
-                        View Details ({seedingLogs.length} items)
-                      </summary>
-                      <div className="mt-3 p-4 bg-black/50 border border-dashed border-white/20 rounded-none">
-                        <div className="space-y-2 max-h-48 overflow-y-auto">
-                          {seedingLogs.map((log, index) => (
-                            <div key={index} className="text-xs font-mono text-gray-300 flex items-start space-x-2">
-                              <span className="text-green-400">✓</span>
-                              <span>{log}</span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </details>
-                  </div>
+                  <Terminal 
+                    title="Organization Seeding Terminal"
+                    lines={seedingLogs}
+                    isRunning={isSeeding}
+                    className="w-full"
+                    defaultCollapsed={true}
+                  />
                 </div>
               )}
             </div>
