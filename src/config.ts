@@ -281,10 +281,16 @@ function detectDatabaseAdapter(content: string): AuthDatabase {
       database.provider = 'postgresql';
       database.type = 'postgresql';
     }
-  } else if (content.includes('better-sqlite3')) {
+  } else if (content.includes('better-sqlite3') || content.includes('new Database(')) {
     database.adapter = 'sqlite';
     database.type = 'sqlite';
     database.provider = 'sqlite';
+    
+    // Try to extract the database file path
+    const dbPathMatch = content.match(/new\s+Database\s*\(\s*["']([^"']+)["']\s*\)/);
+    if (dbPathMatch) {
+      database.name = dbPathMatch[1];
+    }
   }
   
   const urlMatch = content.match(/DATABASE_URL|DB_URL|DB_CONNECTION_STRING/);
@@ -312,6 +318,9 @@ function cleanConfigString(configStr: string): string {
   cleaned = cleaned.replace(/:\s*postgres\s*\(\s*[^)]*\)/g, ':"postgres"');
   cleaned = cleaned.replace(/:\s*mysql2\s*\(\s*[^)]*\)/g, ':"mysql2"');
   cleaned = cleaned.replace(/:\s*bun:sqlite\s*\(\s*[^)]*\)/g, ':"bun-sqlite"');
+  
+  // Handle new Database() pattern from better-sqlite3
+  cleaned = cleaned.replace(/:\s*new\s+Database\s*\(\s*[^)]*\)/g, ':"sqlite-database"');
   
   // Handle other function calls
   cleaned = cleaned.replace(/:\s*(\w+)\s*\(\s*[^)]*\)/g, ':"$1-function"');
@@ -588,11 +597,13 @@ function extractBetterAuthFields(config: any): AuthConfig {
         adapter = 'prisma';
         dbType = 'postgresql';
       }
-    } else if (config.database.constructor?.name === 'Database') {
+    } else if (config.database.constructor?.name === 'Database' || 
+               (typeof config.database === 'object' && config.database.constructor && config.database.constructor.name === 'Database')) {
       dbType = 'sqlite';
       dbName = config.database.name || './better-auth.db';
       adapter = 'sqlite';
-    } else if (config.database.name?.endsWith('.db')) {
+    } else if (config.database.name?.endsWith('.db') || 
+               (typeof config.database === 'string' && config.database.endsWith('.db'))) {
       dbType = 'sqlite';
       adapter = 'sqlite';
     } else if (config.database.provider) {
