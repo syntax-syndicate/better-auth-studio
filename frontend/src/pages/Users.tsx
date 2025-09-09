@@ -19,6 +19,8 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Terminal } from '../components/Terminal'
+import { useCounts } from '../contexts/CountsContext'
+import { Pagination } from '../components/ui/pagination'
 
 interface User {
   id: string
@@ -31,12 +33,13 @@ interface User {
 }
 
 export default function Users() {
+  const { refetchCounts } = useCounts()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
   const [currentPage, setCurrentPage] = useState(1)
-  const [usersPerPage] = useState(50)
+  const [usersPerPage] = useState(20)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -124,6 +127,8 @@ export default function Users() {
         
         // Refresh the users list to show updated count
         await fetchUsers()
+        // Refetch counts to update tab badges
+        await refetchCounts()
       } else {
         setSeedingLogs(prev => [...prev, {
           id: 'error',
@@ -257,6 +262,8 @@ export default function Users() {
       if (result.success) {
         // Refresh the users list to remove the deleted user
         await fetchUsers()
+        // Refetch counts to update tab badges
+        await refetchCounts()
         setShowDeleteModal(false)
         setSelectedUser(null)
         toast.success('User deleted successfully!', { id: toastId })
@@ -472,50 +479,14 @@ export default function Users() {
         </div>
 
         {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between mt-6">
-            <div className="text-sm text-gray-400">
-              Showing {startIndex + 1} to {Math.min(endIndex, filteredUsers.length)} of {filteredUsers.length} users
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={currentPage === 1}
-                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-              >
-                Previous
-              </Button>
-              
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => handlePageChange(page)}
-                  className={
-                    currentPage === page
-                      ? "bg-white text-black rounded-none"
-                      : "border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-                  }
-                >
-                  {page}
-                </Button>
-              ))}
-              
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={currentPage === totalPages}
-                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-              >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={filteredUsers.length}
+          startIndex={startIndex}
+          endIndex={endIndex}
+        />
       </div>
 
       {/* Seed Modal */}

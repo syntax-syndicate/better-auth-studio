@@ -18,6 +18,8 @@ import { Input } from '../components/ui/input'
 import { Label } from '../components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Terminal } from '../components/Terminal'
+import { useCounts } from '../contexts/CountsContext'
+import { Pagination } from '../components/ui/pagination'
 
 interface Organization {
   id: string
@@ -38,11 +40,14 @@ interface PluginStatus {
 
 export default function Organizations() {
   const navigate = useNavigate()
+  const { refetchCounts } = useCounts()
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [loading, setLoading] = useState(true)
   const [pluginStatus, setPluginStatus] = useState<PluginStatus | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filter, setFilter] = useState('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [organizationsPerPage] = useState(20)
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -185,6 +190,8 @@ export default function Organizations() {
         
         // Refresh the organizations list to show updated count
         await fetchOrganizations()
+        // Refetch counts to update tab badges
+        await refetchCounts()
       } else {
         setSeedingLogs(prev => [...prev, {
           id: 'error',
@@ -260,6 +267,8 @@ export default function Organizations() {
         
         // Refresh the organizations list to show updated count
         await fetchOrganizations()
+        // Refetch counts to update tab badges
+        await refetchCounts()
       } else {
         setSeedingLogs(prev => [...prev, {
           id: 'error',
@@ -431,6 +440,8 @@ export default function Organizations() {
       if (result.success) {
         // Refresh the organizations list to remove the deleted organization
         await fetchOrganizations()
+        // Refetch counts to update tab badges
+        await refetchCounts()
         setShowDeleteModal(false)
         setSelectedOrganization(null)
         toast.success('Organization deleted successfully!', { id: toastId })
@@ -449,6 +460,16 @@ export default function Organizations() {
     const matchesFilter = filter === 'all' || organization.metadata?.status === filter
     return matchesSearch && matchesFilter
   })
+
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOrganizations.length / organizationsPerPage)
+  const startIndex = (currentPage - 1) * organizationsPerPage
+  const endIndex = startIndex + organizationsPerPage
+  const currentOrganizations = filteredOrganizations.slice(startIndex, endIndex)
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   if (loading) {
     return (
@@ -659,7 +680,7 @@ export default function Organizations() {
                   </td>
                 </tr>
               ) : (
-                filteredOrganizations.map((organization) => (
+                currentOrganizations.map((organization) => (
                   <tr 
                     key={organization.id} 
                     className="border-b border-dashed border-white/5 hover:bg-white/5 cursor-pointer"
@@ -726,6 +747,16 @@ export default function Organizations() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          totalItems={filteredOrganizations.length}
+          startIndex={startIndex}
+          endIndex={endIndex}
+        />
       </div>
 
       {/* Seed Modal */}

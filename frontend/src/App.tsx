@@ -8,28 +8,31 @@ import OrganizationDetails from './pages/OrganizationDetails'
 import TeamDetails from './pages/TeamDetails'
 import Sessions from './pages/Sessions'
 import Settings from './pages/Settings'
+import { CountsProvider } from './contexts/CountsContext'
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="/organizations" element={<Organizations />} />
-          <Route path="/organizations/:orgId" element={<OrganizationDetails />} />
-          <Route path="/teams/:teamId" element={<TeamDetails />} />
-          <Route path="/sessions" element={<Sessions />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
-      </Layout>
-      <Toaster 
-        theme="dark" 
-        position="top-right"
-        richColors
-        closeButton
-      />
-    </Router>
+    <CountsProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/users" element={<Users />} />
+            <Route path="/organizations" element={<Organizations />} />
+            <Route path="/organizations/:orgId" element={<OrganizationDetails />} />
+            <Route path="/teams/:teamId" element={<TeamDetails />} />
+            <Route path="/sessions" element={<Sessions />} />
+            <Route path="/settings" element={<Settings />} />
+          </Routes>
+        </Layout>
+        <Toaster 
+          theme="dark" 
+          position="top-right"
+          richColors
+          closeButton
+        />
+      </Router>
+    </CountsProvider>
   )
 }
 

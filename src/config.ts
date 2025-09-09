@@ -260,6 +260,7 @@ async function loadTypeScriptConfig(configPath: string): Promise<AuthConfig | nu
 function detectDatabaseAdapter(content: string): AuthDatabase {
   const database: AuthDatabase = {};
   
+  
   if (content.includes('drizzleAdapter')) {
     database.adapter = 'drizzle';
     const providerMatch = content.match(/drizzleAdapter\s*\(\s*\w+\s*,\s*\{[^}]*provider\s*:\s*["']([^"']+)["'][^}]*\}/);
@@ -321,6 +322,7 @@ function cleanConfigString(configStr: string): string {
   
   // Handle new Database() pattern from better-sqlite3
   cleaned = cleaned.replace(/:\s*new\s+Database\s*\(\s*[^)]*\)/g, ':"sqlite-database"');
+  cleaned = cleaned.replace(/new\s+Database\s*\(\s*[^)]*\)/g, '"sqlite-database"');
   
   // Handle other function calls
   cleaned = cleaned.replace(/:\s*(\w+)\s*\(\s*[^)]*\)/g, ':"$1-function"');
@@ -562,6 +564,7 @@ export function extractBetterAuthConfig(content: string): AuthConfig | null {
 
 function extractBetterAuthFields(config: any): AuthConfig {
   const authConfig: AuthConfig = {};
+
 
   if (config.database) {
     let dbType = 'postgresql';

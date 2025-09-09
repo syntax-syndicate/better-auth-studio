@@ -10,26 +10,16 @@ import {
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 import CommandPalette from './CommandPalette'
+import { useCounts } from '../contexts/CountsContext'
 
 interface LayoutProps {
   children: ReactNode
 }
 
-interface Counts {
-  users: number
-  organizations: number
-  sessions: number
-}
-
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
-  const [counts, setCounts] = useState<Counts>({ users: 0, organizations: 0, sessions: 0 })
-  const [loading, setLoading] = useState(true)
+  const { counts, loading } = useCounts()
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
-
-  useEffect(() => {
-    fetchCounts()
-  }, [])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,18 +32,6 @@ export default function Layout({ children }: LayoutProps) {
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [])
-
-  const fetchCounts = async () => {
-    try {
-      const response = await fetch('/api/counts')
-      const data = await response.json()
-      setCounts(data)
-    } catch (error) {
-      console.error('Failed to fetch counts:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const formatCount = (count: number): string => {
     if (count >= 1000) {

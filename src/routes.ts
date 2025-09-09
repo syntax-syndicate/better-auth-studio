@@ -309,12 +309,15 @@ export function createRoutes(authConfig: AuthConfig) {
     // Try to detect adapter from the raw config content
     let databaseType = 'unknown';
     const configPath = await findAuthConfigPath();
+    console.log('Config path:', configPath);
     if (configPath) {
       const content = readFileSync(configPath, 'utf-8');
       if (content.includes('drizzleAdapter')) {
         databaseType = 'Drizzle';
       } else if (content.includes('prismaAdapter')) {
         databaseType = 'Prisma';
+      } else if (content.includes('better-sqlite3') || content.includes('new Database(')) {
+        databaseType = 'SQLite';
       }
     }
     
@@ -2055,10 +2058,24 @@ export function createRoutes(authConfig: AuthConfig) {
       const results = [];
       for (let i = 0; i < count; i++) {
         try {
+          // Generate random string suffix
+          const randomSuffix = Math.random().toString(36).substring(2, 8);
+          const organizationName = `organization-${randomSuffix}`;
+          
+          // Generate slug from organization name
+          const generateSlug = (name: string): string => {
+            return name
+              .toLowerCase()
+              .replace(/\s+/g, '-') // Replace spaces with hyphens
+              .replace(/[^a-z0-9-]/g, '') // Remove special characters except hyphens
+              .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+              .replace(/^-|-$/g, '') // Remove leading/trailing hyphens
+          };
+          
           const organizationData = {
-            name: `Organization ${i + 1}`,
-            slug: `org-${i + 1}`,
-            image: `https://api.dicebear.com/7.x/identicon/svg?seed=org${i + 1}`,
+            name: organizationName,
+            slug: generateSlug(organizationName),
+            image: `https://api.dicebear.com/7.x/identicon/svg?seed=${randomSuffix}`,
             createdAt: new Date(),
             updatedAt: new Date()
           };

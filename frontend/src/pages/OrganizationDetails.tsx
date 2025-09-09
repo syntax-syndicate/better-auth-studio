@@ -1057,7 +1057,7 @@ export default function OrganizationDetails() {
                                     </Button>
                                     <Button 
                                         onClick={openInviteModal}
-                                        className="bg-white hover:bg-white/90 bg-transparent border border-white/20 rounded-none"
+                                        className="bg-white text-white hover:bg-white/90 bg-transparent border border-white/20 rounded-none"
                                     >
                                         <Mail className="w-4 h-4 mr-2" />
                                         Invite User
