@@ -62,11 +62,9 @@ export default function TeamDetails() {
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState<'details' | 'members'>('details')
     
-    // Modal states
     const [showAddMemberModal, setShowAddMemberModal] = useState(false)
     const [showEditTeamModal, setShowEditTeamModal] = useState(false)
     
-    // Search and selection states
     const [searchTerm, setSearchTerm] = useState('')
     const [availableUsers, setAvailableUsers] = useState<User[]>([])
     const [selectedUsers, setSelectedUsers] = useState<string[]>([])
@@ -117,7 +115,6 @@ export default function TeamDetails() {
             const response = await fetch('/api/users?limit=10000')
             const data = await response.json()
             
-            // Filter out users who are already team members
             const memberUserIds = members.map(member => member.userId)
             const available = (data.users || []).filter((user: User) => 
                 !memberUserIds.includes(user.id)

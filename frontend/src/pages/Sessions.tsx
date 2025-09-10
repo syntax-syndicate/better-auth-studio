@@ -219,19 +219,16 @@ export default function Sessions() {
   }
 
   const handleCreateSession = async (sessionData: any) => {
-    // Implementation for creating session
     console.log('Creating session:', sessionData)
     setShowCreateModal(false)
   }
 
   const handleUpdateSession = async (sessionData: any) => {
-    // Implementation for updating session
     console.log('Updating session:', sessionData)
     setShowEditModal(false)
   }
 
   const handleDeleteSession = async () => {
-    // Implementation for deleting session
     console.log('Deleting session:', selectedSession?.id)
     setShowDeleteModal(false)
   }
