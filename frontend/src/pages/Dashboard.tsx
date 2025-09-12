@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { 
   Users, 
   Building2, 
-  Database, 
   Settings, 
   BarChart3, 
   Zap,
@@ -13,22 +12,18 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import UsersPage from './Users'
 import OrganizationsPage from './Organizations'
-import SessionsPage from './Sessions'
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview')
 
   const renderOverview = () => (
     <div className="space-y-8 animate-fade-in px-6 py-8">
-      {/* Header */}
       <div>
         <h1 className="text-2xl text-white font-normal">Better Auth Studio</h1>
         <p className="text-gray-400 mt-1 font-light">Manage your authentication system</p>
       </div>
 
-      {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Users Card */}
         <Card className="border border-dashed border-white/20 bg-black/30 rounded-none hover:bg-black/50 transition-colors">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
@@ -75,7 +70,7 @@ export default function Dashboard() {
         </Card>
 
         {/* Sessions Card */}
-        <Card className="border border-dashed border-white/20 bg-black/30 rounded-none hover:bg-black/50 transition-colors">
+        {/* <Card className="border border-dashed border-white/20 bg-black/30 rounded-none hover:bg-black/50 transition-colors">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="p-3 bg-white/10 rounded-none">
@@ -95,7 +90,7 @@ export default function Dashboard() {
               <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
           </CardContent>
-        </Card>
+        </Card> */}
 
         {/* Configuration Card */}
         <Card className="border border-dashed border-white/20 bg-black/30 rounded-none hover:bg-black/50 transition-colors">
@@ -224,7 +219,7 @@ export default function Dashboard() {
       {activeTab === 'overview' ? renderOverview() : 
        activeTab === 'users' ? <UsersPage /> : 
        activeTab === 'organizations' ? <OrganizationsPage /> :
-       activeTab === 'sessions' ? <SessionsPage /> : 
+      //  activeTab === 'sessions' ? <SessionsPage /> : 
        renderOverview()}
     </div>
   )

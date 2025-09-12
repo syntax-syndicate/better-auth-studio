@@ -127,11 +127,6 @@ export const auth = betterAuth({
 - **Member management** - Add/remove members from teams
 - **Bulk seeding** - Generate test organizations and teams
 
-### 🔐 Session Management
-- **Active sessions** - View all active user sessions
-- **Session details** - IP addresses, user agents, expiration times
-- **Session termination** - Revoke specific sessions
-
 ### ⚙️ Settings & Configuration
 - **Plugin status** - Check which Better Auth plugins are enabled
 - **Database configuration** - View current database adapter and settings
