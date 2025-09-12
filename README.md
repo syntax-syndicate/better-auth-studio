@@ -170,7 +170,7 @@ pnpx better-auth-studio --version
 
 # Show help
 pnpx better-auth-studio --help
-
+```
 ## 📝 Development
 
 ### Running from Source
