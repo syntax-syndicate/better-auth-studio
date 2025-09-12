@@ -221,7 +221,7 @@ export default function UserDetails() {
           <Button
             variant="outline"
             onClick={() => navigate('/users')}
-            className="mb-4 border-none text-white hover:bg-white/10 rounded-none"
+            className="mb-4 border-none text-white"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Users
