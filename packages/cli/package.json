@@ -1,0 +1,44 @@
+{
+  "name": "@better-auth/cli",
+  "version": "1.0.16",
+  "description": "CLI for Better Auth Studio",
+  "main": "dist/cli.js",
+  "types": "dist/cli.d.ts",
+  "type": "module",
+  "bin": {
+    "better-auth-studio": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "node dist/cli.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "better-auth",
+    "cli",
+    "studio",
+    "authentication"
+  ],
+  "author": "kinfish",
+  "license": "MIT",
+  "dependencies": {
+    "better-auth-studio": "workspace:*",
+    "chalk": "^5.3.0",
+    "commander": "^11.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "tsx": "^4.6.0",
+    "typescript": "^5.3.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "package.json"
+  ]
+}
+

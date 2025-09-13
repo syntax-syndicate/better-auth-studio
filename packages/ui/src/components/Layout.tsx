@@ -1,0 +1,136 @@
+import { ReactNode, useState, useEffect } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import {
+  LayoutDashboard,
+  Users,
+  Building2,
+  Settings,
+  Search
+} from 'lucide-react'
+import { Button } from './ui/button'
+import { Badge } from './ui/badge'
+import CommandPalette from './CommandPalette'
+import { useCounts } from '../contexts/CountsContext'
+
+interface LayoutProps {
+  children: ReactNode
+}
+
+export default function Layout({ children }: LayoutProps) {
+  const location = useLocation()
+  const { counts, loading } = useCounts()
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false)
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setIsCommandPaletteOpen(true)
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
+  const formatCount = (count: number): string => {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'k'
+    }
+    return count.toString()
+  }
+
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+    { name: 'Users', href: '/users', icon: Users, badge: loading ? '...' : formatCount(counts.users) },
+    { name: 'Organizations', href: '/organizations', icon: Building2, badge: loading ? '...' : formatCount(counts.organizations) },
+    { name: 'Settings', href: '/settings', icon: Settings },
+  ]
+
+  return (
+    <div className="min-h-screen bg-black">
+      {/* Top Navigation */}
+      <div className="bg-black/70 border-b border-white/15">
+        <div className="flex items-center justify-between px-6 py-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-lg">⚡</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-white">Better Auth Studio</h1>
+                <p className="text-xs text-gray-300">v1.0.0</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Search..."
+                onClick={() => setIsCommandPaletteOpen(true)}
+                className="pl-10 pr-4 py-2  bg-black border rounded-none border-gray-600 text-white border-dashed focus:ring-2 focus:ring-white focus:border-transparent transition-colors placeholder-gray-400 cursor-pointer"
+                readOnly
+              />
+              <kbd className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400 border border-dashed border-white/20 rounded-sm px-1.5 py-0.5">
+                ⌘K
+              </kbd>
+            </div>
+            <a href="https://better-auth.com/docs" target="_blank">
+              <Button variant="ghost" className="text-gray-300 bg-transparent hover:bg-transparent hover:bg-gray-900 border-dashed">
+                Docs
+              </Button>
+            </a>
+            <a href="https://better-auth.com/support" target="_blank">
+              <Button variant="ghost" className="text-gray-300 bg-transparent hover:bg-transparent hover:bg-gray-900 border-dashed">
+                Support
+              </Button>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Top Navigation Tabs */}
+      <div className="bg-black/50 border-b border-white/10">
+        <div className="px-6">
+          <nav className="flex space-x-8">
+            {navigation.map((item) => {
+              const isActive = location.pathname === item.href
+              return (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className={`flex items-center space-x-2 px-3 py-4 text-sm font-medium border-b-2 transition-all duration-200 ${isActive
+                    ? 'border-white text-white'
+                    : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'
+                    }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span>{item.name}</span>
+                  {item.badge && (
+                    <Badge variant="secondary" className="text-xs bg-white/10 border border-white/20 rounded-sm">
+                      {item.badge}
+                    </Badge>
+                  )}
+                </Link>
+              )
+            })}
+          </nav>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 p-0">
+        {children}
+      </div>
+
+      {/* Command Palette */}
+      <CommandPalette 
+        isOpen={isCommandPaletteOpen} 
+        onClose={() => setIsCommandPaletteOpen(false)} 
+      />
+    </div>
+  )
+}

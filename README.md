@@ -1,190 +1,152 @@
-# Better Auth Studio 
+# Better Auth Studio Monorepo
 
-> ⚠️ **Alpha Version Notice**
-> 
-> Better Auth Studio is currently in **alpha** and in early development. You may encounter bugs or incomplete features. Please report any issues you find on our GitHub repository to help us improve the project. Your feedback is greatly appreciated!
+A comprehensive monorepo for Better Auth Studio - a beautiful GUI dashboard for Better Auth authentication system.
 
+## 🏗️ Project Structure
 
-A web-based studio interface for managing Better Auth applications. Better Auth Studio provides a comprehensive dashboard for managing users, organizations, teams, and more.
+```
+bt-studio/
+├── packages/           # Core packages
+│   ├── studio/        # Main studio application
+│   ├── cli/           # CLI tool for running studio
+│   └── web/           # Landing page (Vite + React)
+├── apps/              # Applications
+│   └── docs/          # Documentation site (Next.js)
+├── tests/             # Test projects
+│   ├── prisma/        # Prisma test project
+│   └── drizzle/       # Drizzle test project
+└── package.json       # Root workspace configuration
+```
 
-## 🚀 Quick Start
+## 📦 Packages
+
+### `@better-auth/studio`
+The main studio application that provides the GUI dashboard for managing Better Auth.
+
+**Features:**
+- User management interface
+- Session monitoring and control
+- Organization management
+- Real-time updates via WebSocket
+- Database integration (Prisma, Drizzle, etc.)
+- Analytics and insights
+
+### `@better-auth/cli`
+Command-line interface for running Better Auth Studio.
+
+**Usage:**
+```bash
+# Install globally
+npm install -g @better-auth/cli
+
+# Start studio
+better-auth-studio start
+
+# Or use npx
+npx @better-auth/cli start
+```
+
+### `@better-auth/web`
+Landing page and marketing site built with Vite and React.
+
+**Features:**
+- Modern, responsive design
+- Feature showcase
+- Getting started guide
+- Documentation links
+
+## 🚀 Applications
+
+### `docs` (Next.js Documentation)
+Complete documentation site built with Next.js, featuring:
+
+- Interactive documentation
+- Code examples
+- API reference
+- Getting started guides
+- Search functionality
+- Dark/light theme support
+
+## 🧪 Test Projects
+
+### `test-prisma`
+Test project using Prisma ORM with Better Auth Studio.
+
+### `test-drizzle`
+Test project using Drizzle ORM with Better Auth Studio.
+
+## 🛠️ Development
+
+### Prerequisites
+- Node.js >= 18.0.0
+- pnpm (recommended) or npm
 
 ### Installation
-
-Install Better Auth Studio globally using pnpm:
-
 ```bash
-pnpm add -g better-auth-studio
-```
-
-Or use pnpx to run it without installation:
-
-```bash
-pnpx better-auth-studio
-```
-
-### Basic Usage
-
-1. **Navigate to your Better Auth project directory**
-   ```bash
-   cd your-better-auth-project
-   ```
-
-2. **Start the studio**
-   ```bash
-   pnpx better-auth-studio start
-   ```
-
-3. **Open your browser**
-   - The studio will automatically open at `http://localhost:3000`
-   - Or manually navigate to the URL shown in the terminal
-
-## 📋 Prerequisites
-
-Before using Better Auth Studio, ensure you have:
-
-- **Node.js** (v18 or higher)
-- **A Better Auth project** with a valid `auth.ts` configuration file
-- **Database setup** (Prisma, Drizzle, or SQLite)
-
-## 🔧 Configuration
-
-### Supported Database Adapters
-
-Better Auth Studio automatically detects and works with:
-
-- **Prisma** (`prismaAdapter`)
-- **Drizzle** (`drizzleAdapter`) 
-- **SQLite** (`new Database()` from better-sqlite3)
-- **PostgreSQL** (via Prisma or Drizzle)
-- **MySQL** (via Prisma or Drizzle)
-
-### Example Configuration Files
-
-#### Prisma Setup
-```typescript
-// auth.ts
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
-
-export const auth = betterAuth({
-  database: prismaAdapter(prisma, {
-    provider: "postgresql", // or "mysql", "sqlite"
-  }),
-  // ... other config
-});
-```
-
-#### Drizzle Setup
-```typescript
-// auth.ts
-import { betterAuth } from "better-auth";
-import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "./database";
-
-export const auth = betterAuth({
-  database: drizzleAdapter(db, {
-    provider: "pg", // or "mysql", "sqlite"
-  }),
-  // ... other config
-});
-```
-
-#### SQLite Setup
-```typescript
-// auth.ts
-import { betterAuth } from "better-auth";
-import Database from "better-sqlite3";
-
-export const auth = betterAuth({
-  database: new Database("./better-auth.db"),
-  // ... other config
-});
-```
-
-## 🎯 Features
-
-### 📊 Dashboard
-- **Overview statistics** - User counts, organization counts, session data
-
-### 👥 User Management
-- **View all users** - Paginated list with search and filtering
-- **Create users** - Add new users with email/password
-- **Edit users** - Update user information, email verification status
-- **Delete users** - Remove users from the system
-- **Bulk operations** - Seed multiple test users
-- **User details** - View user profiles, and accounts
-
-### 🏢 Organization Management
-- **View organizations** - List all organizations with pagination
-- **Create organizations** - Add new organizations with custom slugs
-- **Edit organizations** - Update organization details
-- **Delete organizations** - Remove organizations
-- **Team management** - Create and manage teams within organizations
-- **Member management** - Add/remove members from teams
-- **Bulk seeding** - Generate test organizations and teams
-
-### ⚙️ Settings & Configuration
-- **Plugin status** - Check which Better Auth plugins are enabled
-- **Database configuration** - View current database adapter and settings
-- **Social providers** - Configure OAuth providers (GitHub, Google, etc.)
-- **Email settings** - Configure email verification and password reset
-
-## 🛠️ Command Line Options
-
-### Start Studio
-```bash
-pnpx better-auth-studio start [options]
-```
-
-**Options:**
-- `--port <number>` - Specify port (default: 3000)
-- `--host <string>` - Specify host (default: localhost)
-- `--no-open` - Don't automatically open browser
-- `--config <path>` - Path to auth config file (default: auto-detect)
-
-**Examples:**
-```bash
-# Start on custom port
-pnpx better-auth-studio start --port 3001
-
-# Start without opening browser
-pnpx better-auth-studio start --no-open
-
-# Use custom config file
-pnpx better-auth-studio start --config ./custom-auth.ts
-```
-
-### Other Commands
-```bash
-# Check version
-pnpx better-auth-studio --version
-
-# Show help
-pnpx better-auth-studio --help
-```
-## 📝 Development
-
-### Running from Source
-```bash
-# Clone the repository
-git clone https://github.com/better-auth/better-auth-studio.git
-cd better-auth-studio
-
-# Install dependencies
+# Install dependencies for all packages
 pnpm install
 
-# Build the project
-pnpm run build
-
-# Start development server
-pnpm run dev
+# Or install dependencies for specific package
+pnpm --filter @better-auth/studio install
 ```
 
-### Contributing
+### Development Scripts
+
+```bash
+# Build all packages
+pnpm build
+
+# Run development servers
+pnpm dev
+
+# Run specific package
+pnpm --filter @better-auth/studio dev
+pnpm --filter @better-auth/cli dev
+pnpm --filter @better-auth/web dev
+pnpm --filter docs dev
+
+# Run test projects
+pnpm --filter test-prisma dev
+pnpm --filter test-drizzle dev
+```
+
+### Package-specific Scripts
+
+#### Studio Package
+```bash
+pnpm --filter @better-auth/studio studio:dev    # Run studio in dev mode
+pnpm --filter @better-auth/studio studio:build  # Build studio
+```
+
+#### CLI Package
+```bash
+pnpm --filter @better-auth/cli cli:dev    # Run CLI in dev mode
+pnpm --filter @better-auth/cli cli:build  # Build CLI
+```
+
+#### Web Package
+```bash
+pnpm --filter @better-auth/web web:dev    # Run web app in dev mode
+pnpm --filter @better-auth/web web:build  # Build web app
+```
+
+#### Docs App
+```bash
+pnpm --filter docs docs:dev    # Run docs in dev mode
+pnpm --filter docs docs:build  # Build docs
+```
+
+## 📚 Documentation
+
+Visit the documentation site to learn more about:
+- Getting started with Better Auth Studio
+- Configuration options
+- API reference
+- Examples and guides
+- Troubleshooting
+
+## 🤝 Contributing
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -193,13 +155,17 @@ pnpm run dev
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+MIT License - see LICENSE file for details.
 
-## 🤝 Support
+## 🔗 Links
 
-If you encounter any issues or have questions:
+- [Better Auth](https://better-auth.com) - The authentication library
+- [Documentation](https://docs.better-auth.com) - Complete documentation
+- [GitHub](https://github.com/better-auth/studio) - Source code
+- [NPM](https://npmjs.com/package/@better-auth/cli) - CLI package
 
-**Search existing issues** on GitHub
-**Create a new issue** with detailed information
+## 🆘 Support
 
----
+- GitHub Issues: [Report bugs or request features](https://github.com/better-auth/studio/issues)
+- Discord: [Join our community](https://discord.gg/better-auth)
+- Documentation: [Read the docs](https://docs.better-auth.com)
