@@ -18,7 +18,6 @@ export async function getAuthData(authConfig, type = 'stats', options) {
             case 'deleteUser':
                 return await deleteRealUser(adapter, options.id);
             case 'updateUser':
-                console.log({ adapter });
                 return await updateRealUser(adapter, options.id, options.userData);
             default:
                 throw new Error(`Unknown data type: ${type}`);
@@ -155,7 +154,6 @@ async function updateRealUser(adapter, userId, userData) {
             ],
             update: { ...userData }
         });
-        console.log({ updatedUser });
         return updatedUser;
     }
     catch (error) {

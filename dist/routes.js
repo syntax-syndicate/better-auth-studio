@@ -1568,7 +1568,6 @@ export function createRoutes(authConfig) {
             const updatedTeam = {
                 id,
                 name,
-                updatedAt: new Date().toISOString()
             };
             if (!adapter.update) {
                 return res.status(500).json({ error: 'Adapter update method not available' });
@@ -1578,7 +1577,6 @@ export function createRoutes(authConfig) {
                 where: [{ field: 'id', value: id }],
                 update: {
                     name: updatedTeam.name,
-                    updatedAt: updatedTeam.updatedAt
                 }
             });
             res.json({ success: true, team: updatedTeam });
