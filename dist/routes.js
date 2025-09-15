@@ -427,8 +427,12 @@ export function createRoutes(authConfig) {
             if (!adapter || !adapter.findMany) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
             }
-            const users = await adapter.findMany({ model: 'user', limit: 10000 });
-            const user = users && users.length > 0 ? users.find((u) => u.id === userId) : null;
+            const users = await adapter.findMany({
+                model: 'user',
+                where: [{ field: 'id', value: userId }],
+                limit: 1
+            });
+            const user = users && users.length > 0 ? users[0] : null;
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
@@ -654,12 +658,42 @@ export function createRoutes(authConfig) {
             if (!adapter || !adapter.findMany) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
             }
-            const teams = await adapter.findMany({ model: 'team', limit: 10000 });
-            const team = teams.find((t) => t.id === teamId);
+            const teams = await adapter.findMany({
+                model: 'team',
+                where: [{ field: 'id', value: teamId }],
+                limit: 1
+            });
+            const team = teams && teams.length > 0 ? teams[0] : null;
             if (!team) {
-                return res.status(404).json({ error: 'Team not found' });
+                return res.status(404).json({ success: false, error: 'Team not found' });
             }
-            res.json({ team });
+            // Fetch organization details for the team
+            let organization = null;
+            try {
+                const orgs = await adapter.findMany({
+                    model: 'organization',
+                    where: [{ field: 'id', value: team.organizationId }],
+                    limit: 1
+                });
+                organization = orgs && orgs.length > 0 ? orgs[0] : null;
+            }
+            catch (error) {
+                console.error('Error fetching organization for team:', error);
+            }
+            const transformedTeam = {
+                id: team.id,
+                name: team.name,
+                organizationId: team.organizationId,
+                metadata: team.metadata,
+                createdAt: team.createdAt,
+                updatedAt: team.updatedAt,
+                memberCount: team.memberCount || 0,
+                organization: organization ? {
+                    id: organization.id,
+                    name: organization.name
+                } : null
+            };
+            res.json({ success: true, team: transformedTeam });
         }
         catch (error) {
             console.error('Error fetching team:', error);
@@ -667,18 +701,33 @@ export function createRoutes(authConfig) {
         }
     });
     router.get('/api/organizations/:orgId', async (req, res) => {
+        console.log('DEBUG: Organization route hit!');
         try {
             const { orgId } = req.params;
+            console.log('DEBUG: Organization route called with orgId:', orgId);
             const adapter = await getAuthAdapter();
             if (!adapter || !adapter.findMany) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
             }
-            const organizations = await adapter.findMany({ model: 'organization', limit: 10000 });
-            const organization = organizations.find((org) => org.id === orgId);
+            const organizations = await adapter.findMany({
+                model: 'organization',
+                where: [{ field: 'id', value: orgId }],
+                limit: 1
+            });
+            const organization = organizations && organizations.length > 0 ? organizations[0] : null;
             if (!organization) {
-                return res.status(404).json({ error: 'Organization not found' });
+                return res.status(404).json({ success: false, error: 'Organization not found' });
             }
-            res.json({ organization });
+            const transformedOrganization = {
+                id: organization.id,
+                name: organization.name,
+                slug: organization.slug,
+                metadata: organization.metadata,
+                createdAt: organization.createdAt,
+                updatedAt: organization.updatedAt,
+            };
+            console.log('DEBUG: Returning organization:', { success: true, organization: transformedOrganization });
+            res.json({ success: true, organization: transformedOrganization });
         }
         catch (error) {
             console.error('Error fetching organization:', error);
@@ -1389,59 +1438,6 @@ export function createRoutes(authConfig) {
             res.status(500).json({ error: 'Failed to create team' });
         }
     });
-    router.get('/api/teams/:id', async (req, res) => {
-        try {
-            const { id } = req.params;
-            const adapter = await getAuthAdapter();
-            if (adapter && typeof adapter.findMany === 'function') {
-                try {
-                    const teams = await adapter.findMany({
-                        model: 'team',
-                        where: [{ field: 'id', value: id }],
-                        limit: 1
-                    });
-                    const team = teams?.[0];
-                    if (team) {
-                        let organization = null;
-                        try {
-                            const orgs = await adapter.findMany({
-                                model: 'organization',
-                                where: [{ field: 'id', value: team.organizationId }],
-                                limit: 1
-                            });
-                            organization = orgs?.[0];
-                        }
-                        catch (error) {
-                            console.error('Error fetching organization for team:', error);
-                        }
-                        const transformedTeam = {
-                            id: team.id,
-                            name: team.name,
-                            organizationId: team.organizationId,
-                            metadata: team.metadata,
-                            createdAt: team.createdAt,
-                            updatedAt: team.updatedAt,
-                            memberCount: team.memberCount || 0,
-                            organization: organization ? {
-                                id: organization.id,
-                                name: organization.name
-                            } : null
-                        };
-                        res.json({ success: true, team: transformedTeam });
-                        return;
-                    }
-                }
-                catch (error) {
-                    console.error('Error fetching team from adapter:', error);
-                }
-            }
-            res.status(404).json({ success: false, error: 'Team not found' });
-        }
-        catch (error) {
-            console.error('Error fetching team:', error);
-            res.status(500).json({ error: 'Failed to fetch team' });
-        }
-    });
     router.get('/api/teams/:teamId/members', async (req, res) => {
         try {
             const { teamId } = req.params;
@@ -1572,7 +1568,6 @@ export function createRoutes(authConfig) {
             const updatedTeam = {
                 id,
                 name,
-                updatedAt: new Date().toISOString()
             };
             if (!adapter.update) {
                 return res.status(500).json({ error: 'Adapter update method not available' });
@@ -1582,7 +1577,6 @@ export function createRoutes(authConfig) {
                 where: [{ field: 'id', value: id }],
                 update: {
                     name: updatedTeam.name,
-                    updatedAt: updatedTeam.updatedAt
                 }
             });
             res.json({ success: true, team: updatedTeam });
@@ -1777,33 +1771,6 @@ export function createRoutes(authConfig) {
         catch (error) {
             console.error('Error updating organization:', error);
             res.status(500).json({ error: 'Failed to update organization' });
-        }
-    });
-    router.get('/api/organizations/:id', async (req, res) => {
-        try {
-            const { id } = req.params;
-            const adapter = await getAuthAdapter();
-            if (adapter && typeof adapter.findMany === 'function') {
-                const organizations = await adapter.findMany({ model: 'organization', limit: 10000 });
-                const organization = organizations?.find((org) => org.id === id);
-                if (organization) {
-                    const transformedOrganization = {
-                        id: organization.id,
-                        name: organization.name,
-                        slug: organization.slug,
-                        metadata: organization.metadata,
-                        createdAt: organization.createdAt,
-                        updatedAt: organization.updatedAt,
-                    };
-                    res.json({ success: true, organization: transformedOrganization });
-                    return;
-                }
-            }
-            res.status(404).json({ success: false, error: 'Organization not found' });
-        }
-        catch (error) {
-            console.error('Error fetching organization:', error);
-            res.status(500).json({ error: 'Failed to fetch organization' });
         }
     });
     router.delete('/api/organizations/:id', async (req, res) => {

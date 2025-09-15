@@ -608,8 +608,7 @@ export default function UserDetails() {
               <Button
                 variant="outline"
                 onClick={() => setShowEditModal(false)}
-                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-              >
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none" >
                 Cancel
               </Button>
               <Button

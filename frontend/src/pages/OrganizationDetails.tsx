@@ -157,7 +157,10 @@ export default function OrganizationDetails() {
             const response = await fetch(`/api/organizations/${orgId}`)
             const data = await response.json()
 
-            if (data.success) {
+            // Handle both response formats: { success: true, organization: ... } and { organization: ... }
+            if (data.success && data.organization) {
+                setOrganization(data.organization)
+            } else if (data.organization) {
                 setOrganization(data.organization)
             } else {
                 toast.error('Organization not found')
@@ -878,7 +881,7 @@ export default function OrganizationDetails() {
                                             <tr 
                                                 key={team.id} 
                                                 className="border-b border-dashed border-white/5 hover:bg-white/5 cursor-pointer"
-                                                onClick={() => navigate(`/teams/${team.id}`)}
+                                                onClick={() => navigate(`/organizations/${orgId}/teams/${team.id}`)}
                                             >
                                                 <td className="py-4 px-4">
                                                     <div className="flex items-center space-x-3">

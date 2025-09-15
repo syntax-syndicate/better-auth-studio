@@ -1,5 +1,5 @@
 {
-  "name": "better-auth-test-project",
+  "name": "test-drizzle",
   "version": "1.0.0",
   "description": "Test project for Better Auth Studio",
   "main": "dist/index.js",
@@ -14,7 +14,7 @@
     "@prisma/client": "^6.15.0",
     "@types/better-sqlite3": "^7.6.13",
     "better-auth": "1.3.5",
-    "better-auth-studio": "file:../",
+    "better-auth-studio": "file:../../",
     "better-sqlite3": "^12.2.0",
     "drizzle-orm": "^0.44.5",
     "express": "^4.18.2",

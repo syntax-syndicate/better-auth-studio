@@ -22,7 +22,7 @@ function App() {
             <Route path="/users/:userId" element={<UserDetails />} />
             <Route path="/organizations" element={<Organizations />} />
             <Route path="/organizations/:orgId" element={<OrganizationDetails />} />
-            <Route path="/teams/:teamId" element={<TeamDetails />} />
+            <Route path="/organizations/:orgId/teams/:teamId" element={<TeamDetails />} />
             <Route path="/sessions" element={<Sessions />} />
             <Route path="/settings" element={<Settings />} />
           </Routes>

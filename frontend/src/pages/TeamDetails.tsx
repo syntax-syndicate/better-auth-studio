@@ -56,7 +56,7 @@ interface User {
 }
 
 export default function TeamDetails() {
-    const { teamId } = useParams<{ teamId: string }>()
+    const { orgId, teamId } = useParams<{ orgId: string; teamId: string }>()
     const [team, setTeam] = useState<Team | null>(null)
     const [members, setMembers] = useState<TeamMember[]>([])
     const [loading, setLoading] = useState(true)
@@ -82,7 +82,11 @@ export default function TeamDetails() {
             const response = await fetch(`/api/teams/${teamId}`)
             const data = await response.json()
             
-            if (data.success) {
+            // Handle both response formats: { success: true, team: ... } and { team: ... }
+            if (data.success && data.team) {
+                setTeam(data.team)
+                setTeamFormData({ name: data.team.name })
+            } else if (data.team) {
                 setTeam(data.team)
                 setTeamFormData({ name: data.team.name })
             } else {
@@ -245,10 +249,10 @@ export default function TeamDetails() {
         return (
             <div className="space-y-6 p-6">
                 <div className="flex items-center space-x-4">
-                    <Link to="/organizations">
+                    <Link to={`/organizations/${orgId}`}>
                         <Button variant="ghost" className="text-gray-400 hover:text-white rounded-none">
                             <ArrowLeft className="w-4 h-4 mr-2" />
-                            Back to Organizations
+                            Back to Organization
                         </Button>
                     </Link>
                 </div>
