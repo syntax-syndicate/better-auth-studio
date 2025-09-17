@@ -13,10 +13,8 @@ export default function PixelLayout({ children, currentPage, title, description 
     <div className="min-h-screen bg-black text-white font-mono" style={{ fontFamily: 'var(--font-geist-mono)' }}>
       <Navigation currentPage={currentPage} />
       
-      {/* Hero Section */}
       <div className="relative h-screen flex items-center justify-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-200/[15%] to-black">
-          {/* Pixel grid pattern */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-gray-200/[7%] to-black">
           <div className="absolute inset-0 opacity-5">
             <div className="h-full w-full" style={{
               backgroundImage: `
