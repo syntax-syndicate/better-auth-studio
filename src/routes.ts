@@ -791,10 +791,8 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   });
 
   router.get('/api/organizations/:orgId', async (req: Request, res: Response) => {
-    console.log('DEBUG: Organization route hit!');
     try {
       const { orgId } = req.params;
-      console.log('DEBUG: Organization route called with orgId:', orgId);
       const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -821,7 +819,6 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
         updatedAt: organization.updatedAt,
       };
 
-      console.log('DEBUG: Returning organization:', { success: true, organization: transformedOrganization });
       res.json({ success: true, organization: transformedOrganization });
     } catch (error) {
       console.error('Error fetching organization:', error);
@@ -938,8 +935,8 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
           authModule = await safeImportAuthConfig(authConfigPath);
         } catch (importError) {
           // Fallback: read file content directly
-          console.log('🔍 Debug: safeImportAuthConfig failed, using readFileSync fallback');
           const content = readFileSync(authConfigPath, 'utf-8');
+          
           authModule = {
             auth: {
               options: {
@@ -1091,7 +1088,6 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
           authModule = await safeImportAuthConfig(authConfigPath);
         } catch (importError) {
           // Fallback: read file content directly
-          console.log('🔍 Debug: safeImportAuthConfig failed, using readFileSync fallback');
           const content = readFileSync(authConfigPath, 'utf-8');
           authModule = {
             auth: {
@@ -1835,13 +1831,14 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
       }
 
       try {
+        // Use the same logic as the /api/plugins endpoint
         let authModule;
         try {
           authModule = await safeImportAuthConfig(authConfigPath);
         } catch (importError) {
           // Fallback: read file content directly
-          console.log('🔍 Debug: safeImportAuthConfig failed, using readFileSync fallback');
           const content = readFileSync(authConfigPath, 'utf-8');
+          
           authModule = {
             auth: {
               options: {
@@ -1852,6 +1849,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
           };
         }
         const auth = authModule.auth || authModule.default;
+        
         if (!auth) {
           return res.json({
             enabled: false,
@@ -1859,16 +1857,14 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
             configPath: authConfigPath
           });
         }
-        const result = auth.options.plugins
-        console.log({result})
-        const hasOrganizationPlugin = auth.options?.plugins?.find((plugin: any) =>
-          plugin.id === "organization"
-        );
+        
+        const plugins = auth.options?.plugins || [];
+        const hasOrganizationPlugin = plugins.find((plugin: any) => plugin.id === "organization");
 
         res.json({
           enabled: !!hasOrganizationPlugin,
           configPath: authConfigPath,
-          availablePlugins: auth.options?.plugins?.map((p: any) => p.id) || [],
+          availablePlugins: plugins.map((p: any) => p.id) || [],
           organizationPlugin: hasOrganizationPlugin || null
         });
 

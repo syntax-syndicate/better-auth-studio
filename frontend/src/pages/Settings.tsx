@@ -190,7 +190,7 @@ export default function Settings() {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch("/api/config");
+      const response = await fetch("/api/plugins");
       const data = await response.json();
       console.log("Config data:", data);
       setConfig(data);

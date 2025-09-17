@@ -100,11 +100,11 @@ export default function Organizations() {
 
   const checkPluginStatus = async () => {
     try {
-      const response = await fetch('/api/plugins/organization/status')
-      const status = await response.json()
-      setPluginStatus(status)
-      
-      if (status.enabled) {
+      const response = await fetch('/api/config')
+      const pluginLists: any[] = await response.json()
+      const orgEnabled = pluginLists.find((plugin) => plugin.name === 'organization')
+      setPluginStatus(orgEnabled)
+      if (orgEnabled) {
         await fetchOrganizations()
       } else {
         setLoading(false)
