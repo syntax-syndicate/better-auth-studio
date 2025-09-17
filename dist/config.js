@@ -1,5 +1,6 @@
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
+import { createJiti } from 'jiti';
 import { pathToFileURL } from 'url';
 function resolveModuleWithExtensions(id, parent) {
     if (!id.startsWith('./') && !id.startsWith('../')) {
@@ -169,8 +170,54 @@ async function loadTypeScriptConfig(configPath) {
                         }
                     }
                 }
-                // For better-t-stack projects, create a basic config without importing
-                // This avoids the jiti URL_INVALID error by not trying to import the module
+                try {
+                    let importPath = configPath;
+                    if (!configPath.startsWith('/')) {
+                        importPath = join(process.cwd(), configPath);
+                    }
+                    console.log({ importPath });
+                    const jitiInstance = createJiti(importPath, {
+                        debug: true,
+                        fsCache: true,
+                        moduleCache: true,
+                        interopDefault: true
+                    });
+                    console.log({ jitiInstance });
+                    const authModule = await jitiInstance.import(importPath);
+                    console.log({ authModule });
+                    const auth = authModule.auth || authModule.default || authModule;
+                    if (auth && typeof auth === 'object') {
+                        try {
+                            if (auth.$context) {
+                                const context = await auth.$context;
+                                const adapter = context.adapter;
+                                const config = {
+                                    database: {
+                                        type: 'drizzle',
+                                        adapter: 'drizzle-adapter'
+                                    },
+                                    emailAndPassword: {
+                                        enabled: true
+                                    },
+                                    trustedOrigins: ['http://localhost:3000'],
+                                    advanced: {
+                                        defaultCookieAttributes: {
+                                            sameSite: 'none',
+                                            secure: true,
+                                            httpOnly: true
+                                        }
+                                    }
+                                };
+                                return config;
+                            }
+                        }
+                        catch (contextError) {
+                        }
+                    }
+                }
+                catch (importError) {
+                    console.warn(`Failed to import auth config from ${configPath}:`, importError.message);
+                }
                 const config = {
                     database: {
                         type: 'drizzle',
@@ -188,7 +235,6 @@ async function loadTypeScriptConfig(configPath) {
                         }
                     }
                 };
-                console.log('🔍 Debug: Created basic config for better-t-stack project');
                 return config;
             }
             catch (importError) {

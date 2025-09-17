@@ -16,7 +16,7 @@ export interface AuthAdapter {
         offset?: number;
     }) => Promise<any[]>;
 }
-export declare function getAuthAdapter(): Promise<AuthAdapter | null>;
+export declare function getAuthAdapter(configPath?: string): Promise<AuthAdapter | null>;
 export declare function createMockUser(adapter: AuthAdapter, index: number): Promise<any>;
 export declare function createMockSession(adapter: AuthAdapter, userId: string, index: number): Promise<any>;
 export declare function createMockAccount(adapter: AuthAdapter, userId: string, index: number): Promise<any>;

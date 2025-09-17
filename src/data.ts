@@ -43,10 +43,11 @@ export interface PaginatedResult<T> {
 export async function getAuthData(
   authConfig: AuthConfig,
   type: 'stats' | 'users' | 'sessions' | 'providers' | 'deleteUser' | 'updateUser' = 'stats',
-  options?: any
+  options?: any,
+  configPath?: string
 ): Promise<any> {
   try {
-    const adapter = await getAuthAdapter();
+    const adapter = await getAuthAdapter(configPath);
 
     if (!adapter) {
       console.log('No adapter available, falling back to mock data');

@@ -1,76 +1,34 @@
 import { join, dirname } from 'path';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'fs';
 import { createJiti } from 'jiti';
-import { pathToFileURL } from 'url';
 let authInstance = null;
 let authAdapter = null;
-export async function getAuthAdapter() {
+export async function getAuthAdapter(configPath) {
     try {
-        const authConfigPath = await findAuthConfigPath();
+        let authConfigPath = configPath;
+        if (!authConfigPath) {
+            authConfigPath = await findAuthConfigPath() || undefined;
+        }
         if (!authConfigPath) {
             return null;
         }
         let authModule;
         try {
-            if (authConfigPath.endsWith('.ts')) {
-                const aliases = {};
-                const authConfigDir = dirname(authConfigPath);
-                const content = readFileSync(authConfigPath, 'utf-8');
-                const relativeImportRegex = /import\s+.*?\s+from\s+['"](\.\/[^'"]+)['"]/g;
-                const dynamicImportRegex = /import\s*\(\s*['"](\.\/[^'"]+)['"]\s*\)/g;
-                const foundImports = new Set();
-                let match;
-                while ((match = relativeImportRegex.exec(content)) !== null) {
-                    foundImports.add(match[1]);
-                }
-                while ((match = dynamicImportRegex.exec(content)) !== null) {
-                    foundImports.add(match[1]);
-                }
-                for (const importPath of foundImports) {
-                    const importName = importPath.replace('./', '');
-                    const possiblePaths = [
-                        join(authConfigDir, importName + '.ts'),
-                        join(authConfigDir, importName + '.js'),
-                        join(authConfigDir, importName + '.mjs'),
-                        join(authConfigDir, importName + '.cjs'),
-                        join(authConfigDir, importName, 'index.ts'),
-                        join(authConfigDir, importName, 'index.js'),
-                        join(authConfigDir, importName, 'index.mjs'),
-                        join(authConfigDir, importName, 'index.cjs')
-                    ];
-                    for (const path of possiblePaths) {
-                        if (existsSync(path)) {
-                            aliases[importPath] = pathToFileURL(path).href;
-                            break;
-                        }
-                    }
-                }
-                const jiti = createJiti(import.meta.url, {
-                    debug: false,
-                    fsCache: true,
-                    moduleCache: true,
-                    interopDefault: true,
-                    alias: aliases
-                });
-                try {
-                    authModule = await jiti.import(authConfigPath);
-                }
-                catch (jitiError) {
-                    const content = readFileSync(authConfigPath, 'utf-8');
-                    authModule = {
-                        auth: {
-                            options: {
-                                _content: content
-                            }
-                        }
-                    };
-                }
+            let importPath = authConfigPath;
+            console.log({ importPath });
+            if (!authConfigPath.startsWith('/')) {
+                importPath = join(process.cwd(), authConfigPath);
             }
-            else {
-                authModule = await import(authConfigPath);
-            }
+            const jitiInstance = createJiti(importPath, {
+                debug: true,
+                fsCache: true,
+                moduleCache: true,
+                interopDefault: true
+            });
+            authModule = await jitiInstance.import(importPath);
         }
         catch (error) {
+            console.warn('🔍 Debug: Failed to import auth module in adapter:', error.message);
             return null;
         }
         const auth = authModule.auth || authModule.default;

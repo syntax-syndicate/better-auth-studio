@@ -219,6 +219,9 @@ async function findAuthConfigPath(): Promise<string | null> {
 
 export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   const router = Router();
+  
+  // Store the config path for use in adapter functions
+  const getAuthAdapterWithConfig = () => getAuthAdapter(configPath);
 
   router.get('/api/health', (req: Request, res: Response) => {
     const uptime = process.uptime();
@@ -405,7 +408,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.get('/api/stats', async (req: Request, res: Response) => {
     try {
-      const stats = await getAuthData(authConfig, 'stats');
+      const stats = await getAuthData(authConfig, 'stats', undefined, configPath);
       res.json(stats);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -415,7 +418,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.get('/api/counts', async (req: Request, res: Response) => {
     try {
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       let userCount = 0;
       let sessionCount = 0;
       let organizationCount = 0;
@@ -462,7 +465,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   });
   router.get('/api/users/all', async (req: Request, res: Response) => {
     try {
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -482,7 +485,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/users/:userId', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -508,7 +511,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     try {
       const { userId } = req.params;
       const { name, email } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.update) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -529,7 +532,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/users/:userId', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.delete) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -545,7 +548,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/users/:userId/organizations', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -588,7 +591,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/users/:userId/teams', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -633,7 +636,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/organizations/members/:membershipId', async (req: Request, res: Response) => {
     try {
       const { membershipId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.delete) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -649,7 +652,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/teams/members/:membershipId', async (req: Request, res: Response) => {
     try {
       const { membershipId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.delete) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -665,7 +668,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/users/:userId/ban', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.update) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -686,7 +689,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/users/:userId/sessions', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -720,7 +723,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/sessions/:sessionId', async (req: Request, res: Response) => {
     try {
       const { sessionId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.delete) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -736,7 +739,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/teams/:teamId', async (req: Request, res: Response) => {
     try {
       const { teamId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -792,7 +795,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     try {
       const { orgId } = req.params;
       console.log('DEBUG: Organization route called with orgId:', orgId);
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -832,7 +835,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
       const limit = parseInt(req.query.limit as string) || 20;
       const search = req.query.search as string;
       try {
-        const adapter = await getAuthAdapter();
+        const adapter = await getAuthAdapterWithConfig();
         if (adapter && typeof adapter.findMany === 'function') {
           const allUsers = await adapter.findMany({ model: 'user', limit: limit });
           
@@ -865,7 +868,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
         console.error('Error fetching users from adapter:', adapterError);
       }
 
-      const result = await getAuthData(authConfig, 'users', { page, limit, search });
+      const result = await getAuthData(authConfig, 'users', { page, limit, search }, configPath);
       
       const transformedUsers = (result.data || []).map((user: any) => ({
         id: user.id,
@@ -889,7 +892,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
 
-      const sessions = await getAuthData(authConfig, 'sessions', { page, limit });
+      const sessions = await getAuthData(authConfig, 'sessions', { page, limit }, configPath);
       res.json(sessions);
     } catch (error) {
       console.error('Error fetching sessions:', error);
@@ -899,7 +902,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.get('/api/providers', async (req: Request, res: Response) => {
     try {
-      const providers = await getAuthData(authConfig, 'providers');
+      const providers = await getAuthData(authConfig, 'providers', undefined, configPath);
       res.json(providers);
     } catch (error) {
       console.error('Error fetching providers:', error);
@@ -910,7 +913,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/users/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      await getAuthData(authConfig, 'deleteUser', { id });
+      await getAuthData(authConfig, 'deleteUser', { id }, configPath);
       res.json({ success: true });
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -997,7 +1000,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.get('/api/database/info', async (req: Request, res: Response) => {
     try {
-      const authConfigPath = await findAuthConfigPath();
+      const authConfigPath = configPath || await findAuthConfigPath();
       if (!authConfigPath) {
         return res.json({
           database: null,
@@ -1058,7 +1061,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.get('/api/plugins/teams/status', async (req: Request, res: Response) => {
     try {
-      const authConfigPath = await findAuthConfigPath();
+      const authConfigPath = configPath || await findAuthConfigPath();
       if (!authConfigPath) {
         return res.json({
           enabled: false,
@@ -1133,7 +1136,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/organizations/:orgId/invitations', async (req: Request, res: Response) => {
     try {
       const { orgId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (adapter && typeof adapter.findMany === 'function') {
         try {
           const invitations = await adapter.findMany({
@@ -1171,7 +1174,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/organizations/:orgId/members', async (req: Request, res: Response) => {
     try {
       const { orgId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
 
       if (adapter && typeof adapter.findMany === 'function') {
         try {
@@ -1231,7 +1234,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     try {
       const { orgId } = req.params;
       const { count = 5 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
 
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -1316,7 +1319,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     try {
       const { orgId } = req.params;
       const { count = 3 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
 
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -1387,7 +1390,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/members/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -1412,7 +1415,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/invitations/:id/resend', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -1441,7 +1444,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/invitations/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -1476,7 +1479,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
         return res.status(400).json({ error: 'Inviter ID is required' });
       }
 
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -1523,7 +1526,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/organizations/:orgId/teams', async (req: Request, res: Response) => {
     try {
       const { orgId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
 
       if (adapter && typeof adapter.findMany === 'function') {
         try {
@@ -1573,7 +1576,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
       const { orgId } = req.params;
       const { name } = req.body;
 
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -1613,7 +1616,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.get('/api/teams/:teamId/members', async (req: Request, res: Response) => {
     try {
       const { teamId } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (adapter && typeof adapter.findMany === 'function') {
         try {
@@ -1680,7 +1683,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
         return res.status(400).json({ error: 'userIds array is required' });
       }
 
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.create) {
         return res.status(500).json({ error: 'Adapter not available' });
       }
@@ -1722,7 +1725,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/team-members/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter || !adapter.delete) {
         return res.status(500).json({ error: 'Adapter not available' });
@@ -1744,7 +1747,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     try {
       const { id } = req.params;
       const { name } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if(!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -1772,7 +1775,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/teams/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if(!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -1792,7 +1795,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.get('/api/plugins/organization/status', async (req: Request, res: Response) => {
     try {
-      const authConfigPath = await findAuthConfigPath();
+      const authConfigPath = configPath || await findAuthConfigPath();
       if (!authConfigPath) {
         return res.json({
           enabled: false,
@@ -1868,7 +1871,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
       const search = req.query.search as string;
 
       try {
-        const adapter = await getAuthAdapter();
+        const adapter = await getAuthAdapterWithConfig();
         if (adapter && typeof adapter.findMany === 'function') {
           const allOrganizations = await adapter.findMany({ model: 'organization' });
 
@@ -1928,7 +1931,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.post('/api/organizations', async (req: Request, res: Response) => {
     try {
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -1951,7 +1954,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     try {
       const { id } = req.params;
       const orgData = req.body;
-      const adapter: any = await getAuthAdapter();
+      const adapter: any = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -1982,7 +1985,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.delete('/api/organizations/:id', async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const adapter: any = await getAuthAdapter();
+      const adapter: any = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -2001,7 +2004,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
 
   router.post('/api/users', async (req: Request, res: Response) => {
     try {
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -2020,7 +2023,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
       const { id } = req.params;
       const userData = req.body;
       
-      const updatedUser = await getAuthData(authConfig, 'updateUser', { id, userData });
+      const updatedUser = await getAuthData(authConfig, 'updateUser', { id, userData }, configPath);
       res.json({ success: true, user: updatedUser });
     } catch (error) {
       console.error('Error updating user:', error);
@@ -2031,7 +2034,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/seed/users', async (req: Request, res: Response) => {
     try {
       const { count = 1 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
       }
@@ -2077,7 +2080,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/seed/sessions', async (req: Request, res: Response) => {
     try {
       const { count = 1 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -2130,7 +2133,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/seed/accounts', async (req: Request, res: Response) => {
     try {
       const { count = 1 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -2184,7 +2187,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/seed/verifications', async (req: Request, res: Response) => {
     try {
       const { count = 1 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
@@ -2230,7 +2233,7 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   router.post('/api/seed/organizations', async (req: Request, res: Response) => {
     try {
       const { count = 1 } = req.body;
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
       
       if (!adapter) {
         return res.status(500).json({ error: 'Auth adapter not available' });
