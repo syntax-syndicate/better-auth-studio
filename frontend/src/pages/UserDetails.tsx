@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, User, Building2, Users, Mail, Calendar, Edit, Ban, UserMinus, Clock, Monitor, Globe } from 'lucide-react'
+import { ArrowLeft, User, Building2, Users, Mail, Calendar, Edit, Ban, UserMinus, Clock, Monitor, Globe, Plus, X, Database, Loader } from 'lucide-react'
 import { Button } from '../components/ui/button'
 import { Badge } from '../components/ui/badge'
+import { Input } from '../components/ui/input'
+import { Label } from '../components/ui/label'
+import { Terminal } from '../components/Terminal'
 import { toast } from 'sonner'
 
 interface User {
@@ -59,6 +62,13 @@ interface Session {
   updatedAt: string
 }
 
+interface LocationData {
+  country: string
+  countryCode: string
+  city: string
+  region: string
+}
+
 export default function UserDetails() {
   const { userId } = useParams<{ userId: string }>()
   const navigate = useNavigate()
@@ -70,6 +80,16 @@ export default function UserDetails() {
   const [activeTab, setActiveTab] = useState<'details' | 'organizations' | 'teams' | 'sessions'>('details')
   const [showEditModal, setShowEditModal] = useState(false)
   const [showBanModal, setShowBanModal] = useState(false)
+  const [showSessionSeedModal, setShowSessionSeedModal] = useState(false)
+  const [seedingLogs, setSeedingLogs] = useState<Array<{
+    id: string
+    type: 'info' | 'success' | 'error' | 'progress'
+    message: string
+    timestamp: Date
+    status?: 'pending' | 'running' | 'completed' | 'failed'
+  }>>([])
+  const [isSeeding, setIsSeeding] = useState(false)
+  const [sessionLocations, setSessionLocations] = useState<Record<string, LocationData>>({})
 
   useEffect(() => {
     if (userId) {
@@ -77,6 +97,65 @@ export default function UserDetails() {
       fetchUserMemberships()
     }
   }, [userId])
+
+  const resolveIPLocation = async (ipAddress: string): Promise<LocationData | null> => {
+    try {
+      const response = await fetch('/api/geo/resolve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ipAddress })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.location) {
+          return data.location
+        }
+      }
+      return null
+    } catch (error) {
+      console.error('Failed to resolve IP location:', error)
+      return null
+    }
+  }
+
+  const resolveSessionLocations = async (sessions: Session[]) => {
+    const locationPromises = sessions.map(async (session) => {
+      if (!sessionLocations[session.id]) {
+        const location = await resolveIPLocation(session.ipAddress)
+        if (location) {
+          return { sessionId: session.id, location }
+        }
+      }
+      return null
+    })
+
+    const results = await Promise.all(locationPromises)
+    const newLocations: Record<string, LocationData> = {}
+    
+    results.forEach(result => {
+      if (result) {
+        newLocations[result.sessionId] = result.location
+      }
+    })
+
+    if (Object.keys(newLocations).length > 0) {
+      setSessionLocations(prev => ({ ...prev, ...newLocations }))
+    }
+  }
+
+  const getCountryFlag = (countryCode: string): string => {
+    if (!countryCode) return '🌍'
+    
+    // Convert country code to flag emoji
+    const codePoints = countryCode
+      .toUpperCase()
+      .split('')
+      .map(char => 127397 + char.charCodeAt(0))
+    return String.fromCodePoint(...codePoints)
+  }
 
   const fetchUserDetails = async () => {
     try {
@@ -117,7 +196,10 @@ export default function UserDetails() {
 
       if (sessionResponse.ok) {
         const sessionData = await sessionResponse.json()
-        setSessions(sessionData.sessions || [])
+        const sessions = sessionData.sessions || []
+        setSessions(sessions)
+        // Resolve locations for sessions
+        resolveSessionLocations(sessions)
       }
     } catch (error) {
       console.error('Failed to fetch user memberships:', error)
@@ -241,6 +323,81 @@ export default function UserDetails() {
     } catch (error) {
       console.error('Error deleting session:', error)
       toast.error('Error deleting session', { id: toastId })
+    }
+  }
+
+  const handleSeedSessions = async (count: number = 3) => {
+    if (!userId) return
+    
+    setSeedingLogs([])
+    setIsSeeding(true)
+    
+    setSeedingLogs([{
+      id: 'start',
+      type: 'info',
+      message: `Starting session seeding process for ${count} sessions...`,
+      timestamp: new Date()
+    }])
+    
+    try {
+      const response = await fetch(`/api/users/${userId}/seed-sessions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ count })
+      })
+
+      const result = await response.json()
+
+      if (result.success) {
+        const progressLogs = result.results.map((r: any, index: number) => {
+          if (r.success) {
+            return {
+              id: `session-${index}`,
+              type: 'progress' as const,
+              message: `Creating session ${index + 1}: ${r.session.token.substring(0, 20)}... from ${r.session.ipAddress}`,
+              timestamp: new Date(),
+              status: 'completed' as const
+            }
+          } else {
+            return {
+              id: `session-${index}`,
+              type: 'error' as const,
+              message: `Failed to create session ${index + 1}: ${r.error}`,
+              timestamp: new Date()
+            }
+          }
+        })
+        
+        setSeedingLogs(prev => [...prev, ...progressLogs])
+        
+        const successCount = result.results.filter((r: any) => r.success).length
+        setSeedingLogs(prev => [...prev, {
+          id: 'complete',
+          type: 'success',
+          message: `✅ Session seeding completed! Created ${successCount}/${count} sessions successfully`,
+          timestamp: new Date()
+        }])
+        
+        // Refresh sessions data
+        fetchUserMemberships()
+        setShowSessionSeedModal(false)
+      } else {
+        setSeedingLogs(prev => [...prev, {
+          id: 'error',
+          type: 'error',
+          message: `❌ Session seeding failed: ${result.error || 'Unknown error'}`,
+          timestamp: new Date()
+        }])
+      }
+    } catch (error) {
+      setSeedingLogs(prev => [...prev, {
+        id: 'error',
+        type: 'error',
+        message: `❌ Network error: ${error}`,
+        timestamp: new Date()
+      }])
+    } finally {
+      setIsSeeding(false)
     }
   }
 
@@ -501,6 +658,25 @@ export default function UserDetails() {
 
             {activeTab === 'sessions' && (
               <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h3 className="text-lg font-medium text-white">Sessions</h3>
+                    <p className="text-gray-400 text-sm">Manage user authentication sessions</p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSeedingLogs([])
+                      setIsSeeding(false)
+                      setShowSessionSeedModal(true)
+                    }}
+                    className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Seed Sessions
+                  </Button>
+                </div>
+
                 {sessions.length === 0 ? (
                   <div className="text-center py-12">
                     <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -515,37 +691,54 @@ export default function UserDetails() {
                         className="border border-dashed border-white/10 rounded-none p-4 hover:bg-white/5 transition-colors"
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-black/80 border border-dashed border-white/20 flex items-center justify-center">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <div className="w-12 -mt-2 h-12 bg-black/80 border border-dashed border-white/20 flex items-center justify-center rounded-none">
                               <Monitor className="w-6 h-6 text-white" />
                             </div>
-                            <div>
-                              <h3 className="text-white font-medium">Session {session.id.substring(0, 8)}...</h3>
-                              <p className="text-gray-400 text-sm">Token: {session.token.substring(0, 20)}...</p>
-                              <div className="flex items-center space-x-4 mt-1">
-                                <div className="flex items-center space-x-1 text-gray-400 text-xs">
-                                  <Globe className="w-3 h-3" />
-                                  <span>{session.ipAddress}</span>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-3 mb-2">
+                                <h3 className="text-white font-medium">Session {session.id.substring(0, 8)}...</h3>
+                                <Badge variant="outline" className="rounded-none text-xs bg-green-500/10 border-green-500/30 text-green-400">
+                                  Active
+                                </Badge>
+                              </div>
+                              <div className="flex items-center space-x-4 mb-1">
+                                <div className="flex items-center space-x-2">
+                                  <Globe className="w-4 h-4 text-white" />
+                                  <span className="text-white text-sm">{session.ipAddress}</span>
                                 </div>
-                                <div className="flex items-center space-x-1 text-gray-400 text-xs">
-                                  <Clock className="w-3 h-3" />
-                                  <span>Expires {new Date(session.expiresAt).toLocaleDateString()}</span>
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-gray-400 text-xs">📍</span>
+                                  <span className="text-gray-300 text-sm">
+                                    {sessionLocations[session.id]?.city || '...'}, {sessionLocations[session.id]?.country || '...'}
+                                  </span>
+                                  {sessionLocations[session.id]?.countryCode && (
+                                    <span className="text-sm ml-1">
+                                      {getCountryFlag(sessionLocations[session.id]?.countryCode)}
+                                    </span>
+                                  )}
                                 </div>
                               </div>
-                              <div className="text-gray-400 text-xs mt-1">
-                                Created: {new Date(session.createdAt).toLocaleString()}
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                  <Clock className="w-4 h-4 text-white" />
+                                  <span className="text-gray-400 text-sm">Expires:</span>
+                                  <span className="text-white text-sm">
+                                    {new Date(session.expiresAt).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteSession(session.id)}
+                                  className="border border-dashed border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-none"
+                                >
+                                  <Ban className="w-4 h-4 mr-1" />
+                                  Revoke
+                                </Button>
                               </div>
                             </div>
                           </div>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDeleteSession(session.id)}
-                            className="border border-dashed border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-none"
-                          >
-                            <Ban className="w-4 h-4 mr-1" />
-                            Revoke
-                          </Button>
                         </div>
                       </div>
                     ))}
@@ -643,6 +836,90 @@ export default function UserDetails() {
               >
                 Ban User
               </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Session Seed Modal */}
+      {showSessionSeedModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-2xl rounded-none">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg text-white font-light">Seed Sessions</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowSessionSeedModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Clock className="w-5 h-5 text-white" />
+                  <h4 className="text-white font-light">Create Sessions for {user?.name}</h4>
+                </div>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="session-count" className="text-sm text-gray-400 font-light">Number of sessions</Label>
+                    <Input
+                      id="session-count"
+                      type="number"
+                      min="1"
+                      max="50"
+                      defaultValue="3"
+                      className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                    />
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    Each session will have a unique token, IP address, and 7-day expiration.
+                  </p>
+                </div>
+              </div>
+              
+              {seedingLogs.length > 0 && (
+                <div className="mt-6">
+                  <Terminal 
+                    title="Session Seeding Terminal"
+                    lines={seedingLogs}
+                    isRunning={isSeeding}
+                    className="w-full"
+                    defaultCollapsed={false}
+                  />
+                </div>
+              )}
+            </div>
+            <div className="flex justify-end space-x-2 mt-6 pt-6 border-t border-dashed border-white/10">
+              <Button
+                variant="outline"
+                onClick={() => setShowSessionSeedModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+                  <Button
+                    onClick={() => {
+                      const count = parseInt((document.getElementById('session-count') as HTMLInputElement)?.value || '3')
+                      handleSeedSessions(count)
+                    }}
+                    disabled={isSeeding}
+                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
+                  >
+                    {isSeeding ? (
+                      <>
+                        <Loader className="w-4 h-4 mr-2 animate-spin" />
+                        Seeding...
+                      </>
+                    ) : (
+                      <>
+                        <Database className="w-4 h-4 mr-2" />
+                        Seed Sessions
+                      </>
+                    )}
+                  </Button>
             </div>
           </div>
         </div>

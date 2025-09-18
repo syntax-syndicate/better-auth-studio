@@ -1,0 +1,1 @@
+{"version":3,"file":"geo-service.d.ts","sourceRoot":"","sources":["../src/geo-service.ts"],"names":[],"mappings":"AAEA,UAAU,YAAY;IACpB,OAAO,EAAE,MAAM,CAAC;IAChB,WAAW,EAAE,MAAM,CAAC;IACpB,IAAI,EAAE,MAAM,CAAC;IACb,MAAM,EAAE,MAAM,CAAC;CAChB;AAID,wBAAsB,oBAAoB,IAAI,OAAO,CAAC,IAAI,CAAC,CAc1D;AAED,wBAAgB,iBAAiB,CAAC,SAAS,EAAE,MAAM,GAAG,YAAY,GAAG,IAAI,CAsBxE"}

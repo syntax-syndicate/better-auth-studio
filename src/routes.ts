@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { getAuthData } from './data.js';
 import { AuthConfig } from './config.js';
 import { getAuthAdapter, createMockUser, createMockSession, createMockAccount, createMockVerification } from './auth-adapter.js';
+import { resolveIPLocation, initializeGeoService } from './geo-service.js';
 import { createJiti } from 'jiti';
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -219,6 +220,9 @@ async function findAuthConfigPath(): Promise<string | null> {
 
 export function createRoutes(authConfig: AuthConfig, configPath?: string) {
   const router = Router();
+
+  // Initialize Geo service
+  initializeGeoService().catch(console.error);
   
   // Store the config path for use in adapter functions
   const getAuthAdapterWithConfig = () => getAuthAdapter(configPath);
@@ -247,6 +251,40 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
         cwd: process.cwd()
       }
     });
+  });
+
+  // IP Geolocation endpoint
+  router.post('/api/geo/resolve', (req: Request, res: Response) => {
+    try {
+      const { ipAddress } = req.body;
+      
+      if (!ipAddress) {
+        return res.status(400).json({ 
+          success: false, 
+          error: 'IP address is required' 
+        });
+      }
+
+      const location = resolveIPLocation(ipAddress);
+      
+      if (!location) {
+        return res.status(404).json({ 
+          success: false, 
+          error: 'Location not found for IP address' 
+        });
+      }
+
+      res.json({ 
+        success: true, 
+        location 
+      });
+    } catch (error) {
+      console.error('Error resolving IP location:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to resolve IP location' 
+      });
+    }
   });
 
   router.get('/api/config', async (req: Request, res: Response) => {
@@ -2169,6 +2207,61 @@ export function createRoutes(authConfig: AuthConfig, configPath?: string) {
     } catch (error) {
       console.error('Error seeding sessions:', error);
       res.status(500).json({ error: 'Failed to seed sessions' });
+    }
+  });
+
+  router.post('/api/users/:userId/seed-sessions', async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const { count = 3 } = req.body;
+      const adapter = await getAuthAdapterWithConfig();
+      
+      if (!adapter) {
+        return res.status(500).json({ error: 'Auth adapter not available' });
+      }
+      // @ts-ignore
+      const user = await adapter.findOne({ model: 'user', where: [{ field: 'id', value: userId }] });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const results = [];
+      for (let i = 0; i < count; i++) {
+        try {
+          if (typeof adapter.createSession !== 'function') {
+            throw new Error('createSession method not available on adapter');
+          }
+          
+          const session = await createMockSession(adapter, userId, i + 1);
+          results.push({
+            success: true,
+            session: {
+              id: session.id,
+              userId: session.userId,
+              expiresAt: session.expiresAt,
+              token: session.token,
+              ipAddress: session.ipAddress,
+              userAgent: session.userAgent,
+              createdAt: session.createdAt,
+              updatedAt: session.updatedAt
+            }
+          });
+        } catch (error) {
+          results.push({
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error'
+          });
+        }
+      }
+
+      res.json({
+        success: true,
+        message: `Seeded ${results.filter(r => r.success).length} sessions for user`,
+        results
+      });
+    } catch (error) {
+      console.error('Error seeding sessions for user:', error);
+      res.status(500).json({ error: 'Failed to seed sessions for user' });
     }
   });
 

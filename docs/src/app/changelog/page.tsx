@@ -41,10 +41,6 @@ export default function Changelog() {
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  Pixel-inspired UI design with 3D hero component
-                </li>
-                <li className="flex items-start">
-                  <span className="text-white/50 mr-3">•</span>
                   Support for Prisma, Drizzle, and SQLite databases
                 </li>
               </ul>

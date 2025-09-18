@@ -12,7 +12,6 @@ export async function getAuthAdapter(configPath) {
         let authModule;
         try {
             let importPath = authConfigPath;
-            console.log({ importPath });
             if (!authConfigPath.startsWith('/')) {
                 importPath = join(process.cwd(), authConfigPath);
             }
@@ -23,10 +22,8 @@ export async function getAuthAdapter(configPath) {
                 interopDefault: true
             });
             authModule = await jitiInstance.import(importPath);
-            console.log({ authModule });
         }
         catch (error) {
-            console.log({ error });
             console.warn('🔍 Debug: Failed to import auth module in adapter:', error.message);
             return null;
         }
@@ -252,11 +249,83 @@ export async function createMockUser(adapter, index) {
     };
     return await adapter.createUser(userData);
 }
+// Random IP address generators for different countries
+const countryIPRanges = [
+    // United States
+    { country: 'United States', city: 'New York', region: 'NY', ranges: [
+            { min: 8, max: 8 }, { min: 24, max: 24 }, { min: 32, max: 32 }, { min: 64, max: 64 }
+        ] },
+    // United Kingdom
+    { country: 'United Kingdom', city: 'London', region: 'England', ranges: [
+            { min: 51, max: 51 }, { min: 77, max: 77 }, { min: 81, max: 81 }, { min: 86, max: 86 }
+        ] },
+    // Germany
+    { country: 'Germany', city: 'Berlin', region: 'Berlin', ranges: [
+            { min: 46, max: 46 }, { min: 78, max: 78 }, { min: 85, max: 85 }, { min: 134, max: 134 }
+        ] },
+    // Japan
+    { country: 'Japan', city: 'Tokyo', region: 'Tokyo', ranges: [
+            { min: 126, max: 126 }, { min: 157, max: 157 }, { min: 202, max: 202 }, { min: 210, max: 210 }
+        ] },
+    // Australia
+    { country: 'Australia', city: 'Sydney', region: 'NSW', ranges: [
+            { min: 101, max: 101 }, { min: 118, max: 118 }, { min: 125, max: 125 }, { min: 139, max: 139 }
+        ] },
+    // Canada
+    { country: 'Canada', city: 'Toronto', region: 'ON', ranges: [
+            { min: 24, max: 24 }, { min: 70, max: 70 }, { min: 142, max: 142 }, { min: 174, max: 174 }
+        ] },
+    // France
+    { country: 'France', city: 'Paris', region: 'Île-de-France', ranges: [
+            { min: 37, max: 37 }, { min: 51, max: 51 }, { min: 78, max: 78 }, { min: 90, max: 90 }
+        ] },
+    // Brazil
+    { country: 'Brazil', city: 'São Paulo', region: 'SP', ranges: [
+            { min: 177, max: 177 }, { min: 179, max: 179 }, { min: 186, max: 186 }, { min: 200, max: 200 }
+        ] },
+    // India
+    { country: 'India', city: 'Mumbai', region: 'Maharashtra', ranges: [
+            { min: 103, max: 103 }, { min: 117, max: 117 }, { min: 125, max: 125 }, { min: 180, max: 180 }
+        ] },
+    // South Korea
+    { country: 'South Korea', city: 'Seoul', region: 'Seoul', ranges: [
+            { min: 112, max: 112 }, { min: 114, max: 114 }, { min: 175, max: 175 }, { min: 203, max: 203 }
+        ] }
+];
+function generateRandomIP() {
+    // Generate a random IP address from common ranges
+    const commonRanges = [
+        { min: '8.0.0.0', max: '8.255.255.255' }, // US
+        { min: '24.0.0.0', max: '24.255.255.255' }, // US
+        { min: '2.0.0.0', max: '2.255.255.255' }, // UK
+        { min: '5.0.0.0', max: '5.255.255.255' }, // UK
+        { min: '46.0.0.0', max: '46.255.255.255' }, // Germany
+        { min: '62.0.0.0', max: '62.255.255.255' }, // Germany
+        { min: '37.0.0.0', max: '37.255.255.255' }, // France
+        { min: '126.0.0.0', max: '126.255.255.255' }, // Japan
+        { min: '210.0.0.0', max: '210.255.255.255' }, // Japan
+        { min: '1.0.0.0', max: '1.255.255.255' }, // Australia
+        { min: '27.0.0.0', max: '27.255.255.255' }, // Australia
+        { min: '177.0.0.0', max: '177.255.255.255' }, // Brazil
+        { min: '201.0.0.0', max: '201.255.255.255' }, // Brazil
+        { min: '103.0.0.0', max: '103.255.255.255' }, // India
+        { min: '117.0.0.0', max: '117.255.255.255' } // India
+    ];
+    const range = commonRanges[Math.floor(Math.random() * commonRanges.length)];
+    const secondOctet = Math.floor(Math.random() * 256);
+    const thirdOctet = Math.floor(Math.random() * 256);
+    const fourthOctet = Math.floor(Math.random() * 255) + 1;
+    return `${range.min.split('.')[0]}.${secondOctet}.${thirdOctet}.${fourthOctet}`;
+}
 export async function createMockSession(adapter, userId, index) {
+    // Generate a random IP address
+    const ipAddress = generateRandomIP();
     const sessionData = {
         userId: userId,
-        expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-        sessionToken: `session_token_${index}_${Date.now()}`,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days from now
+        token: `session_token_${index}_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`,
+        ipAddress: ipAddress,
+        userAgent: `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`,
         createdAt: new Date(),
         updatedAt: new Date()
     };
