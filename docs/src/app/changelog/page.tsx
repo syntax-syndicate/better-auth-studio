@@ -25,6 +25,10 @@ export default function Changelog() {
               <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
+                  <strong className="pr-2">CSV Export functionality{" "} </strong> for users and organizations with timestamped downloads
+                </li>
+                <li className="flex items-start">
+                  <span className="text-white/50 mr-3">•</span>
                   Complete user management interface with CRUD operations
                 </li>
                 <li className="flex items-start">
@@ -51,6 +55,55 @@ export default function Changelog() {
         {/* Recent Updates */}
         <section>
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">RECENT UPDATES</h2>
+          
+          {/* CSV Export Feature */}
+          <PixelCard className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-light tracking-tight text-white">CSV Export Feature</h3>
+              <span className="text-sm font-light tracking-tight text-white/50">2025-01-27</span>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white">📊 Data Export</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Added CSV export functionality for Users page with ID, name, email, verification status, and timestamps
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Added CSV export functionality for Organizations page with ID, name, slug, and timestamps
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Automatic timestamped filename generation (e.g., users-export-2025-01-27.csv)
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Proper CSV formatting with quoted fields and UTF-8 encoding for compatibility
+                  </li>
+                </ul>
+              </div>
+              
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white">🎯 User Experience</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Export buttons positioned next to "Add User" and "Add Organization" buttons
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Success toast notifications showing number of records exported
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Error handling for empty datasets with appropriate user feedback
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </PixelCard>
           
           {/* API Improvements */}
           <PixelCard className="mb-6">
@@ -191,7 +244,7 @@ export default function Changelog() {
                   </li>
                   <li className="flex items-start">
                     <span className="text-white/50 mr-3">•</span>
-                    Export capabilities for data analysis
+                    Advanced export formats (JSON, Excel) and filtering options
                   </li>
                 </ul>
               </div>
