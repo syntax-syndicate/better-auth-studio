@@ -10,7 +10,6 @@ import {
   Loader,
   Mail,
   Monitor,
-  Plus,
   User,
   UserMinus,
   Users,
@@ -728,7 +727,7 @@ export default function UserDetails() {
                     }}
                     className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Database className="w-4 h-4 mr-2" />
                     Seed Sessions
                   </Button>
                 </div>
