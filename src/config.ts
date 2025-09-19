@@ -142,7 +142,7 @@ export async function findAuthConfig(configPath?: string): Promise<AuthConfig | 
 
       for (const path of commonPaths) {
         if (existsSync(path)) {
-          console.log(`Found config file at: ${path}`);
+          // Found config file
           try {
             const config = await loadConfig(path);
             if (config) {
@@ -271,24 +271,19 @@ async function loadTypeScriptConfig(configPath: string): Promise<AuthConfig | nu
           if (!configPath.startsWith('/')) {
             importPath = join(process.cwd(), configPath);
           }
-          console.log({ importPath });
           const jitiInstance = createJiti(importPath, {
-            debug: true,
+            debug: false,
             fsCache: true,
             moduleCache: true,
             interopDefault: true,
           });
-          console.log({ jitiInstance });
           const authModule: any = await jitiInstance.import(importPath);
-          console.log({ authModule });
           const auth = authModule.auth || authModule.default || authModule;
           if (auth && typeof auth === 'object') {
             try {
               if (auth.$context) {
-                console.log('Found auth.$context, attempting to await...');
                 const context = await auth.$context;
                 const options = context.options;
-                console.log({ context });
                 if (!options) {
                   console.warn('No options found in auth context');
                   return null;
@@ -321,7 +316,6 @@ async function loadTypeScriptConfig(configPath: string): Promise<AuthConfig | nu
                     ...options.advanced,
                   },
                 };
-                console.log('Returning config from auth.$context:', config);
                 return config;
               }
             } catch (contextError: any) {

@@ -16,7 +16,7 @@ export async function getAuthAdapter(configPath) {
                 importPath = join(process.cwd(), authConfigPath);
             }
             const jitiInstance = createJiti(importPath, {
-                debug: true,
+                debug: false,
                 fsCache: true,
                 moduleCache: true,
                 interopDefault: true,
@@ -24,7 +24,7 @@ export async function getAuthAdapter(configPath) {
             authModule = await jitiInstance.import(importPath);
         }
         catch (error) {
-            console.warn('🔍 Debug: Failed to import auth module in adapter:', error.message);
+            console.warn('Failed to import auth module in adapter:', error.message);
             return null;
         }
         const auth = authModule.auth || authModule.default;

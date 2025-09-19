@@ -50,7 +50,7 @@ export async function getAuthData(
     const adapter = await getAuthAdapter(configPath);
 
     if (!adapter) {
-      console.log('No adapter available, falling back to mock data');
+      // No adapter available, falling back to mock data
       return getMockData(type, options);
     }
 
@@ -216,7 +216,7 @@ async function updateRealUser(
   userId: string,
   userData: Partial<User>
 ): Promise<User> {
-  console.log({ userId, userData });
+  // Logging user update for debugging
   try {
     const updatedUser = await adapter.update({
       model: 'user',

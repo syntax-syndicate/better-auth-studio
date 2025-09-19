@@ -193,7 +193,6 @@ async function findAuthConfigPath() {
     }
     return null;
 }
-// @ts-nocheck
 export function createRoutes(authConfig, configPath, geoDbPath) {
     const router = Router();
     if (geoDbPath) {

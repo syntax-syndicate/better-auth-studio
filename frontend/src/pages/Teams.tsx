@@ -1,11 +1,4 @@
-import {
-  CheckCircle,
-  Copy,
-  Loader,
-  Plus,
-  Search,
-  Users,
-} from 'lucide-react';
+import { CheckCircle, Copy, Loader, Plus, Search, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -60,9 +53,7 @@ export default function Teams() {
         enabled: !!teamsEnabled,
         availablePlugins: (pluginLists?.plugins as any).map((plugin: any) => plugin.id),
         configPath: (pluginLists as any).configPath,
-        teamsPlugin: (pluginLists?.plugins as any).find(
-          (plugin: any) => plugin.id === 'teams'
-        ),
+        teamsPlugin: (pluginLists?.plugins as any).find((plugin: any) => plugin.id === 'teams'),
       });
       if (teamsEnabled) {
         await fetchTeams();
@@ -101,9 +92,10 @@ export default function Teams() {
   };
 
   const filteredTeams = teams.filter((team) => {
-    const matchesSearch = team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch =
+      team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       team.organization?.name.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     if (filter === 'all') return matchesSearch;
     if (filter === 'recent') {
       const weekAgo = new Date();
@@ -146,8 +138,8 @@ export default function Teams() {
             <div className="flex-1">
               <h3 className="text-xl text-white font-light mb-2">Teams Plugin Required</h3>
               <p className="text-gray-300 mb-6">
-                To use Teams in Better Auth Studio, you need to enable the teams
-                plugin in your Better Auth configuration.
+                To use Teams in Better Auth Studio, you need to enable the teams plugin in your
+                Better Auth configuration.
               </p>
 
               <div className="bg-black/50 border border-dashed border-white/20 rounded-none p-4 mb-6">
@@ -165,7 +157,7 @@ export default function Teams() {
                 <div className="mt-4 bg-black/70 border border-dashed border-white/10 rounded-none p-3 overflow-x-auto">
                   <pre className="text-sm text-gray-300">
                     <code>
-{`import { betterAuth } from "better-auth";
+                      {`import { betterAuth } from "better-auth";
 import { teams } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -187,7 +179,8 @@ export const auth = betterAuth({
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => copyToClipboard(`import { betterAuth } from "better-auth";
+                    onClick={() =>
+                      copyToClipboard(`import { betterAuth } from "better-auth";
 import { teams } from "better-auth/plugins";
 
 export const auth = betterAuth({
@@ -200,7 +193,8 @@ export const auth = betterAuth({
                   // allowPublicTeams: false,
     })
   ]
-});`)}
+});`)
+                    }
                     className="border-dashed border-white/20 text-white hover:bg-white/10"
                   >
                     <Copy className="w-4 h-4 mr-2" />
@@ -268,7 +262,11 @@ export const auth = betterAuth({
             variant={filter === 'all' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilter('all')}
-            className={filter === 'all' ? 'bg-white text-black' : 'border-dashed border-white/20 text-white hover:bg-white/10'}
+            className={
+              filter === 'all'
+                ? 'bg-white text-black'
+                : 'border-dashed border-white/20 text-white hover:bg-white/10'
+            }
           >
             All
           </Button>
@@ -276,7 +274,11 @@ export const auth = betterAuth({
             variant={filter === 'recent' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setFilter('recent')}
-            className={filter === 'recent' ? 'bg-white text-black' : 'border-dashed border-white/20 text-white hover:bg-white/10'}
+            className={
+              filter === 'recent'
+                ? 'bg-white text-black'
+                : 'border-dashed border-white/20 text-white hover:bg-white/10'
+            }
           >
             Recent
           </Button>
@@ -289,7 +291,9 @@ export const auth = betterAuth({
           <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
           <h3 className="text-lg font-light text-white mb-2">No teams found</h3>
           <p className="text-gray-400 mb-6">
-            {searchTerm ? 'Try adjusting your search terms' : 'Get started by creating your first team'}
+            {searchTerm
+              ? 'Try adjusting your search terms'
+              : 'Get started by creating your first team'}
           </p>
           {!searchTerm && (
             <Button

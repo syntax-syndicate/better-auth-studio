@@ -237,7 +237,6 @@ async function findAuthConfigPath(): Promise<string | null> {
   return null;
 }
 
-// @ts-nocheck
 export function createRoutes(
   authConfig: AuthConfig,
   configPath?: string,

@@ -25,7 +25,7 @@ export default function Changelog() {
               <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">Advanced Session Management</strong> with user-specific session seeding and terminal logging
+                  <strong className="pr-2">Advanced Session Management</strong> with user-specific session seeding
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
@@ -94,10 +94,6 @@ export default function Changelog() {
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">📊 Session Display</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Compact 3-row session card design with essential information
-                  </li>
                   <li className="flex items-start">
                     <span className="text-white/50 mr-3">•</span>
                     Session ID, status, IP address, and expiration date display

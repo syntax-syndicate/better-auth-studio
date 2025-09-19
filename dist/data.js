@@ -3,7 +3,7 @@ export async function getAuthData(authConfig, type = 'stats', options, configPat
     try {
         const adapter = await getAuthAdapter(configPath);
         if (!adapter) {
-            console.log('No adapter available, falling back to mock data');
+            // No adapter available, falling back to mock data
             return getMockData(type, options);
         }
         switch (type) {
@@ -142,7 +142,7 @@ async function deleteRealUser(adapter, userId) {
     }
 }
 async function updateRealUser(adapter, userId, userData) {
-    console.log({ userId, userData });
+    // Logging user update for debugging
     try {
         const updatedUser = await adapter.update({
             model: 'user',
