@@ -39,7 +39,10 @@ async function testCI() {
   // Test 1.5: Install frontend dependencies
   console.log('📦 Installing frontend dependencies...');
   try {
-    execSync('cd frontend && npm install', { stdio: 'inherit' });
+    console.log('🧹 Cleaning existing frontend dependencies...');
+    execSync('cd frontend && rm -rf node_modules pnpm-lock.yaml', { stdio: 'inherit' });
+    console.log('📦 Installing fresh frontend dependencies...');
+    execSync('cd frontend && pnpm install', { stdio: 'inherit' });
     console.log('✅ Frontend dependencies installed successfully\n');
   } catch (error) {
     console.error('❌ Frontend dependencies installation failed:', error.message);

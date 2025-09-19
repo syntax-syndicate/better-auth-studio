@@ -65,13 +65,10 @@ jobs:
         # Install frontend dependencies
         echo "📦 Installing frontend dependencies..."
         cd frontend
-        if [ -f "package-lock.json" ]; then
-          echo "✅ package-lock.json found, installing with npm ci"
-          npm ci --no-optional
-        else
-          echo "⚠️ package-lock.json not found, installing with npm install"
-          npm install --no-optional
-        fi
+        echo "🧹 Cleaning existing frontend dependencies..."
+        rm -rf node_modules pnpm-lock.yaml
+        echo "📦 Installing fresh frontend dependencies..."
+        pnpm install
         cd ..
       
     - name: Lint packages
@@ -147,13 +144,10 @@ jobs:
         # Install frontend dependencies
         echo "📦 Installing frontend dependencies..."
         cd frontend
-        if [ -f "package-lock.json" ]; then
-          echo "✅ package-lock.json found, installing with npm ci"
-          npm ci --no-optional
-        else
-          echo "⚠️ package-lock.json not found, installing with npm install"
-          npm install --no-optional
-        fi
+        echo "🧹 Cleaning existing frontend dependencies..."
+        rm -rf node_modules pnpm-lock.yaml
+        echo "📦 Installing fresh frontend dependencies..."
+        pnpm install
         cd ..
       
     - name: Run security audit
