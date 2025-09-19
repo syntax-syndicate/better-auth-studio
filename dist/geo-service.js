@@ -1,44 +1,97 @@
 import maxmind from 'maxmind';
+import { readFileSync, existsSync } from 'fs';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 let lookup = null;
-export async function initializeGeoService() {
-    try {
-        // Try to load the GeoLite2 database
-        // Note: You need to download this from MaxMind and place it in the data directory
-        lookup = await maxmind.open('./data/GeoLite2-City.mmdb');
-        console.log('✅ MaxMind GeoLite2 database loaded successfully');
-    }
-    catch (error) {
-        console.log('⚠️  MaxMind database not found, using fallback IP ranges');
-        console.log('📝 To use MaxMind:');
-        console.log('   1. Register at https://www.maxmind.com/en/geolite2/signup');
-        console.log('   2. Download GeoLite2-City.mmdb');
-        console.log('   3. Place it in ./data/GeoLite2-City.mmdb');
-        lookup = null;
-    }
+let geoDbPath = null;
+let defaultDatabase = null;
+export function setGeoDbPath(path) {
+    geoDbPath = path;
 }
-export function resolveIPLocation(ipAddress) {
-    if (!lookup) {
-        // Fallback to basic IP range detection
-        return resolveIPFromRanges(ipAddress);
-    }
+function loadDefaultDatabase() {
     try {
-        const result = lookup.get(ipAddress);
-        if (result) {
-            return {
-                country: result.country?.names?.en || 'Unknown',
-                countryCode: result.country?.iso_code || '',
-                city: result.city?.names?.en || 'Unknown',
-                region: result.subdivisions?.[0]?.names?.en || 'Unknown'
-            };
+        const defaultDbPath = join(__dirname, '../data/default-geo.json');
+        if (existsSync(defaultDbPath)) {
+            const dbContent = readFileSync(defaultDbPath, 'utf-8');
+            defaultDatabase = JSON.parse(dbContent);
+            console.log(`✅ Default geolocation database loaded (${defaultDatabase?.countries} countries, ${defaultDatabase?.totalRanges} IP ranges)`);
+        }
+        else {
+            console.log('⚠️  Default geolocation database not found, using basic fallback');
         }
     }
     catch (error) {
-        console.error('MaxMind lookup failed:', error);
+        console.error('❌ Failed to load default geolocation database:', error);
     }
-    // Fallback to IP ranges
+}
+export async function initializeGeoService() {
+    try {
+        // Determine database path
+        const dbPath = geoDbPath || './data/GeoLite2-City.mmdb';
+        // Try to load the GeoLite2 database
+        lookup = await maxmind.open(dbPath);
+        console.log(`✅ MaxMind GeoLite2 database loaded successfully from: ${dbPath}`);
+    }
+    catch (error) {
+        console.log('⚠️  MaxMind database not found, loading default geolocation database');
+        lookup = null;
+        loadDefaultDatabase();
+    }
+}
+export function resolveIPLocation(ipAddress) {
+    if (lookup) {
+        try {
+            const result = lookup.get(ipAddress);
+            if (result) {
+                return {
+                    country: result.country?.names?.en || 'Unknown',
+                    countryCode: result.country?.iso_code || '',
+                    city: result.city?.names?.en || 'Unknown',
+                    region: result.subdivisions?.[0]?.names?.en || 'Unknown'
+                };
+            }
+        }
+        catch (error) {
+            console.error('MaxMind lookup failed:', error);
+        }
+    }
+    if (defaultDatabase) {
+        const location = findLocationInDefaultDatabase(ipAddress);
+        if (location) {
+            return location;
+        }
+    }
+    // Final fallback to basic IP range detection
     return resolveIPFromRanges(ipAddress);
 }
-// Fallback function using IP ranges (same as before)
+function findLocationInDefaultDatabase(ipAddress) {
+    if (!defaultDatabase)
+        return null;
+    const ipToNumber = (ip) => {
+        return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part), 0) >>> 0;
+    };
+    const isIPInRange = (ip, minIP, maxIP) => {
+        const ipNum = ipToNumber(ip);
+        const minNum = ipToNumber(minIP);
+        const maxNum = ipToNumber(maxIP);
+        return ipNum >= minNum && ipNum <= maxNum;
+    };
+    for (const countryData of defaultDatabase.ranges) {
+        for (const range of countryData.ranges) {
+            if (isIPInRange(ipAddress, range.min, range.max)) {
+                return {
+                    country: countryData.country,
+                    countryCode: countryData.countryCode,
+                    city: countryData.city,
+                    region: countryData.region
+                };
+            }
+        }
+    }
+    return null;
+}
 function resolveIPFromRanges(ipAddress) {
     const countryIPRanges = [
         { country: 'United States', countryCode: 'US', city: 'New York', region: 'New York', ranges: [{ min: '8.0.0.0', max: '8.255.255.255' }, { min: '24.0.0.0', max: '24.255.255.255' }] },

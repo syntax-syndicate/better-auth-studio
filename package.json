@@ -66,6 +66,7 @@
     "dist/",
     "frontend/dist/",
     "public/",
+    "data/",
     "README.md",
     "package.json"
   ]

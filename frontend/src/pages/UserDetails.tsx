@@ -380,7 +380,6 @@ export default function UserDetails() {
         
         // Refresh sessions data
         fetchUserMemberships()
-        setShowSessionSeedModal(false)
       } else {
         setSeedingLogs(prev => [...prev, {
           id: 'error',
@@ -698,9 +697,6 @@ export default function UserDetails() {
                             <div className="flex-1">
                               <div className="flex items-center space-x-3 mb-2">
                                 <h3 className="text-white font-medium">Session {session.id.substring(0, 8)}...</h3>
-                                <Badge variant="outline" className="rounded-none text-xs bg-green-500/10 border-green-500/30 text-green-400">
-                                  Active
-                                </Badge>
                               </div>
                               <div className="flex items-center space-x-4 mb-1">
                                 <div className="flex items-center space-x-2">
@@ -724,7 +720,14 @@ export default function UserDetails() {
                                   <Clock className="w-4 h-4 text-white" />
                                   <span className="text-gray-400 text-sm">Expires:</span>
                                   <span className="text-white text-sm">
-                                    {new Date(session.expiresAt).toLocaleDateString()}
+                                    {new Date(session.expiresAt).toLocaleDateString('en-US', {
+                                      year: 'numeric',
+                                      month: 'short',
+                                      day: 'numeric',
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    })}
                                   </span>
                                 </div>
                                 <Button

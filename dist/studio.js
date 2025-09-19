@@ -10,7 +10,7 @@ import { createRoutes } from './routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export async function startStudio(options) {
-    const { port, host, openBrowser, authConfig, configPath, watchMode } = options;
+    const { port, host, openBrowser, authConfig, configPath, watchMode, geoDbPath } = options;
     const app = express();
     const server = createServer(app);
     app.use(cors({
@@ -45,7 +45,7 @@ export async function startStudio(options) {
             }));
         });
     }
-    app.use(createRoutes(authConfig, configPath));
+    app.use(createRoutes(authConfig, configPath, geoDbPath));
     app.use(express.static(join(__dirname, '../public')));
     app.get('*', (req, res) => {
         res.sendFile(join(__dirname, '../public/index.html'));

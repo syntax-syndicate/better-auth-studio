@@ -19,10 +19,11 @@ interface StudioOptions {
   authConfig: AuthConfig;
   configPath?: string;
   watchMode?: boolean;
+  geoDbPath?: string;
 }
 
 export async function startStudio(options: StudioOptions) {
-  const { port, host, openBrowser, authConfig, configPath, watchMode } = options;
+  const { port, host, openBrowser, authConfig, configPath, watchMode, geoDbPath } = options;
   const app = express();
   const server = createServer(app);
 
@@ -67,7 +68,7 @@ export async function startStudio(options: StudioOptions) {
     });
   }
 
-  app.use(createRoutes(authConfig, configPath));
+  app.use(createRoutes(authConfig, configPath, geoDbPath));
 
   app.use(express.static(join(__dirname, '../public')));
 

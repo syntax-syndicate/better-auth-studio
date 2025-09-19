@@ -56,6 +56,7 @@ interface StudioWatchOptions {
   authConfig: any;
   configPath?: string;
   watchMode: boolean;
+  geoDbPath?: string;
 }
 
 let currentStudio: any = null;
@@ -63,7 +64,7 @@ let watcher: any = null;
 let webSocketServer: any = null;
 
 async function startStudioWithWatch(options: StudioWatchOptions) {
-  const { port, host, openBrowser, authConfig, configPath, watchMode } = options;
+  const { port, host, openBrowser, authConfig, configPath, watchMode, geoDbPath } = options;
   
   const studioResult = await startStudio({
     port,
@@ -71,7 +72,8 @@ async function startStudioWithWatch(options: StudioWatchOptions) {
     openBrowser,
     authConfig,
     configPath,
-    watchMode
+    watchMode,
+    geoDbPath
   });
   currentStudio = studioResult.server;
   webSocketServer = studioResult.wss;
@@ -110,7 +112,8 @@ async function startStudioWithWatch(options: StudioWatchOptions) {
           openBrowser: false,
           authConfig: newAuthConfig,
           configPath,
-          watchMode
+          watchMode,
+          geoDbPath
         });
         currentStudio = newStudioResult.server;
         webSocketServer = newStudioResult.wss;
@@ -178,6 +181,7 @@ program
   .option('-p, --port <port>', 'Port to run the studio on', '3002')
   .option('-h, --host <host>', 'Host to run the studio on', 'localhost')
   .option('-c, --config <path>', 'Path to the auth configuration file')
+  .option('--geo-db <path>', 'Path to MaxMind GeoLite2 database file (.mmdb)')
   .option('-w, --watch', 'Watch for changes in auth config file and reload server')
   .option('--no-open', 'Do not open browser automatically')
   .action(async (options) => {
@@ -258,7 +262,8 @@ program
           openBrowser: options.open,
           authConfig,
           configPath: options.config,
-          watchMode: true
+          watchMode: true,
+          geoDbPath: options.geoDb
         });
       } else {
         await startStudio({
@@ -267,7 +272,8 @@ program
           openBrowser: options.open,
           authConfig,
           configPath: options.config,
-          watchMode: false
+          watchMode: false,
+          geoDbPath: options.geoDb
         });
       }
 

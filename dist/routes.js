@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { getAuthData } from './data.js';
 import { getAuthAdapter, createMockUser, createMockSession, createMockAccount, createMockVerification } from './auth-adapter.js';
-import { resolveIPLocation, initializeGeoService } from './geo-service.js';
+import { resolveIPLocation, initializeGeoService, setGeoDbPath } from './geo-service.js';
 import { createJiti } from 'jiti';
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -179,8 +179,12 @@ async function findAuthConfigPath() {
     }
     return null;
 }
-export function createRoutes(authConfig, configPath) {
+export function createRoutes(authConfig, configPath, geoDbPath) {
     const router = Router();
+    // Set geo database path if provided
+    if (geoDbPath) {
+        setGeoDbPath(geoDbPath);
+    }
     // Initialize Geo service
     initializeGeoService().catch(console.error);
     // Store the config path for use in adapter functions

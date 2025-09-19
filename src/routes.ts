@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { getAuthData } from './data.js';
 import { AuthConfig } from './config.js';
 import { getAuthAdapter, createMockUser, createMockSession, createMockAccount, createMockVerification } from './auth-adapter.js';
-import { resolveIPLocation, initializeGeoService } from './geo-service.js';
+import { resolveIPLocation, initializeGeoService, setGeoDbPath } from './geo-service.js';
 import { createJiti } from 'jiti';
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
@@ -218,8 +218,13 @@ async function findAuthConfigPath(): Promise<string | null> {
   return null;
 }
 
-export function createRoutes(authConfig: AuthConfig, configPath?: string) {
+export function createRoutes(authConfig: AuthConfig, configPath?: string, geoDbPath?: string) {
   const router = Router();
+
+  // Set geo database path if provided
+  if (geoDbPath) {
+    setGeoDbPath(geoDbPath);
+  }
 
   // Initialize Geo service
   initializeGeoService().catch(console.error);

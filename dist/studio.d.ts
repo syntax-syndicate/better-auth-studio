@@ -7,6 +7,7 @@ interface StudioOptions {
     authConfig: AuthConfig;
     configPath?: string;
     watchMode?: boolean;
+    geoDbPath?: string;
 }
 export declare function startStudio(options: StudioOptions): Promise<{
     server: import("http").Server<typeof import("http").IncomingMessage, typeof import("http").ServerResponse>;
