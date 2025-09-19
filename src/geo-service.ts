@@ -54,14 +54,9 @@ function loadDefaultDatabase(): void {
 
 export async function initializeGeoService(): Promise<void> {
   try {
-    // Determine database path
     const dbPath = geoDbPath || './data/GeoLite2-City.mmdb';
-    
-    // Try to load the GeoLite2 database
     lookup = await maxmind.open<CityResponse>(dbPath);
-    console.log(`✅ MaxMind GeoLite2 database loaded successfully from: ${dbPath}`);
   } catch (error) {
-    console.log('⚠️  MaxMind database not found, loading default geolocation database');
     lookup = null;
     loadDefaultDatabase();
   }
