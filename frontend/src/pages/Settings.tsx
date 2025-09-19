@@ -190,7 +190,7 @@ export default function Settings() {
 
   const fetchConfig = async () => {
     try {
-      const response = await fetch("/api/plugins");
+      const response = await fetch("/api/config");
       const data = await response.json();
       console.log("Config data:", data);
       setConfig(data);
@@ -392,7 +392,7 @@ export default function Settings() {
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-white">
-                  {config?.secret ? "Configured" : "Not set"}
+                  {config?.secret === "Configured" ? "Configured" : "Not set"}
                 </p>
               </div>
             </div>
