@@ -943,16 +943,14 @@ export default function OrganizationDetails() {
                 <div className="flex-1">
                   <h3 className="text-xl text-white font-light mb-2">Teams Feature Required</h3>
                   <p className="text-gray-300 mb-6">
-                    To use Teams in Better Auth Studio, you need to enable the teams feature
-                    in your organization plugin configuration.
+                    To use Teams in Better Auth Studio, you need to enable the teams feature in your
+                    organization plugin configuration.
                   </p>
 
                   <div className="bg-black/50 border border-dashed border-white/20 rounded-none p-4 mb-6">
                     <h4 className="text-white font-light mb-3">Follow these steps:</h4>
                     <ol className="text-gray-300 space-y-2 text-sm list-decimal list-inside">
-                      <li>
-                        Update your auth configuration file to enable teams:
-                      </li>
+                      <li>Update your auth configuration file to enable teams:</li>
                     </ol>
 
                     <div className="mt-4 bg-black/70 border border-dashed border-white/10 rounded-none p-3 overflow-x-auto">
@@ -967,12 +965,15 @@ export default function OrganizationDetails() {
                         <span className="text-blue-400">export const</span>{' '}
                         <span className="text-yellow-300">auth</span> ={' '}
                         <span className="text-yellow-300">betterAuth</span>({`{`} <br />
-                        <span className="text-gray-500 pl-10">// ... your existing configuration</span>{' '}
+                        <span className="text-gray-500 pl-10">
+                          // ... your existing configuration
+                        </span>{' '}
                         <br />
                         <span className="text-red-300 pl-10">plugins</span>: [ <br />
                         <span className="text-yellow-300 pl-12">organization</span>({`{`} <br />
                         <span className="text-red-300 pl-16">teams</span>: {`{`} <br />
-                        <span className="text-yellow-300 pl-20">enabled</span>: <span className="text-blue-400">true</span> <br />
+                        <span className="text-yellow-300 pl-20">enabled</span>:{' '}
+                        <span className="text-blue-400">true</span> <br />
                         <span className="pl-16">{`}`}</span> <br />
                         <span className="pl-12">{`})`}</span> <br />
                         <span className="pl-10">]</span> <br />

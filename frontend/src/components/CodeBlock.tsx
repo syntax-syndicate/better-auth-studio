@@ -1,5 +1,5 @@
+import { Check, Copy } from 'lucide-react';
 import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface CodeBlockProps {
@@ -9,7 +9,12 @@ interface CodeBlockProps {
   className?: string;
 }
 
-export function CodeBlock({ code, language = 'typescript', title, className = '' }: CodeBlockProps) {
+export function CodeBlock({
+  code,
+  language = 'typescript',
+  title,
+  className = '',
+}: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -33,11 +38,7 @@ export function CodeBlock({ code, language = 'typescript', title, className = ''
             onClick={handleCopy}
             className="text-gray-400 hover:text-white rounded-none p-1 h-auto"
           >
-            {copied ? (
-              <Check className="w-4 h-4" />
-            ) : (
-              <Copy className="w-4 h-4" />
-            )}
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           </Button>
         </div>
       )}

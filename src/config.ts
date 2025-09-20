@@ -67,7 +67,7 @@ export interface AuthConfig {
     enabled: boolean;
   }>;
   trustedOrigins?: string[];
-  plugins?: any[]
+  plugins?: any[];
   advanced?: {
     defaultCookieAttributes?: {
       sameSite?: string;
