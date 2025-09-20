@@ -207,57 +207,6 @@ export default function Changelog() {
               </div>
             </div>
           </PixelCard>
-
-          {/* Documentation Enhancements */}
-          <PixelCard className="mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-light tracking-tight text-white">Documentation Enhancements</h3>
-              <span className="text-sm font-light tracking-tight text-white/50">2025-01-28</span>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-light tracking-tight mb-2 text-white">📋 Copy Functionality</h4>
-                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    One-click copy functionality for all code blocks
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Visual feedback with copy/check icons
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Support for both inline code blocks and syntax-highlighted blocks
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Hover-triggered copy buttons for better UX
-                  </li>
-                </ul>
-              </div>
-              
-              <div>
-                <h4 className="font-light tracking-tight mb-2 text-white">📚 Beta Version Promotion</h4>
-                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Prominent beta version callout in installation documentation
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Clear installation instructions for beta features
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Updated examples to use beta version commands
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </PixelCard>
-          
-          {/* CSV Export Feature */}
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">CSV Export Feature</h3>
