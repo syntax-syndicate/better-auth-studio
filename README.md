@@ -11,6 +11,8 @@ A web-based studio interface for managing Better Auth applications. Better Auth 
 
 ### Installation
 
+📖 **[Documentation](https://better-auth-studio.vercel.app)**
+
 Install Better Auth Studio globally using pnpm:
 
 ```bash
