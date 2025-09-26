@@ -45,10 +45,10 @@ const TableNode = ({
 		<>
 			{data.isForeign ? (
 				<header
-					className="text-[0.55rem] px-2 py-1 border-[0.5px] border-gray-600 bg-gray-800 text-white flex gap-1 items-center"
+					className="text-[0.55rem] px-2 py-1 border-[0.5px] border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white flex gap-1 items-center"
 					id={`${data.name}-foreign-key`}
 				>
-					<span className="text-white font-medium">{data.name}</span>
+					<span className="text-gray-900 dark:text-white font-medium">{data.name}</span>
 					{targetPosition && (
 						<Handle
 							type="target"
@@ -60,7 +60,7 @@ const TableNode = ({
 				</header>
 			) : (
 				<div
-					className={cn("border-[0.5px] border-gray-600 overflow-hidden shadow-sm bg-gray-900")}
+					className={cn("border-[0.5px] border-gray-300 dark:border-gray-600 overflow-hidden shadow-sm bg-black")}
 					style={{ width: TABLE_NODE_WIDTH / 2 }}
 					id={`${data.name}-table-node`}
 				>
@@ -80,7 +80,7 @@ const TableNode = ({
 						<div
 							className={cn(
 								"text-[8px] leading-5 relative flex flex-row justify-items-start",
-								"bg-gray-900",
+								"bg-black",
 								"border-t",
 								"border-t-gray-600",
 								"hover:bg-gray-800 transition cursor-default",

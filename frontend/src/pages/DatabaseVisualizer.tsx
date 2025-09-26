@@ -178,23 +178,23 @@ export default function DatabaseVisualizer() {
             type: 'smoothstep',
             animated: false,
             style: {
-              stroke: '#ffffff',
+              stroke: '#000000',
               strokeWidth: 2,
               strokeDasharray: '5,5',
             },
             label: rel.type.replace('-', ' → '),
             labelStyle: {
               fontSize: '10px',
-              fill: '#ffffff',
+              fill: '#000000',
               fontWeight: 'bold',
             },
             labelBgStyle: {
-              fill: 'rgba(0, 0, 0, 0.8)',
+              fill: 'rgba(255, 255, 255, 0.8)',
               fillOpacity: 0.9,
             },
             markerEnd: {
               type: 'arrowclosed',
-              color: '#ffffff',
+              color: '#000000',
             },
           });
         }
@@ -256,12 +256,12 @@ export default function DatabaseVisualizer() {
   }
 
   return (
-    <div className="p-6 h-screen flex flex-col">
+    <div className="p-6 h-screen flex flex-col bg-white dark:bg-black">
       <div className="mb-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
-            <Database className="w-8 h-8 text-white" />
-            <h1 className="text-3xl font-bold text-white">Schema Visualizer</h1>
+            <Database className="w-8 h-8 text-gray-900 dark:text-white" />
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Schema Visualizer</h1>
           </div>
           
           <div className="flex items-center space-x-4">
@@ -269,14 +269,14 @@ export default function DatabaseVisualizer() {
               variant="outline"
               size="sm"
               onClick={() => setShowPluginLabels(!showPluginLabels)}
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 rounded-none border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-black"
             >
               {showPluginLabels ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               <span>Plugin Labels</span>
             </Button>
           </div>
         </div>
-        <p className="text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400">
           Visualize your Better Auth database schema with interactive tables and relationships.
         </p>
       </div>
@@ -284,9 +284,9 @@ export default function DatabaseVisualizer() {
       <div className="flex-1 grid grid-cols-4 gap-6">
         {/* Plugin Selector */}
         <div className="col-span-1">
-          <Card className="bg-gray-900/50 border-gray-700 h-fit">
+          <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-700 h-fit shadow-sm">
             <CardHeader>
-              <CardTitle className="text-white flex items-center space-x-2">
+              <CardTitle className="text-gray-900 dark:text-white flex items-center space-x-2">
                 <Settings className="w-5 h-5" />
                 <span>Plugins</span>
               </CardTitle>
@@ -304,11 +304,11 @@ export default function DatabaseVisualizer() {
                   <div className="flex-1">
                     <label
                       htmlFor={plugin.name}
-                      className="text-sm font-medium text-white cursor-pointer"
+                      className="text-sm font-medium text-gray-900 dark:text-white cursor-pointer"
                     >
                       {plugin.displayName}
                     </label>
-                    <p className="text-xs text-gray-400">{plugin.description}</p>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{plugin.description}</p>
                   </div>
                   <div className={`w-3 h-3 rounded-full ${plugin.color}`} />
                 </div>
@@ -318,24 +318,24 @@ export default function DatabaseVisualizer() {
 
           {/* Schema Info */}
           {schema && (
-            <Card className="bg-gray-900/50 border-gray-700 mt-4">
+            <Card className="bg-white dark:bg-black border-gray-200 dark:border-gray-700 mt-4 shadow-sm">
               <CardHeader>
-                <CardTitle className="text-white text-sm">Schema Info</CardTitle>
+                <CardTitle className="text-gray-900 dark:text-white text-sm">Schema Info</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Tables:</span>
-                  <span className="text-white">{schema.tables.length}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Tables:</span>
+                  <span className="text-gray-900 dark:text-white">{schema.tables.length}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Relationships:</span>
-                  <span className="text-white">
+                  <span className="text-gray-600 dark:text-gray-400">Relationships:</span>
+                  <span className="text-gray-900 dark:text-white">
                     {schema.tables.reduce((sum, table) => sum + table.relationships.length, 0)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Plugins:</span>
-                  <span className="text-white">{selectedPlugins.length}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Plugins:</span>
+                  <span className="text-gray-900 dark:text-white">{selectedPlugins.length}</span>
                 </div>
               </CardContent>
             </Card>
@@ -344,7 +344,7 @@ export default function DatabaseVisualizer() {
 
         {/* ReactFlow Diagram */}
         <div className="col-span-3">
-          <div className="h-full bg-black border border-gray-700 rounded-lg overflow-hidden">
+          <div className="h-full bg-white dark:bg-black border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden shadow-sm">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -356,10 +356,10 @@ export default function DatabaseVisualizer() {
               fitViewOptions={{
                 padding: 0.2,
               }}
-              className="bg-black"
+              className="bg-white dark:bg-black"
               defaultEdgeOptions={{
                 style: {
-                  stroke: '#ffffff',
+                  stroke: '#000000',
                   strokeWidth: 2,
                   strokeDasharray: '5,5',
                 },
@@ -367,20 +367,20 @@ export default function DatabaseVisualizer() {
                 type: 'smoothstep',
               }}
             >
-              <Controls className="bg-gray-800 border-gray-600" />
+              <Controls className="bg-white dark:bg-black border-gray-200 dark:border-gray-600" />
               <MiniMap 
-                className="bg-gray-800 border-gray-600"
+                className="bg-white dark:bg-black border-gray-200 dark:border-gray-600"
                 nodeColor={(node) => {
-                  if (node.data?.isForeign) return '#374151';
-                  return '#1f2937';
+                  if (node.data?.isForeign) return '#e5e7eb';
+                  return '#f3f4f6';
                 }}
-                maskColor="rgba(0, 0, 0, 0.8)"
+                maskColor="rgba(255, 255, 255, 0.8)"
               />
               <Background 
                 variant={BackgroundVariant.Dots} 
                 gap={20} 
                 size={1}
-                color="#ffffff"
+                color="#000000"
               />
             </ReactFlow>
           </div>
