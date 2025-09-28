@@ -1,23 +1,23 @@
-import { useCallback, useEffect, useState } from 'react';
 import {
-  ReactFlow,
-  MiniMap,
-  Controls,
-  Background,
-  useNodesState,
-  useEdgesState,
   addEdge,
-  Connection,
-  Edge,
-  Node,
+  Background,
   BackgroundVariant,
+  type Connection,
+  Controls,
+  type Edge,
+  MiniMap,
+  type Node,
+  ReactFlow,
+  useEdgesState,
+  useNodesState,
 } from '@xyflow/react';
+import { useCallback, useEffect, useState } from 'react';
 import '@xyflow/react/dist/style.css';
-import { Database, Settings, Eye, EyeOff } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Checkbox } from '../components/ui/checkbox';
+import { Database, Eye, EyeOff, Settings } from 'lucide-react';
 import { TableNode, type TableNodeData } from '../components/TableNode';
+import { Button } from '../components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { Checkbox } from '../components/ui/checkbox';
 
 const nodeTypes = {
   tableNode: TableNode,
@@ -105,7 +105,7 @@ export default function DatabaseVisualizer() {
       const pluginParams = plugins.length > 0 ? `?plugins=${plugins.join(',')}` : '';
       const response = await fetch(`/api/database/schema${pluginParams}`);
       const data = await response.json();
-      
+
       if (data.success) {
         setSchema(data.schema);
       } else {
@@ -163,11 +163,11 @@ export default function DatabaseVisualizer() {
       table.relationships.forEach((rel) => {
         const sourceTable = table.name;
         const targetTable = rel.target;
-        
+
         // Find the source and target nodes
-        const sourceNode = newNodes.find(n => n.id === sourceTable);
-        const targetNode = newNodes.find(n => n.id === targetTable);
-        
+        const sourceNode = newNodes.find((n) => n.id === sourceTable);
+        const targetNode = newNodes.find((n) => n.id === targetTable);
+
         if (sourceNode && targetNode) {
           newEdges.push({
             id: `${sourceTable}-${targetTable}-${rel.field}`,
@@ -204,29 +204,34 @@ export default function DatabaseVisualizer() {
 
   const getPluginForField = (tableName: string, _fieldName: string, plugins: string[]): string => {
     // Determine which plugin a field belongs to
-    if (tableName === 'user' || tableName === 'session' || tableName === 'account' || tableName === 'verification') {
+    if (
+      tableName === 'user' ||
+      tableName === 'session' ||
+      tableName === 'account' ||
+      tableName === 'verification'
+    ) {
       return 'core';
     }
-    
+
     for (const plugin of plugins) {
       if (tableName === plugin || tableName.includes(plugin)) {
         return plugin;
       }
     }
-    
+
     return 'core';
   };
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges],
+    [setEdges]
   );
 
   const handlePluginToggle = (pluginName: string, checked: boolean) => {
     if (checked) {
-      setSelectedPlugins(prev => [...prev, pluginName]);
+      setSelectedPlugins((prev) => [...prev, pluginName]);
     } else {
-      setSelectedPlugins(prev => prev.filter(p => p !== pluginName));
+      setSelectedPlugins((prev) => prev.filter((p) => p !== pluginName));
     }
   };
 
@@ -258,9 +263,11 @@ export default function DatabaseVisualizer() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <Database className="w-8 h-8 text-gray-900 dark:text-white" />
-            <h1 className="text-2xl font-normal text-gray-900 dark:text-white">Schema Visualizer</h1>
+            <h1 className="text-2xl font-normal text-gray-900 dark:text-white">
+              Schema Visualizer
+            </h1>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
@@ -294,9 +301,7 @@ export default function DatabaseVisualizer() {
                   <Checkbox
                     id={plugin.name}
                     checked={selectedPlugins.includes(plugin.name)}
-                    onCheckedChange={(checked: boolean) => 
-                      handlePluginToggle(plugin.name, checked)
-                    }
+                    onCheckedChange={(checked: boolean) => handlePluginToggle(plugin.name, checked)}
                   />
                   <div className="flex-1">
                     <label
@@ -364,7 +369,7 @@ export default function DatabaseVisualizer() {
               }}
             >
               <Controls className="bg-white dark:bg-black border-gray-200 dark:border-gray-600" />
-              <MiniMap 
+              <MiniMap
                 className="bg-white dark:bg-black border-gray-200 dark:border-gray-600"
                 nodeColor={(node) => {
                   if (node.data?.isForeign) return '#e5e7eb';
@@ -372,12 +377,7 @@ export default function DatabaseVisualizer() {
                 }}
                 maskColor="rgba(255, 255, 255, 0.8)"
               />
-              <Background 
-                variant={BackgroundVariant.Dots} 
-                gap={20} 
-                size={1}
-                color="#000000"
-              />
+              <Background variant={BackgroundVariant.Dots} gap={20} size={1} color="#000000" />
             </ReactFlow>
           </div>
         </div>
