@@ -198,13 +198,6 @@ export default function DatabaseVisualizer() {
       });
     });
 
-    // Debug: Log the edges being created
-    if (newEdges.length > 0) {
-      console.log('Creating edges:', newEdges);
-    } else {
-      console.log('No edges created. Schema relationships:', schema.tables.map(t => ({ name: t.name, relationships: t.relationships })));
-    }
-    
     setNodes(newNodes);
     setEdges(newEdges);
   }, [schema, selectedPlugins]);

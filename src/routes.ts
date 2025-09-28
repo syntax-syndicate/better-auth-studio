@@ -1424,8 +1424,12 @@ const PLUGIN_SCHEMAS = {
 function generateSchema(selectedPlugins: string[]) {
   const schema: { tables: any[] } = { tables: [] };
   
-  // Start with base tables
-  const baseTables = Object.values(BASE_SCHEMA);
+  // Start with base tables (deep clone to avoid mutations)
+  const baseTables = Object.values(BASE_SCHEMA).map(table => ({
+    ...table,
+    fields: [...table.fields],
+    relationships: [...table.relationships]
+  }));
   schema.tables.push(...baseTables);
   
   // Apply plugin extensions
@@ -1436,31 +1440,66 @@ function generateSchema(selectedPlugins: string[]) {
     // Add plugin-specific tables
     if (plugin.tables) {
       Object.values(plugin.tables).forEach((table: any) => {
-        schema.tables.push(table);
+        schema.tables.push({
+          ...table,
+          fields: [...table.fields],
+          relationships: [...table.relationships]
+        });
       });
     }
     
-    // Extend existing tables
+    // Extend existing tables (with duplicate prevention)
     if ('userExtensions' in plugin && plugin.userExtensions) {
       const userTable = schema.tables.find((t: any) => t.name === 'user');
       if (userTable && 'fields' in plugin.userExtensions) {
-        userTable.fields.push(...(plugin.userExtensions.fields || []));
-        userTable.relationships.push(...(plugin.userExtensions.relationships || []));
+        // Add fields only if they don't already exist
+        (plugin.userExtensions.fields || []).forEach((field: any) => {
+          if (!userTable.fields.some((f: any) => f.name === field.name)) {
+            userTable.fields.push(field);
+          }
+        });
+        // Add relationships only if they don't already exist
+        (plugin.userExtensions.relationships || []).forEach((rel: any) => {
+          if (!userTable.relationships.some((r: any) => 
+            r.target === rel.target && r.field === rel.field && r.type === rel.type
+          )) {
+            userTable.relationships.push(rel);
+          }
+        });
       }
     }
     
     if ('sessionExtensions' in plugin && plugin.sessionExtensions) {
       const sessionTable = schema.tables.find((t: any) => t.name === 'session');
       if (sessionTable && 'fields' in plugin.sessionExtensions) {
-        sessionTable.fields.push(...(plugin.sessionExtensions.fields || []));
-        sessionTable.relationships.push(...(plugin.sessionExtensions.relationships || []));
+        // Add fields only if they don't already exist
+        (plugin.sessionExtensions.fields || []).forEach((field: any) => {
+          if (!sessionTable.fields.some((f: any) => f.name === field.name)) {
+            sessionTable.fields.push(field);
+          }
+        });
+        // Add relationships only if they don't already exist
+        (plugin.sessionExtensions.relationships || []).forEach((rel: any) => {
+          if (!sessionTable.relationships.some((r: any) => 
+            r.target === rel.target && r.field === rel.field && r.type === rel.type
+          )) {
+            sessionTable.relationships.push(rel);
+          }
+        });
       }
     }
     
     if ('organizationExtensions' in plugin && plugin.organizationExtensions) {
       const orgTable = schema.tables.find((t: any) => t.name === 'organization');
       if (orgTable) {
-        orgTable.relationships.push(...(plugin.organizationExtensions.relationships || []));
+        // Add relationships only if they don't already exist
+        (plugin.organizationExtensions.relationships || []).forEach((rel: any) => {
+          if (!orgTable.relationships.some((r: any) => 
+            r.target === rel.target && r.field === rel.field && r.type === rel.type
+          )) {
+            orgTable.relationships.push(rel);
+          }
+        });
       }
     }
   });
