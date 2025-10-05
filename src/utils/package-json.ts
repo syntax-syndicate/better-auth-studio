@@ -60,9 +60,6 @@ export async function getPackageVersion(packageName: string, cwd?: string): Prom
       }
     } catch (resolveError: any) {
       // Only log unexpected errors, not MODULE_NOT_FOUND which is expected
-      if (resolveError.code !== 'MODULE_NOT_FOUND') {
-        console.warn(`Unexpected error resolving ${packageName}:`, resolveError.message);
-      }
     }
     
     return undefined;

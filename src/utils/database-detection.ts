@@ -44,7 +44,6 @@ export async function detectDatabase(cwd?: string): Promise<DetectionInfo | unde
  */
 export async function detectDatabaseWithDialect(cwd?: string): Promise<DatabaseDetectionResult | undefined> {
 	const detection = await detectDatabase(cwd);
-    console.log('detection', detection);
 	if (!detection) return undefined;
 
 	let dialect = detection.name;

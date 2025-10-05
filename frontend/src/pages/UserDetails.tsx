@@ -32,6 +32,10 @@ interface User {
   image?: string;
   createdAt: string;
   updatedAt: string;
+  banned?: boolean;
+  banReason?: string;
+  banExpires?: string;
+  role?: string;
 }
 
 interface Organization {
@@ -98,7 +102,11 @@ export default function UserDetails() {
   );
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
+  const [showUnbanModal, setShowUnbanModal] = useState(false);
   const [showSessionSeedModal, setShowSessionSeedModal] = useState(false);
+  const [banReason, setBanReason] = useState('');
+  const [banExpiresIn, setBanExpiresIn] = useState<number | undefined>();
+  const [adminPluginEnabled, setAdminPluginEnabled] = useState(false);
   const [seedingLogs, setSeedingLogs] = useState<
     Array<{
       id: string;
@@ -115,8 +123,20 @@ export default function UserDetails() {
     if (userId) {
       fetchUserDetails();
       fetchUserMemberships();
+      checkAdminPlugin();
     }
   }, [userId]);
+
+  const checkAdminPlugin = async () => {
+    try {
+      const response = await fetch('/api/admin/status');
+      const data = await response.json();
+      setAdminPluginEnabled(data.enabled);
+    } catch (error) {
+      console.error('Failed to check admin plugin:', error);
+      setAdminPluginEnabled(false);
+    }
+  };
 
   const resolveIPLocation = async (ipAddress: string): Promise<LocationData | null> => {
     try {
@@ -263,23 +283,88 @@ export default function UserDetails() {
   const handleBanUser = async () => {
     if (!user) return;
 
+    if (!adminPluginEnabled) {
+      toast.error('Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration to use ban functionality.');
+      return;
+    }
+
     const toastId = toast.loading('Banning user...');
     try {
-      const response = await fetch(`/api/users/${userId}/ban`, {
+      const response = await fetch('/api/admin/ban-user', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId,
+          banReason: banReason || 'No reason provided',
+          banExpiresIn: banExpiresIn
+        }),
       });
-
       const result = await response.json();
 
-      if (result.success) {
+      if (response.ok) {
         toast.success('User banned successfully!', { id: toastId });
-        navigate('/users');
+        setShowBanModal(false);
+        setBanReason('');
+        setBanExpiresIn(undefined);
+        fetchUserDetails();
       } else {
-        toast.error(`Error banning user: ${result.error || 'Unknown error'}`, { id: toastId });
+        if (response.status === 403) {
+          toast.error('You do not have permission to ban users. Admin role required.', { id: toastId });
+        } else if (result.adminPluginEnabled && result.instructions) {
+          toast.error(`${result.error}`, { 
+            id: toastId,
+            duration: 6000,
+            description: `Use: ${result.instructions.example}`
+          });
+        } else {
+          toast.error(`Error banning user: ${result.error || result.message || 'Unknown error'}`, { id: toastId });
+        }
       }
     } catch (error) {
       console.error('Error banning user:', error);
       toast.error('Error banning user', { id: toastId });
+    }
+  };
+
+  const handleUnbanUser = async () => {
+    if (!user) return;
+
+    if (!adminPluginEnabled) {
+      toast.error('Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration to use unban functionality.');
+      return;
+    }
+
+    const toastId = toast.loading('Unbanning user...');
+    try {
+      const response = await fetch('/api/admin/unban-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId
+        }),
+      });
+      const result = await response.json();
+
+      if (response.ok) {
+        toast.success('User unbanned successfully!', { id: toastId });
+        setShowUnbanModal(false);
+        fetchUserDetails();
+      } else {
+        if (response.status === 403) {
+          toast.error('You do not have permission to unban users. Admin role required.', { id: toastId });
+        } else if (result.adminPluginEnabled && result.instructions) {
+          toast.error(`${result.error}`, { 
+            id: toastId,
+            duration: 6000,
+            description: `Use: ${result.instructions.example}`
+          });
+        } else {
+          toast.error(`Error unbanning user: ${result.error || result.message || 'Unknown error'}`, { id: toastId });
+        }
+      }
+    } catch (error) {
+      console.error('Error unbanning user:', error);
+      toast.error('Error unbanning user', { id: toastId });
     }
   };
 
@@ -492,14 +577,32 @@ export default function UserDetails() {
                 <Edit className="w-4 h-4 mr-2" />
                 Edit User
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowBanModal(true)}
-                className="border border-dashed border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-none"
-              >
-                <Ban className="w-4 h-4 mr-2" />
-                Ban User
-              </Button>
+              {user.banned ? (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowUnbanModal(true)}
+                  className="border border-dashed border-green-400/50 text-green-400 hover:bg-green-400/10 rounded-none"
+                  disabled={!adminPluginEnabled}
+                >
+                  <Ban className="w-4 h-4 mr-2" />
+                  Unban User
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBanModal(true)}
+                  className="border border-dashed border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-none"
+                  disabled={!adminPluginEnabled}
+                >
+                  <Ban className="w-4 h-4 mr-2" />
+                  Ban User
+                </Button>
+              )}
+              {!adminPluginEnabled && (
+                <p className="text-xs text-yellow-400 mt-1">
+                  Admin plugin required for ban/unban functionality. Please enable the admin plugin in your Better Auth configuration.
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -565,6 +668,27 @@ export default function UserDetails() {
                       >
                         {user.emailVerified ? 'Verified' : 'Unverified'}
                       </Badge>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-400 mb-2">
+                        Account Status
+                      </label>
+                      <Badge
+                        variant={user.banned ? 'destructive' : 'default'}
+                        className="rounded-none"
+                      >
+                        {user.banned ? 'Banned' : 'Active'}
+                      </Badge>
+                      {user.banned && user.banReason && (
+                        <div className="mt-2 text-sm text-red-400">
+                          Reason: {user.banReason}
+                        </div>
+                      )}
+                      {user.banned && user.banExpires && (
+                        <div className="mt-1 text-sm text-yellow-400">
+                          Expires: {new Date(user.banExpires).toLocaleDateString()}
+                        </div>
+                      )}
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -882,14 +1006,46 @@ export default function UserDetails() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-black border border-dashed border-red-400/50 rounded-none p-6 w-full max-w-md">
             <h2 className="text-xl font-bold text-white mb-4">Ban User</h2>
-            <p className="text-gray-400 mb-6">
-              Are you sure you want to ban <strong>{user.name}</strong>? This will prevent them from
-              accessing the system.
+            <p className="text-gray-400 mb-4">
+              Ban <strong>{user.name}</strong> from accessing the system.
             </p>
+            
+            <div className="space-y-4 mb-6">
+              <div>
+                <Label htmlFor="banReason" className="text-white">Ban Reason</Label>
+                <Input
+                  id="banReason"
+                  value={banReason}
+                  onChange={(e) => setBanReason(e.target.value)}
+                  placeholder="Enter reason for ban (optional)"
+                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="banExpires" className="text-white">Ban Duration (seconds)</Label>
+                <Input
+                  id="banExpires"
+                  type="number"
+                  value={banExpiresIn || ''}
+                  onChange={(e) => setBanExpiresIn(e.target.value ? Number(e.target.value) : undefined)}
+                  placeholder="Leave empty for permanent ban"
+                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Examples: 3600 (1 hour), 86400 (1 day), 604800 (1 week)
+                </p>
+              </div>
+            </div>
+            
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
-                onClick={() => setShowBanModal(false)}
+                onClick={() => {
+                  setShowBanModal(false);
+                  setBanReason('');
+                  setBanExpiresIn(undefined);
+                }}
                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
               >
                 Cancel
@@ -899,6 +1055,33 @@ export default function UserDetails() {
                 className="bg-red-600 text-white hover:bg-red-700 rounded-none"
               >
                 Ban User
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showUnbanModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black border border-dashed border-green-400/50 rounded-none p-6 w-full max-w-md">
+            <h2 className="text-xl font-bold text-white mb-4">Unban User</h2>
+            <p className="text-gray-400 mb-6">
+              Are you sure you want to unban <strong>{user.name}</strong>? This will restore their
+              access to the system.
+            </p>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowUnbanModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUnbanUser}
+                className="bg-green-600 text-white hover:bg-green-700 rounded-none"
+              >
+                Unban User
               </Button>
             </div>
           </div>

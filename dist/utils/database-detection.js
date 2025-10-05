@@ -39,7 +39,6 @@ export async function detectDatabase(cwd) {
  */
 export async function detectDatabaseWithDialect(cwd) {
     const detection = await detectDatabase(cwd);
-    console.log('detection', detection);
     if (!detection)
         return undefined;
     let dialect = detection.name;
@@ -117,7 +116,6 @@ async function detectDrizzleDialect(cwd) {
                 return dialect;
         }
         catch (error) {
-            console.error('Error detecting drizzle dialect:', error);
         }
     }
     return undefined;

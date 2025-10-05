@@ -53,9 +53,6 @@ export async function getPackageVersion(packageName, cwd) {
         }
         catch (resolveError) {
             // Only log unexpected errors, not MODULE_NOT_FOUND which is expected
-            if (resolveError.code !== 'MODULE_NOT_FOUND') {
-                console.warn(`Unexpected error resolving ${packageName}:`, resolveError.message);
-            }
         }
         return undefined;
     }

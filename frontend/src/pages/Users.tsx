@@ -1,4 +1,5 @@
 import {
+  Ban,
   Check,
   Database,
   Download,
@@ -38,6 +39,10 @@ interface User {
   image?: string;
   createdAt: string;
   updatedAt: string;
+  banned?: boolean;
+  banReason?: string;
+  banExpires?: string;
+  role?: string;
 }
 
 export default function Users() {
@@ -417,6 +422,7 @@ export default function Users() {
                 <th className="text-left py-4 px-4 text-white font-light">User</th>
                 <th className="text-left py-4 px-4 text-white font-light">Email</th>
                 <th className="text-left py-4 px-4 text-white font-light">Email Verified</th>
+                <th className="text-left py-4 px-4 text-white font-light">Status</th>
                 <th className="text-left py-4 px-4 text-white font-light">Created</th>
                 <th className="text-right py-4 px-4 text-white font-light">Actions</th>
               </tr>
@@ -424,7 +430,7 @@ export default function Users() {
             <tbody>
               {currentUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-12 px-4 text-center">
+                  <td colSpan={6} className="py-12 px-4 text-center">
                     <div className="flex flex-col items-center space-y-4">
                       <div className="w-16 h-16 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
                         <UsersIcon className="w-8 h-8 text-white/50" />
@@ -493,6 +499,23 @@ export default function Users() {
                           {user.emailVerified ? 'Verified' : 'Not Verified'}
                         </span>
                       </div>
+                    </td>
+                    <td className="py-4 px-4">
+                      <div className="flex items-center space-x-2">
+                        {user.banned ? (
+                          <Ban className="w-4 h-4 text-red-400" />
+                        ) : (
+                          <Check className="w-4 h-4 text-green-400" />
+                        )}
+                        <span className="text-sm text-gray-400">
+                          {user.banned ? 'Banned' : 'Active'}
+                        </span>
+                      </div>
+                      {user.banned && user.banReason && (
+                        <div className="text-xs text-red-400 mt-1">
+                          {user.banReason}
+                        </div>
+                      )}
                     </td>
                     <td className="py-4 px-4 text-sm text-gray-400">
                       <div className="flex flex-col">

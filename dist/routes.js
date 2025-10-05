@@ -284,7 +284,6 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 databaseType = type;
             }
         }
-        console.log({ social: authConfig.socialProviders });
         const config = {
             appName: authConfig.appName || 'Better Auth',
             baseURL: authConfig.baseURL || process.env.BETTER_AUTH_URL,
@@ -1136,6 +1135,153 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({
                 success: false,
                 error: 'Failed to get database information',
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    });
+    // Admin Plugin Proxy Endpoints
+    router.post('/api/admin/ban-user', async (req, res) => {
+        try {
+            const authConfigPath = configPath || (await findAuthConfigPath());
+            if (!authConfigPath) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No auth config found'
+                });
+            }
+            const { getConfig } = await import('./config.js');
+            const auth = await getConfig({
+                cwd: process.cwd(),
+                configPath: authConfigPath,
+                shouldThrowOnError: false,
+            });
+            if (!auth) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Failed to load auth config'
+                });
+            }
+            const plugins = auth.plugins || [];
+            const adminPlugin = plugins.find((plugin) => plugin.id === 'admin');
+            if (!adminPlugin) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration.'
+                });
+            }
+            console.log({ auth });
+            if (!auth.api || !auth.api.banUser) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Admin API methods not available. Make sure the admin plugin is properly configured.',
+                    adminPluginEnabled: true
+                });
+            }
+            const result = await auth.api.banUser({
+                body: req.body,
+                headers: req.headers
+            });
+            res.json(result);
+        }
+        catch (error) {
+            console.error('Error banning user:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to ban user',
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    });
+    router.post('/api/admin/unban-user', async (req, res) => {
+        try {
+            const authConfigPath = configPath || (await findAuthConfigPath());
+            if (!authConfigPath) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'No auth config found'
+                });
+            }
+            const { getConfig } = await import('./config.js');
+            const auth = await getConfig({
+                cwd: process.cwd(),
+                configPath: authConfigPath,
+                shouldThrowOnError: false,
+            });
+            if (!auth) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Failed to load auth config'
+                });
+            }
+            const plugins = auth.plugins || [];
+            const adminPlugin = plugins.find((plugin) => plugin.id === 'admin');
+            if (!adminPlugin) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration.'
+                });
+            }
+            if (!auth.api || !auth.api.unbanUser) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Admin API methods not available. Make sure the admin plugin is properly configured.',
+                    adminPluginEnabled: true
+                });
+            }
+            const result = await auth.api.unbanUser({
+                body: req.body,
+                headers: req.headers
+            });
+            res.json(result);
+        }
+        catch (error) {
+            console.error('Error unbanning user:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to unban user',
+                message: error instanceof Error ? error.message : 'Unknown error'
+            });
+        }
+    });
+    router.get('/api/admin/status', async (req, res) => {
+        try {
+            const authConfigPath = configPath || (await findAuthConfigPath());
+            if (!authConfigPath) {
+                return res.json({
+                    enabled: false,
+                    error: 'No auth config found',
+                    configPath: null,
+                });
+            }
+            const { getConfig } = await import('./config.js');
+            const betterAuthConfig = await getConfig({
+                cwd: process.cwd(),
+                configPath: authConfigPath,
+                shouldThrowOnError: false,
+            });
+            if (!betterAuthConfig) {
+                return res.json({
+                    enabled: false,
+                    error: 'Failed to load auth config',
+                    configPath: authConfigPath,
+                });
+            }
+            const plugins = betterAuthConfig.plugins || [];
+            const adminPlugin = plugins.find((plugin) => plugin.id === 'admin');
+            res.json({
+                enabled: !!adminPlugin,
+                configPath: authConfigPath,
+                adminPlugin: adminPlugin || null,
+                message: adminPlugin
+                    ? 'Admin plugin is enabled. Use Better Auth admin endpoints directly for ban/unban functionality.'
+                    : 'Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration.'
+            });
+        }
+        catch (error) {
+            console.error('Error checking admin status:', error);
+            res.status(500).json({
+                enabled: false,
+                error: 'Failed to check admin status',
                 message: error instanceof Error ? error.message : 'Unknown error'
             });
         }
