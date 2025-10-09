@@ -125,15 +125,14 @@ export default function UserDetails() {
       fetchUserMemberships();
       checkAdminPlugin();
     }
-  }, [userId]);
+  }, [userId, checkAdminPlugin, fetchUserDetails, fetchUserMemberships]);
 
   const checkAdminPlugin = async () => {
     try {
       const response = await fetch('/api/admin/status');
       const data = await response.json();
       setAdminPluginEnabled(data.enabled);
-    } catch (error) {
-      console.error('Failed to check admin plugin:', error);
+    } catch (_error) {
       setAdminPluginEnabled(false);
     }
   };
@@ -155,8 +154,7 @@ export default function UserDetails() {
         }
       }
       return null;
-    } catch (error) {
-      console.error('Failed to resolve IP location:', error);
+    } catch (_error) {
       return null;
     }
   };
@@ -207,8 +205,7 @@ export default function UserDetails() {
         toast.error('Failed to fetch user details');
         navigate('/users');
       }
-    } catch (error) {
-      console.error('Failed to fetch user details:', error);
+    } catch (_error) {
       toast.error('Failed to fetch user details');
       navigate('/users');
     } finally {
@@ -241,9 +238,7 @@ export default function UserDetails() {
         // Resolve locations for sessions
         resolveSessionLocations(sessions);
       }
-    } catch (error) {
-      console.error('Failed to fetch user memberships:', error);
-    }
+    } catch (_error) {}
   };
 
   const handleEditUser = async () => {
@@ -274,8 +269,7 @@ export default function UserDetails() {
       } else {
         toast.error(`Error updating user: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error updating user:', error);
+    } catch (_error) {
       toast.error('Error updating user', { id: toastId });
     }
   };
@@ -284,7 +278,9 @@ export default function UserDetails() {
     if (!user) return;
 
     if (!adminPluginEnabled) {
-      toast.error('Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration to use ban functionality.');
+      toast.error(
+        'Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration to use ban functionality.'
+      );
       return;
     }
 
@@ -296,7 +292,7 @@ export default function UserDetails() {
         body: JSON.stringify({
           userId: userId,
           banReason: banReason || 'No reason provided',
-          banExpiresIn: banExpiresIn
+          banExpiresIn: banExpiresIn,
         }),
       });
       const result = await response.json();
@@ -309,19 +305,22 @@ export default function UserDetails() {
         fetchUserDetails();
       } else {
         if (response.status === 403) {
-          toast.error('You do not have permission to ban users. Admin role required.', { id: toastId });
+          toast.error('You do not have permission to ban users. Admin role required.', {
+            id: toastId,
+          });
         } else if (result.adminPluginEnabled && result.instructions) {
-          toast.error(`${result.error}`, { 
+          toast.error(`${result.error}`, {
             id: toastId,
             duration: 6000,
-            description: `Use: ${result.instructions.example}`
+            description: `Use: ${result.instructions.example}`,
           });
         } else {
-          toast.error(`Error banning user: ${result.error || result.message || 'Unknown error'}`, { id: toastId });
+          toast.error(`Error banning user: ${result.error || result.message || 'Unknown error'}`, {
+            id: toastId,
+          });
         }
       }
-    } catch (error) {
-      console.error('Error banning user:', error);
+    } catch (_error) {
       toast.error('Error banning user', { id: toastId });
     }
   };
@@ -330,7 +329,9 @@ export default function UserDetails() {
     if (!user) return;
 
     if (!adminPluginEnabled) {
-      toast.error('Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration to use unban functionality.');
+      toast.error(
+        'Admin plugin is not enabled. Please enable the admin plugin in your Better Auth configuration to use unban functionality.'
+      );
       return;
     }
 
@@ -340,7 +341,7 @@ export default function UserDetails() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: userId
+          userId: userId,
         }),
       });
       const result = await response.json();
@@ -351,19 +352,23 @@ export default function UserDetails() {
         fetchUserDetails();
       } else {
         if (response.status === 403) {
-          toast.error('You do not have permission to unban users. Admin role required.', { id: toastId });
+          toast.error('You do not have permission to unban users. Admin role required.', {
+            id: toastId,
+          });
         } else if (result.adminPluginEnabled && result.instructions) {
-          toast.error(`${result.error}`, { 
+          toast.error(`${result.error}`, {
             id: toastId,
             duration: 6000,
-            description: `Use: ${result.instructions.example}`
+            description: `Use: ${result.instructions.example}`,
           });
         } else {
-          toast.error(`Error unbanning user: ${result.error || result.message || 'Unknown error'}`, { id: toastId });
+          toast.error(
+            `Error unbanning user: ${result.error || result.message || 'Unknown error'}`,
+            { id: toastId }
+          );
         }
       }
-    } catch (error) {
-      console.error('Error unbanning user:', error);
+    } catch (_error) {
       toast.error('Error unbanning user', { id: toastId });
     }
   };
@@ -383,8 +388,7 @@ export default function UserDetails() {
       } else {
         toast.error(`Error removing user: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error removing user from organization:', error);
+    } catch (_error) {
       toast.error('Error removing user from organization', { id: toastId });
     }
   };
@@ -404,8 +408,7 @@ export default function UserDetails() {
       } else {
         toast.error(`Error removing user: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error removing user from team:', error);
+    } catch (_error) {
       toast.error('Error removing user from team', { id: toastId });
     }
   };
@@ -425,8 +428,7 @@ export default function UserDetails() {
       } else {
         toast.error(`Error deleting session: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error deleting session:', error);
+    } catch (_error) {
       toast.error('Error deleting session', { id: toastId });
     }
   };
@@ -631,7 +633,8 @@ export default function UserDetails() {
               )}
               {!adminPluginEnabled && (
                 <p className="text-xs text-yellow-400 mt-1">
-                  Admin plugin required for ban/unban functionality. Please enable the admin plugin in your Better Auth configuration.
+                  Admin plugin required for ban/unban functionality. Please enable the admin plugin
+                  in your Better Auth configuration.
                 </p>
               )}
             </div>
@@ -711,9 +714,7 @@ export default function UserDetails() {
                         {user.banned ? 'Banned' : 'Active'}
                       </Badge>
                       {user.banned && user.banReason && (
-                        <div className="mt-2 text-sm text-red-400">
-                          Reason: {user.banReason}
-                        </div>
+                        <div className="mt-2 text-sm text-red-400">Reason: {user.banReason}</div>
                       )}
                       {user.banned && user.banExpires && (
                         <div className="mt-1 text-sm text-yellow-400">
@@ -1040,10 +1041,12 @@ export default function UserDetails() {
             <p className="text-gray-400 mb-4">
               Ban <strong>{user.name}</strong> from accessing the system.
             </p>
-            
+
             <div className="space-y-4 mb-6">
               <div>
-                <Label htmlFor="banReason" className="text-white">Ban Reason</Label>
+                <Label htmlFor="banReason" className="text-white">
+                  Ban Reason
+                </Label>
                 <Input
                   id="banReason"
                   value={banReason}
@@ -1052,14 +1055,18 @@ export default function UserDetails() {
                   className="bg-black border border-dashed border-white/20 text-white rounded-none"
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="banExpires" className="text-white">Ban Duration (seconds)</Label>
+                <Label htmlFor="banExpires" className="text-white">
+                  Ban Duration (seconds)
+                </Label>
                 <Input
                   id="banExpires"
                   type="number"
                   value={banExpiresIn || ''}
-                  onChange={(e) => setBanExpiresIn(e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setBanExpiresIn(e.target.value ? Number(e.target.value) : undefined)
+                  }
                   placeholder="Leave empty for permanent ban"
                   className="bg-black border border-dashed border-white/20 text-white rounded-none"
                 />
@@ -1068,7 +1075,7 @@ export default function UserDetails() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
@@ -1183,7 +1190,8 @@ export default function UserDetails() {
               <Button
                 onClick={() => {
                   const count = parseInt(
-                    (document.getElementById('session-count') as HTMLInputElement)?.value || '3'
+                    (document.getElementById('session-count') as HTMLInputElement)?.value || '3',
+                    10
                   );
                   handleSeedSessions(count);
                 }}

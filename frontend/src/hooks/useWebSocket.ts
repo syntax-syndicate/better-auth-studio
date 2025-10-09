@@ -16,12 +16,9 @@ export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
       try {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}`;
-
-        console.log('🔌 Attempting to connect to WebSocket:', wsUrl);
         wsRef.current = new WebSocket(wsUrl);
 
         wsRef.current.onopen = () => {
-          console.log('✅ WebSocket connected successfully');
           reconnectAttempts.current = 0;
           if (reconnectTimeoutRef.current) {
             clearTimeout(reconnectTimeoutRef.current);
@@ -32,20 +29,14 @@ export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
         wsRef.current.onmessage = (event) => {
           try {
             const message: WebSocketMessage = JSON.parse(event.data);
-            console.log('📨 WebSocket message received:', message);
             onMessage(message);
-          } catch (error) {
-            console.error('❌ Failed to parse WebSocket message:', error);
-          }
+          } catch (_error) {}
         };
 
         wsRef.current.onclose = (event) => {
-          console.log('🔌 WebSocket disconnected:', event.code, event.reason);
-
           // If connection was refused (code 1006) or server unavailable (code 1001),
           // it means WebSocket server is not running (normal mode)
           if (event.code === 1006 || event.code === 1001) {
-            console.log('ℹ️  WebSocket server not available (running in normal mode)');
             return;
           }
 
@@ -53,24 +44,16 @@ export function useWebSocket(onMessage: (message: WebSocketMessage) => void) {
           if (reconnectAttempts.current < maxReconnectAttempts) {
             reconnectAttempts.current++;
             const delay = Math.min(1000 * 2 ** reconnectAttempts.current, 10000);
-            console.log(
-              `🔄 Attempting to reconnect in ${delay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`
-            );
 
             reconnectTimeoutRef.current = setTimeout(() => {
               connect();
             }, delay);
           } else {
-            console.log('❌ Max reconnection attempts reached');
           }
         };
 
-        wsRef.current.onerror = (error) => {
-          console.error('❌ WebSocket error:', error);
-        };
-      } catch (error) {
-        console.error('❌ Failed to connect WebSocket:', error);
-      }
+        wsRef.current.onerror = (_error) => {};
+      } catch (_error) {}
     };
 
     connect();

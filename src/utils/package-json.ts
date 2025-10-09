@@ -1,6 +1,6 @@
-import { existsSync, readFileSync } from 'fs';
-import { join, dirname, resolve } from 'path';
-import { createRequire } from 'module';
+import { existsSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join, resolve } from 'node:path';
 
 /**
  * Find the project root by looking for package.json files up the directory tree
@@ -10,7 +10,7 @@ import { createRequire } from 'module';
 function findProjectRoot(startDir: string): string {
   let currentDir = resolve(startDir);
   const root = resolve('/');
-  
+
   while (currentDir !== root) {
     const packageJsonPath = join(currentDir, 'package.json');
     if (existsSync(packageJsonPath)) {
@@ -27,9 +27,12 @@ function findProjectRoot(startDir: string): string {
  * @param cwd - The current working directory to search from (defaults to process.cwd())
  * @returns The version string if found, undefined otherwise
  */
-export async function getPackageVersion(packageName: string, cwd?: string): Promise<string | undefined> {
+export async function getPackageVersion(
+  packageName: string,
+  cwd?: string
+): Promise<string | undefined> {
   const searchDir = cwd || process.cwd();
-  
+
   try {
     const projectRoot = findProjectRoot(searchDir);
     const packageJsonPath = join(searchDir, 'package.json');
@@ -38,33 +41,32 @@ export async function getPackageVersion(packageName: string, cwd?: string): Prom
       if (packageJson.dependencies?.[packageName]) {
         return packageJson.dependencies[packageName].replace(/[\^~]/, '');
       }
-      
+
       if (packageJson.devDependencies?.[packageName]) {
         return packageJson.devDependencies[packageName].replace(/[\^~]/, '');
       }
-      
+
       if (packageJson.peerDependencies?.[packageName]) {
         return packageJson.peerDependencies[packageName].replace(/[\^~]/, '');
       }
     }
-    
+
     try {
       const require = createRequire(import.meta.url);
       const packagePath = require.resolve(`${packageName}/package.json`, {
-        paths: [projectRoot]
+        paths: [projectRoot],
       });
-      
+
       if (existsSync(packagePath)) {
         const packageJson = JSON.parse(readFileSync(packagePath, 'utf-8'));
         return packageJson.version;
       }
-    } catch (resolveError: any) {
+    } catch (_resolveError: any) {
       // Only log unexpected errors, not MODULE_NOT_FOUND which is expected
     }
-    
+
     return undefined;
-  } catch (error) {
-    console.warn(`Failed to get version for package ${packageName}:`, error);
+  } catch (_error) {
     return undefined;
   }
 }

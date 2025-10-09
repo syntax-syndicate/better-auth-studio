@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs');
+const path = require('node:path');
 
 // Comprehensive IP ranges covering most of the internet
 const IP_RANGES = [
@@ -373,7 +373,7 @@ const IP_RANGES = [
 
 // Convert IP to number for range checking
 function ipToNumber(ip) {
-  return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part), 0) >>> 0;
+  return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part, 10), 0) >>> 0;
 }
 
 // Check if IP is in range
@@ -410,8 +410,6 @@ function findLocationForIP(ip) {
 
 // Generate a simple database file (JSON format for now)
 function generateDatabase() {
-  console.log('🌍 Generating comprehensive IP geolocation database...');
-
   const database = {
     version: '1.0.0',
     generated: new Date().toISOString(),
@@ -432,19 +430,11 @@ function generateDatabase() {
 
   fs.writeFileSync(outputPath, JSON.stringify(database, null, 2));
 
-  console.log(`✅ Database generated successfully!`);
-  console.log(`📁 Location: ${outputPath}`);
-  console.log(`📊 Countries: ${database.countries}`);
-  console.log(`📊 IP Ranges: ${database.totalRanges}`);
-  console.log(`📊 Coverage: Major IP ranges worldwide`);
-
   return outputPath;
 }
 
 // Test the database with some sample IPs
 function testDatabase() {
-  console.log('\n🧪 Testing database with sample IPs...');
-
   const testIPs = [
     '8.8.8.8', // Google DNS (US)
     '1.1.1.1', // Cloudflare (US)
@@ -459,10 +449,7 @@ function testDatabase() {
   ];
 
   testIPs.forEach((ip) => {
-    const location = findLocationForIP(ip);
-    console.log(
-      `📍 ${ip} → ${location.city}, ${location.country} ${location.countryCode ? `(${location.countryCode})` : ''}`
-    );
+    const _location = findLocationForIP(ip);
   });
 }
 

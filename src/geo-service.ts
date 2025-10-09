@@ -1,7 +1,7 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import maxmind, { type CityResponse, type Reader } from 'maxmind';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,22 +43,16 @@ function loadDefaultDatabase(): void {
     if (existsSync(defaultDbPath)) {
       const dbContent = readFileSync(defaultDbPath, 'utf-8');
       defaultDatabase = JSON.parse(dbContent);
-      console.log(
-        `✅ Default geolocation database loaded (${defaultDatabase?.countries} countries, ${defaultDatabase?.totalRanges} IP ranges)`
-      );
     } else {
-      console.log('⚠️  Default geolocation database not found, using basic fallback');
     }
-  } catch (error) {
-    console.error('❌ Failed to load default geolocation database:', error);
-  }
+  } catch (_error) {}
 }
 
 export async function initializeGeoService(): Promise<void> {
   try {
     const dbPath = geoDbPath || './data/GeoLite2-City.mmdb';
     lookup = await maxmind.open<CityResponse>(dbPath);
-  } catch (error) {
+  } catch (_error) {
     lookup = null;
     loadDefaultDatabase();
   }
@@ -76,9 +70,7 @@ export function resolveIPLocation(ipAddress: string): LocationData | null {
           region: result.subdivisions?.[0]?.names?.en || 'Unknown',
         };
       }
-    } catch (error) {
-      console.error('MaxMind lookup failed:', error);
-    }
+    } catch (_error) {}
   }
 
   if (defaultDatabase) {
@@ -96,7 +88,7 @@ function findLocationInDefaultDatabase(ipAddress: string): LocationData | null {
   if (!defaultDatabase) return null;
 
   const ipToNumber = (ip: string): number => {
-    return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part), 0) >>> 0;
+    return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part, 10), 0) >>> 0;
   };
 
   const isIPInRange = (ip: string, minIP: string, maxIP: string): boolean => {
@@ -227,7 +219,10 @@ function resolveIPFromRanges(ipAddress: string): LocationData | null {
   ];
 
   const ipParts = ipAddress.split('.').map(Number);
-  if (ipParts.length !== 4 || ipParts.some((part) => isNaN(part) || part < 0 || part > 255)) {
+  if (
+    ipParts.length !== 4 ||
+    ipParts.some((part) => Number.isNaN(part) || part < 0 || part > 255)
+  ) {
     return null;
   }
 
@@ -254,7 +249,7 @@ function resolveIPFromRanges(ipAddress: string): LocationData | null {
 
 function isIPInRange(ip: string, minIP: string, maxIP: string): boolean {
   const ipToNumber = (ip: string): number => {
-    return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part), 0) >>> 0;
+    return ip.split('.').reduce((acc, part) => (acc << 8) + parseInt(part, 10), 0) >>> 0;
   };
 
   const ipNum = ipToNumber(ip);

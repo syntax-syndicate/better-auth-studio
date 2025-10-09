@@ -1,12 +1,13 @@
 // @ts-expect-error
+
+import fs, { existsSync } from 'node:fs';
+import path from 'node:path';
 import babelPresetReact from '@babel/preset-react';
 // @ts-expect-error
 import babelPresetTypeScript from '@babel/preset-typescript';
 import type { BetterAuthOptions } from 'better-auth';
 import { BetterAuthError, logger } from 'better-auth';
 import { loadConfig } from 'c12';
-import fs, { existsSync, readFileSync } from 'fs';
-import path, { dirname, join } from 'path';
 import { addSvelteKitEnvModules } from './add-svelte-kit-env-modules.js';
 import { getTsconfigInfo } from './get-tsconfig-info.js';
 
@@ -202,8 +203,7 @@ function getPathAliases(cwd: string): Record<string, string> | null {
     const result = getPathAliasesRecursive(tsConfigPath);
     addSvelteKitEnvModules(result);
     return result;
-  } catch (error) {
-    console.error(error);
+  } catch (_error) {
     throw new BetterAuthError('Error parsing tsconfig.json');
   }
 }
@@ -309,7 +309,6 @@ export async function getConfig({
                 );
               }
               logger.error("[#better-auth]: Couldn't read your auth config.");
-              console.log('');
               logger.info(
                 '[#better-auth]: Make sure to default export your auth instance or to export as a variable named auth.'
               );
@@ -374,7 +373,7 @@ export async function getConfig({
 export { possiblePaths };
 
 // Legacy function for backward compatibility - kept for routes.ts
-export function extractBetterAuthConfig(content: string): AuthConfig | null {
+export function extractBetterAuthConfig(_content: string): AuthConfig | null {
   // This is a simplified version that returns null
   // The actual config loading is now handled by the better-auth getConfig function
   return null;
@@ -423,8 +422,7 @@ export async function findAuthConfig(configPath?: string): Promise<AuthConfig | 
     }
 
     return null;
-  } catch (error) {
-    console.warn(`Failed to load config:`, error);
+  } catch (_error) {
     return null;
   }
 }

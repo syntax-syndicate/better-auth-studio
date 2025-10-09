@@ -22,9 +22,7 @@ export function CodeBlock({
       await navigator.clipboard.writeText(code);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Failed to copy code:', err);
-    }
+    } catch (_err) {}
   };
 
   return (

@@ -116,12 +116,11 @@ export default function DatabaseVisualizer() {
         setAvailablePlugins(enabledPlugins);
         setSelectedPlugins(enabledPlugins.map((p: any) => p.name));
       }
-    } catch (err) {
-      console.error('Error fetching enabled plugins:', err);
+    } catch (_err) {
       setAvailablePlugins(AVAILABLE_PLUGINS);
       setSelectedPlugins(['organization']);
     }
-  }, []);
+  }, [getPluginColor]);
 
   const getPluginColor = (pluginId: string): string => {
     const plugin = AVAILABLE_PLUGINS.find((p) => p.name === pluginId);
@@ -140,9 +139,8 @@ export default function DatabaseVisualizer() {
       } else {
         setError(data.error || 'Failed to fetch schema');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Failed to fetch database schema');
-      console.error('Error fetching schema:', err);
     } finally {
       setLoading(false);
     }
@@ -243,7 +241,7 @@ export default function DatabaseVisualizer() {
 
     setNodes(newNodes);
     setEdges(newEdges);
-  }, [schema, selectedPlugins, setNodes, setEdges]);
+  }, [schema, selectedPlugins, setNodes, setEdges, getPluginForField]);
 
   const getPluginForField = (tableName: string, _fieldName: string, plugins: string[]): string => {
     if (
@@ -308,9 +306,7 @@ export default function DatabaseVisualizer() {
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             <Database className="w-8 h-8 text-white" />
-            <h1 className="text-2xl font-normal text-white">
-              Schema Visualizer
-            </h1>
+            <h1 className="text-2xl font-normal text-white">Schema Visualizer</h1>
           </div>
 
           <div className="flex items-center space-x-4">

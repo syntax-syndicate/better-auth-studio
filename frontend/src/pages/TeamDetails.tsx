@@ -75,7 +75,7 @@ export default function TeamDetails() {
       fetchTeam();
       fetchTeamMembers();
     }
-  }, [teamId]);
+  }, [teamId, fetchTeam, fetchTeamMembers]);
 
   const fetchTeam = async () => {
     try {
@@ -92,8 +92,7 @@ export default function TeamDetails() {
       } else {
         toast.error('Team not found');
       }
-    } catch (error) {
-      console.error('Failed to fetch team:', error);
+    } catch (_error) {
       toast.error('Failed to load team');
     } finally {
       setLoading(false);
@@ -108,8 +107,7 @@ export default function TeamDetails() {
       if (data.success) {
         setMembers(data.members || []);
       }
-    } catch (error) {
-      console.error('Failed to fetch team members:', error);
+    } catch (_error) {
       toast.error('Failed to load team members');
     }
   };
@@ -123,8 +121,7 @@ export default function TeamDetails() {
       const available = (data.users || []).filter((user: User) => !memberUserIds.includes(user.id));
 
       setAvailableUsers(available);
-    } catch (error) {
-      console.error('Failed to fetch available users:', error);
+    } catch (_error) {
       toast.error('Failed to load users');
     }
   };
@@ -153,8 +150,7 @@ export default function TeamDetails() {
       } else {
         toast.error(`Error updating team: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error updating team:', error);
+    } catch (_error) {
       toast.error('Error updating team', { id: toastId });
     }
   };
@@ -185,8 +181,7 @@ export default function TeamDetails() {
       } else {
         toast.error(`Error adding members: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error adding members:', error);
+    } catch (_error) {
       toast.error('Error adding members', { id: toastId });
     }
   };
@@ -208,8 +203,7 @@ export default function TeamDetails() {
       } else {
         toast.error(`Error removing member: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error removing team member:', error);
+    } catch (_error) {
       toast.error('Error removing team member', { id: toastId });
     }
   };
@@ -404,8 +398,7 @@ export default function TeamDetails() {
                 <div>
                   <p className="text-2xl text-white font-light">
                     {Math.ceil(
-                      (new Date().getTime() - new Date(team.createdAt).getTime()) /
-                        (1000 * 60 * 60 * 24)
+                      (Date.now() - new Date(team.createdAt).getTime()) / (1000 * 60 * 60 * 24)
                     )}
                   </p>
                   <p className="text-sm text-gray-400">Days Active</p>

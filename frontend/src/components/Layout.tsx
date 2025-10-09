@@ -36,9 +36,7 @@ export default function Layout({ children }: LayoutProps) {
         if (data.studio?.version) {
           setStudioVersion(`v${data.studio.version}`);
         }
-      } catch (error) {
-        console.warn('Failed to fetch studio version:', error);
-      }
+      } catch (_error) {}
     };
 
     fetchVersion();
@@ -46,7 +44,7 @@ export default function Layout({ children }: LayoutProps) {
 
   const formatCount = (count: number): string => {
     if (count >= 1000) {
-      return (count / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+      return `${(count / 1000).toFixed(1).replace(/\.0$/, '')}k`;
     }
     return count.toString();
   };

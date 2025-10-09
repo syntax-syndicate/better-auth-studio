@@ -1,8 +1,6 @@
-import { existsSync, readFileSync } from 'fs';
+import { existsSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { createJiti } from 'jiti';
-import { dirname, join } from 'path';
-import { pathToFileURL } from 'url';
-import { resolveIPLocation } from './geo-service.js';
 
 export interface AuthAdapter {
   createUser: (data: any) => Promise<any>;
@@ -23,7 +21,7 @@ export interface AuthAdapter {
   }) => Promise<any[]>;
 }
 
-const authInstance: any = null;
+const _authInstance: any = null;
 let authAdapter: AuthAdapter | null = null;
 
 export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter | null> {
@@ -46,8 +44,7 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
         interopDefault: true,
       });
       authModule = await jitiInstance.import(importPath);
-    } catch (error: any) {
-      console.warn('Failed to import auth module in adapter:', error.message);
+    } catch (_error: any) {
       return null;
     }
 
@@ -57,7 +54,7 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
       return null;
     }
 
-    if (auth.options && auth.options._content) {
+    if (auth.options?._content) {
       return null;
     }
 
@@ -65,7 +62,7 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
     try {
       const context = await auth.$context;
       adapter = context?.adapter;
-    } catch (error: any) {
+    } catch (_error: any) {
       adapter = auth.adapter;
     }
 
@@ -75,102 +72,75 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
 
     authAdapter = {
       createUser: async (data: any) => {
-        try {
-          const user = await adapter.create({
-            model: 'user',
-            data: {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              emailVerified: false,
-              name: data.name,
-              email: data.email?.toLowerCase(),
-              image: data.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
-            },
-          });
+        const user = await adapter.create({
+          model: 'user',
+          data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            emailVerified: false,
+            name: data.name,
+            email: data.email?.toLowerCase(),
+            image: data.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
+          },
+        });
 
-          if (data.password) {
-            try {
-              await adapter.create({
-                model: 'account',
-                data: {
-                  userId: user.id,
-                  providerId: 'credential',
-                  accountId: user.id,
-                  password: data.password,
-                  createdAt: new Date(),
-                  updatedAt: new Date(),
-                },
-              });
-            } catch (accountError) {
-              console.error('Error creating credential account:', accountError);
-            }
-          }
-
-          return user;
-        } catch (error) {
-          console.error('Error creating user:', error);
-          throw error;
+        if (data.password) {
+          try {
+            await adapter.create({
+              model: 'account',
+              data: {
+                userId: user.id,
+                providerId: 'credential',
+                accountId: user.id,
+                password: data.password,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+              },
+            });
+          } catch (_accountError) {}
         }
+
+        return user;
       },
       createSession: async (data: any) => {
-        try {
-          return await adapter.create({
-            model: 'session',
-            data: {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              ...data,
-            },
-          });
-        } catch (error) {
-          console.error('Error creating session:', error);
-          throw error;
-        }
+        return await adapter.create({
+          model: 'session',
+          data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...data,
+          },
+        });
       },
       createAccount: async (data: any) => {
-        try {
-          return await adapter.create({
-            model: 'account',
-            data: {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              ...data,
-            },
-          });
-        } catch (error) {
-          console.error('Error creating account:', error);
-          throw error;
-        }
+        return await adapter.create({
+          model: 'account',
+          data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...data,
+          },
+        });
       },
       createVerification: async (data: any) => {
-        try {
-          return await adapter.create({
-            model: 'verification',
-            data: {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              ...data,
-            },
-          });
-        } catch (error) {
-          console.error('Error creating verification:', error);
-          throw error;
-        }
+        return await adapter.create({
+          model: 'verification',
+          data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...data,
+          },
+        });
       },
       createOrganization: async (data: any) => {
-        try {
-          return await adapter.create({
-            model: 'organization',
-            data: {
-              createdAt: new Date(),
-              updatedAt: new Date(),
-              ...data,
-            },
-          });
-        } catch (error) {
-          console.error('Error creating organization:', error);
-          throw error;
-        }
+        return await adapter.create({
+          model: 'organization',
+          data: {
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            ...data,
+          },
+        });
       },
       getUsers: async () => {
         try {
@@ -183,8 +153,7 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
             return users || [];
           }
           return [];
-        } catch (error) {
-          console.error('Error getting users:', error);
+        } catch (_error) {
           return [];
         }
       },
@@ -199,8 +168,7 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
             return sessions || [];
           }
           return [];
-        } catch (error) {
-          console.error('Error getting sessions:', error);
+        } catch (_error) {
           return [];
         }
       },
@@ -215,16 +183,14 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
             return await adapter.findMany(options);
           }
           return [];
-        } catch (error) {
-          console.error('Error using findMany:', error);
+        } catch (_error) {
           return [];
         }
       },
     };
 
     return { ...adapter, ...authAdapter };
-  } catch (error) {
-    console.error('Error loading auth adapter:', error);
+  } catch (_error) {
     return null;
   }
 }
@@ -286,7 +252,7 @@ export async function createMockUser(adapter: AuthAdapter, index: number) {
 }
 
 // Random IP address generators for different countries
-const countryIPRanges = [
+const _countryIPRanges = [
   // United States
   {
     country: 'United States',
@@ -474,7 +440,7 @@ export async function createMockAccount(adapter: AuthAdapter, userId: string, in
   return await adapter.createAccount(accountData);
 }
 
-export async function createMockVerification(adapter: AuthAdapter, userId: string, index: number) {
+export async function createMockVerification(adapter: AuthAdapter, _userId: string, index: number) {
   const verificationData = {
     identifier: `user${index}@example.com`,
     token: `verification_token_${index}_${Date.now()}`,

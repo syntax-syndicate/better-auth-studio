@@ -1,5 +1,5 @@
-import fs from 'fs';
-import path from 'path';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export interface TsConfig {
   compilerOptions?: {
@@ -23,8 +23,7 @@ export function getTsconfigInfo(cwd?: string, tsconfigPath?: string): TsConfig {
   try {
     const content = fs.readFileSync(configPath, 'utf-8');
     return JSON.parse(content);
-  } catch (error) {
-    console.warn(`Failed to parse tsconfig.json at ${configPath}:`, error);
+  } catch (_error) {
     return {};
   }
 }

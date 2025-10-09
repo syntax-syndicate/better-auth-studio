@@ -179,7 +179,6 @@ export default function Settings() {
   // WebSocket hook to listen for config changes
   useWebSocket((message) => {
     if (message.type === 'config_changed') {
-      console.log('🔄 Config changed, refreshing data...');
       // Add a small delay to ensure the server is fully reloaded
       setTimeout(() => {
         fetchConfig();
@@ -188,7 +187,6 @@ export default function Settings() {
         fetchDatabaseInfo();
       }, 500);
     } else if (message.type === 'connected') {
-      console.log('✅ Connected to Better Auth Studio WebSocket');
     }
   });
 
@@ -197,7 +195,7 @@ export default function Settings() {
     fetchSystemInfo();
     fetchPlugins();
     fetchDatabaseInfo();
-  }, []);
+  }, [fetchConfig, fetchDatabaseInfo, fetchPlugins, fetchSystemInfo]);
 
   const fetchConfig = async () => {
     try {
@@ -207,8 +205,7 @@ export default function Settings() {
         setStudioVersion(`v${data.studio.version}`);
       }
       setConfig(data);
-    } catch (error) {
-      console.error('Failed to fetch config:', error);
+    } catch (_error) {
     } finally {
       setLoading(false);
     }
@@ -226,8 +223,7 @@ export default function Settings() {
           uptime: '2h 15m',
         }
       );
-    } catch (error) {
-      console.error('Failed to fetch system info:', error);
+    } catch (_error) {
       setSystemInfo({
         studioVersion: studioVersion || 'v1.0.0',
         nodeVersion: 'v18.0.0',
@@ -242,8 +238,7 @@ export default function Settings() {
       const response = await fetch('/api/plugins');
       const data = await response.json();
       setPlugins(data);
-    } catch (error) {
-      console.error('Failed to fetch plugins:', error);
+    } catch (_error) {
       setPlugins({
         plugins: [],
         configPath: null,
@@ -258,8 +253,7 @@ export default function Settings() {
       const response = await fetch('/api/db');
       const data = await response.json();
       setDatabaseInfo(data);
-    } catch (error) {
-      console.error('Failed to fetch database info:', error);
+    } catch (_error) {
       setDatabaseInfo({
         success: false,
         name: 'unknown',
@@ -430,7 +424,6 @@ export default function Settings() {
             <CardTitle className="text-white flex items-center space-x-2">
               <Database className="w-5 h-5 text-white" />
               <span>Database</span>
-              
             </CardTitle>
             <CardDescription>Database connection and configuration</CardDescription>
           </CardHeader>
@@ -442,38 +435,36 @@ export default function Settings() {
                 <Database className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-medium text-white">
-                    {databaseInfo?.displayName || 
-                     (config?.database?.type &&
-                       config?.database?.type.charAt(0).toUpperCase() +
-                         config?.database?.type.slice(1)) ||
-                     'Unknown'}
+                    {databaseInfo?.displayName ||
+                      (config?.database?.type &&
+                        config?.database?.type.charAt(0).toUpperCase() +
+                          config?.database?.type.slice(1)) ||
+                      'Unknown'}
                   </p>
                   <p className="text-xs text-gray-400">Database Type</p>
                 </div>
               </div>
-              {(databaseInfo?.name || config?.database?.type) && 
-               getConnectionStatus(databaseInfo?.name || config?.database?.type || '')}
+              {(databaseInfo?.name || config?.database?.type) &&
+                getConnectionStatus(databaseInfo?.name || config?.database?.type || '')}
             </div>
 
-
-            {(databaseInfo?.dialect || config?.database?.dialect) && 
-             databaseInfo?.dialect !== 'unknown' && (
-              <div className="flex items-center justify-between p-4 px-5 border-b border-white/15">
-                <div className="flex items-center space-x-3">
-                  <Database className="w-5 h-5 text-white" />
-                  <div>
-                    <p className="text-sm font-medium text-white">Dialect</p>
-                    <p className="text-xs text-gray-400">Database dialect</p>
+            {(databaseInfo?.dialect || config?.database?.dialect) &&
+              databaseInfo?.dialect !== 'unknown' && (
+                <div className="flex items-center justify-between p-4 px-5 border-b border-white/15">
+                  <div className="flex items-center space-x-3">
+                    <Database className="w-5 h-5 text-white" />
+                    <div>
+                      <p className="text-sm font-medium text-white">Dialect</p>
+                      <p className="text-xs text-gray-400">Database dialect</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-white">
+                      {databaseInfo?.dialect || config?.database?.dialect}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-white">
-                    {databaseInfo?.dialect || config?.database?.dialect}
-                  </p>
-                </div>
-              </div>
-            )}
-
+              )}
 
             {config?.database?.url && (
               <div className="flex items-center justify-between p-4 px-5 border-b border-white/15">

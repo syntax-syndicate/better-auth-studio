@@ -3,8 +3,6 @@
 const { resolveIPLocation, initializeGeoService } = require('../dist/geo-service.js');
 
 async function testDefaultDatabase() {
-  console.log('🧪 Testing default geolocation database...\n');
-
   // Initialize the geo service
   await initializeGeoService();
 
@@ -22,22 +20,13 @@ async function testDefaultDatabase() {
     '192.168.1.1', // Private IP (should fallback)
   ];
 
-  console.log('📍 IP Geolocation Test Results:');
-  console.log('================================');
-
   for (const ip of testIPs) {
     const location = resolveIPLocation(ip);
     if (location) {
-      const flag = location.countryCode ? getCountryFlag(location.countryCode) : '🌍';
-      console.log(
-        `${flag} ${ip.padEnd(15)} → ${location.city}, ${location.country} (${location.countryCode})`
-      );
+      const _flag = location.countryCode ? getCountryFlag(location.countryCode) : '🌍';
     } else {
-      console.log(`❌ ${ip.padEnd(15)} → Location not found`);
     }
   }
-
-  console.log('\n✅ Default database test completed!');
 }
 
 function getCountryFlag(countryCode) {

@@ -1,10 +1,9 @@
-import chalk from 'chalk';
+import { createServer } from 'node:http';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import cors from 'cors';
 import express from 'express';
-import { createServer } from 'http';
 import open from 'open';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
 import { WebSocketServer } from 'ws';
 import type { AuthConfig } from './config.js';
 import { createRoutes } from './routes.js';
@@ -44,8 +43,6 @@ export async function startStudio(options: StudioOptions) {
     wss = new WebSocketServer({ server });
 
     wss.on('connection', (ws) => {
-      console.log(chalk.gray('🔌 WebSocket client connected (watch mode)'));
-
       const heartbeat = setInterval(() => {
         if (ws.readyState === ws.OPEN) {
           ws.ping();
@@ -53,12 +50,10 @@ export async function startStudio(options: StudioOptions) {
       }, 30000);
 
       ws.on('close', () => {
-        console.log(chalk.gray('🔌 WebSocket client disconnected'));
         clearInterval(heartbeat);
       });
 
-      ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+      ws.on('error', (_error) => {
         clearInterval(heartbeat);
       });
 
@@ -76,31 +71,22 @@ export async function startStudio(options: StudioOptions) {
 
   app.use(express.static(join(__dirname, '../public')));
 
-  app.get('*', (req, res) => {
+  app.get('*', (_req, res) => {
     res.sendFile(join(__dirname, '../public/index.html'));
   });
 
   server.listen(port, host, () => {
     const url = `http://${host}:${port}`;
-    console.log(chalk.green('✅ Better Auth Studio is running!'));
-    console.log(chalk.blue(`🌐 Dashboard: ${url}`));
-    console.log(chalk.gray(`📊 API: ${url}/api`));
-    console.log(chalk.gray(`🔌 WebSocket: ws://${host}:${port}`));
-    console.log(chalk.yellow('\nPress Ctrl+C to stop the server\n'));
 
     if (openBrowser) {
       setTimeout(() => {
-        open(url).catch(() => {
-          console.log(chalk.yellow('Could not open browser automatically. Please visit:'), url);
-        });
+        open(url).catch(() => {});
       }, 1000);
     }
   });
 
   process.on('SIGINT', () => {
-    console.log(chalk.yellow('\n🛑 Shutting down Better Auth Studio...'));
     server.close(() => {
-      console.log(chalk.green('✅ Server stopped'));
       process.exit(0);
     });
   });

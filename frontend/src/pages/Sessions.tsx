@@ -44,15 +44,14 @@ export default function Sessions() {
 
   useEffect(() => {
     fetchSessions();
-  }, []);
+  }, [fetchSessions]);
 
   const fetchSessions = async () => {
     try {
       const response = await fetch('/api/sessions');
       const data = await response.json();
       setSessions(data.sessions || []);
-    } catch (error) {
-      console.error('Failed to fetch sessions:', error);
+    } catch (_error) {
     } finally {
       setLoading(false);
     }
@@ -237,18 +236,15 @@ export default function Sessions() {
     setShowDeleteModal(true);
   };
 
-  const handleCreateSession = async (sessionData: any) => {
-    console.log('Creating session:', sessionData);
+  const handleCreateSession = async (_sessionData: any) => {
     setShowCreateModal(false);
   };
 
-  const handleUpdateSession = async (sessionData: any) => {
-    console.log('Updating session:', sessionData);
+  const handleUpdateSession = async (_sessionData: any) => {
     setShowEditModal(false);
   };
 
   const handleDeleteSession = async () => {
-    console.log('Deleting session:', selectedSession?.id);
     setShowDeleteModal(false);
   };
 
@@ -449,7 +445,9 @@ export default function Sessions() {
                   <Button
                     onClick={() => {
                       const count = parseInt(
-                        (document.getElementById('session-count') as HTMLInputElement)?.value || '5'
+                        (document.getElementById('session-count') as HTMLInputElement)?.value ||
+                          '5',
+                        10
                       );
                       handleSeedSessions(count);
                     }}
@@ -494,7 +492,9 @@ export default function Sessions() {
                   <Button
                     onClick={() => {
                       const count = parseInt(
-                        (document.getElementById('account-count') as HTMLInputElement)?.value || '5'
+                        (document.getElementById('account-count') as HTMLInputElement)?.value ||
+                          '5',
+                        10
                       );
                       handleSeedAccounts(count);
                     }}

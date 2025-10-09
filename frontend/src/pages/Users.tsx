@@ -17,8 +17,8 @@ import {
   X,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import type { DateRange } from 'react-day-picker';
 import { useNavigate } from 'react-router-dom';
-import { DateRange } from 'react-day-picker';
 import { toast } from 'sonner';
 import { Terminal } from '../components/Terminal';
 import { Button } from '../components/ui/button';
@@ -26,12 +26,7 @@ import { DateRangePicker } from '../components/ui/date-range-picker';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Pagination } from '../components/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '../components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '../components/ui/select';
 import { useCounts } from '../contexts/CountsContext';
 
 interface User {
@@ -99,15 +94,14 @@ export default function Users() {
 
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, [actionMenuOpen]);
+  }, [actionMenuOpen, checkAdminPlugin, fetchUsers]);
 
   const fetchUsers = async () => {
     try {
       const response = await fetch('/api/users?limit=10000');
       const data = await response.json();
       setUsers(data.users || []);
-    } catch (error) {
-      console.error('Failed to fetch users:', error);
+    } catch (_error) {
     } finally {
       setLoading(false);
     }
@@ -118,8 +112,7 @@ export default function Users() {
       const response = await fetch('/api/admin/status');
       const data = await response.json();
       setAdminPluginEnabled(data.enabled);
-    } catch (error) {
-      console.error('Failed to check admin plugin:', error);
+    } catch (_error) {
       setAdminPluginEnabled(false);
     }
   };
@@ -253,8 +246,7 @@ export default function Users() {
       } else {
         toast.error(`Error creating user: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error creating user:', error);
+    } catch (_error) {
       toast.error('Error creating user', { id: toastId });
     }
   };
@@ -292,8 +284,7 @@ export default function Users() {
       } else {
         toast.error(`Error updating user: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error updating user:', error);
+    } catch (_error) {
       toast.error('Error updating user', { id: toastId });
     }
   };
@@ -323,8 +314,7 @@ export default function Users() {
       } else {
         toast.error(`Error deleting user: ${result.error || 'Unknown error'}`, { id: toastId });
       }
-    } catch (error) {
-      console.error('Error deleting user:', error);
+    } catch (_error) {
       toast.error('Error deleting user', { id: toastId });
     }
   };
@@ -345,7 +335,7 @@ export default function Users() {
         body: JSON.stringify({
           userId: selectedUser.id,
           banReason: banReason || 'No reason provided',
-          banExpiresIn: banExpiresIn
+          banExpiresIn: banExpiresIn,
         }),
       });
       const result = await response.json();
@@ -359,10 +349,11 @@ export default function Users() {
         setActionMenuOpen(null);
         fetchUsers();
       } else {
-        toast.error(`Error banning user: ${result.error || result.message || 'Unknown error'}`, { id: toastId });
+        toast.error(`Error banning user: ${result.error || result.message || 'Unknown error'}`, {
+          id: toastId,
+        });
       }
-    } catch (error) {
-      console.error('Error banning user:', error);
+    } catch (_error) {
       toast.error('Error banning user', { id: toastId });
     }
   };
@@ -381,7 +372,7 @@ export default function Users() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          userId: selectedUser.id
+          userId: selectedUser.id,
         }),
       });
       const result = await response.json();
@@ -393,10 +384,11 @@ export default function Users() {
         setActionMenuOpen(null);
         fetchUsers();
       } else {
-        toast.error(`Error unbanning user: ${result.error || result.message || 'Unknown error'}`, { id: toastId });
+        toast.error(`Error unbanning user: ${result.error || result.message || 'Unknown error'}`, {
+          id: toastId,
+        });
       }
-    } catch (error) {
-      console.error('Error unbanning user:', error);
+    } catch (_error) {
       toast.error('Error unbanning user', { id: toastId });
     }
   };
@@ -412,7 +404,7 @@ export default function Users() {
       user.id,
       user.name || '',
       user.email || '',
-      user.emailVerified ? true : false,
+      !!user.emailVerified,
       new Date(user.createdAt).toLocaleString(),
       new Date(user.updatedAt).toLocaleString(),
     ]);
@@ -436,40 +428,36 @@ export default function Users() {
   };
 
   const addFilter = (filterType: string) => {
-    const exists = activeFilters.some(f => f.type === filterType);
+    const exists = activeFilters.some((f) => f.type === filterType);
     if (!exists) {
-      setActiveFilters(prev => [...prev, { type: filterType }]);
+      setActiveFilters((prev) => [...prev, { type: filterType }]);
       setCurrentPage(1);
     }
   };
 
   const removeFilter = (filterType: string) => {
-    setActiveFilters(prev => prev.filter(f => f.type !== filterType));
+    setActiveFilters((prev) => prev.filter((f) => f.type !== filterType));
     setCurrentPage(1);
   };
 
   const updateFilterValue = (filterType: string, value: any) => {
-    setActiveFilters(prev => prev.map(f => 
-      f.type === filterType ? { ...f, value } : f
-    ));
+    setActiveFilters((prev) => prev.map((f) => (f.type === filterType ? { ...f, value } : f)));
   };
 
   const updateFilterDateRange = (filterType: string, dateRange?: DateRange) => {
-    setActiveFilters(prev => prev.map(f => 
-      f.type === filterType ? { ...f, dateRange } : f
-    ));
+    setActiveFilters((prev) => prev.map((f) => (f.type === filterType ? { ...f, dateRange } : f)));
   };
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     if (activeFilters.length === 0) {
       return matchesSearch;
     }
 
-    const matchesFilters = activeFilters.every(filter => {
+    const matchesFilters = activeFilters.every((filter) => {
       switch (filter.type) {
         case 'emailVerified':
           if (filter.value === undefined) return true;
@@ -479,12 +467,13 @@ export default function Users() {
           return user.banned === (filter.value === 'true');
         case 'active':
           return user.banned !== true;
-        case 'createdAt':
+        case 'createdAt': {
           if (!filter.dateRange?.from && !filter.dateRange?.to) return true;
           const userDate = new Date(user.createdAt);
           if (filter.dateRange?.from && filter.dateRange.from > userDate) return false;
           if (filter.dateRange?.to && filter.dateRange.to < userDate) return false;
           return true;
+        }
         case 'role':
           if (!filter.value) return true;
           return user.role?.toLowerCase().includes(filter.value.toLowerCase());
@@ -492,11 +481,11 @@ export default function Users() {
           return true;
       }
     });
-    
+
     return matchesSearch && matchesFilters;
   });
 
-  const bannedCount = users.filter(u => u.banned).length;
+  const bannedCount = users.filter((u) => u.banned).length;
 
   const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
   const startIndex = (currentPage - 1) * usersPerPage;
@@ -580,25 +569,17 @@ export default function Users() {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {!activeFilters.some(f => f.type === 'emailVerified') && (
-                  <SelectItem value="emailVerified">
-                    Email Verified
-                  </SelectItem>
+                {!activeFilters.some((f) => f.type === 'emailVerified') && (
+                  <SelectItem value="emailVerified">Email Verified</SelectItem>
                 )}
-                {!activeFilters.some(f => f.type === 'banned') && (
-                  <SelectItem value="banned">
-                    Banned Status
-                  </SelectItem>
+                {!activeFilters.some((f) => f.type === 'banned') && (
+                  <SelectItem value="banned">Banned Status</SelectItem>
                 )}
-                {!activeFilters.some(f => f.type === 'createdAt') && (
-                  <SelectItem value="createdAt">
-                    Created Date
-                  </SelectItem>
+                {!activeFilters.some((f) => f.type === 'createdAt') && (
+                  <SelectItem value="createdAt">Created Date</SelectItem>
                 )}
-                {!activeFilters.some(f => f.type === 'role') && (
-                  <SelectItem value="role">
-                    Role
-                  </SelectItem>
+                {!activeFilters.some((f) => f.type === 'role') && (
+                  <SelectItem value="role">Role</SelectItem>
                 )}
               </SelectContent>
             </Select>
@@ -617,7 +598,7 @@ export default function Users() {
                 Clear all
               </button>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
               {activeFilters.map((filter) => (
                 <div
@@ -625,16 +606,22 @@ export default function Users() {
                   className="inline-flex items-center gap-2 px-3 py-2 bg-white/10 border border-white/20 rounded-sm"
                 >
                   <Filter className="w-3 h-3 text-white" />
-                  
+
                   {filter.type === 'emailVerified' && (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-white">Email Verified:</span>
-                      <Select 
-                        value={filter.value || ''} 
+                      <Select
+                        value={filter.value || ''}
                         onValueChange={(val) => updateFilterValue('emailVerified', val)}
                       >
                         <SelectTrigger className="h-7 w-24 text-xs">
-                          <span>{filter.value === 'true' ? 'True' : filter.value === 'false' ? 'False' : 'Select'}</span>
+                          <span>
+                            {filter.value === 'true'
+                              ? 'True'
+                              : filter.value === 'false'
+                                ? 'False'
+                                : 'Select'}
+                          </span>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="true">True</SelectItem>
@@ -647,12 +634,18 @@ export default function Users() {
                   {filter.type === 'banned' && (
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-white">Banned:</span>
-                      <Select 
-                        value={filter.value || ''} 
+                      <Select
+                        value={filter.value || ''}
                         onValueChange={(val) => updateFilterValue('banned', val)}
                       >
                         <SelectTrigger className="h-7 w-24 text-xs">
-                          <span>{filter.value === 'true' ? 'Yes' : filter.value === 'false' ? 'No' : 'Select'}</span>
+                          <span>
+                            {filter.value === 'true'
+                              ? 'Yes'
+                              : filter.value === 'false'
+                                ? 'No'
+                                : 'Select'}
+                          </span>
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="true">Yes</SelectItem>
@@ -752,9 +745,7 @@ export default function Users() {
                   <tr
                     key={user.id}
                     className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${
-                      user.banned 
-                        ? 'border-red-500/30 bg-red-500/5' 
-                        : 'border-white/5'
+                      user.banned ? 'border-red-500/30 bg-red-500/5' : 'border-white/5'
                     }`}
                     onClick={() => navigate(`/users/${user.id}`)}
                   >
@@ -786,9 +777,7 @@ export default function Users() {
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-400 mt-0.5">
-                            {user.email}
-                          </div>
+                          <div className="text-sm text-gray-400 mt-0.5">{user.email}</div>
                         </div>
                       </div>
                     </td>
@@ -829,9 +818,9 @@ export default function Users() {
                         >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
-                        
+
                         {actionMenuOpen === user.id && (
-                          <div 
+                          <div
                             className="absolute right-0 top-full mt-1 w-48 bg-black border border-white/20 rounded-none shadow-lg z-50"
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -857,37 +846,34 @@ export default function Users() {
                               <Edit className="w-4 h-4" />
                               <span>Edit User</span>
                             </button>
-                            {adminPluginEnabled && (
-                              <>
-                                {user.banned ? (
-                                  <button
-                                    className="w-full px-4 py-2 text-left text-sm text-green-400 hover:bg-white/10 flex items-center space-x-2"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedUser(user);
-                                      setShowUnbanModal(true);
-                                      setActionMenuOpen(null);
-                                    }}
-                                  >
-                                    <Ban className="w-4 h-4" />
-                                    <span>Unban User</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    className="w-full px-4 py-2 text-left text-sm text-yellow-400 hover:bg-white/10 flex items-center space-x-2"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedUser(user);
-                                      setShowBanModal(true);
-                                      setActionMenuOpen(null);
-                                    }}
-                                  >
-                                    <Ban className="w-4 h-4" />
-                                    <span>Ban User</span>
-                                  </button>
-                                )}
-                              </>
-                            )}
+                            {adminPluginEnabled &&
+                              (user.banned ? (
+                                <button
+                                  className="w-full px-4 py-2 text-left text-sm text-green-400 hover:bg-white/10 flex items-center space-x-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedUser(user);
+                                    setShowUnbanModal(true);
+                                    setActionMenuOpen(null);
+                                  }}
+                                >
+                                  <Ban className="w-4 h-4" />
+                                  <span>Unban User</span>
+                                </button>
+                              ) : (
+                                <button
+                                  className="w-full px-4 py-2 text-left text-sm text-yellow-400 hover:bg-white/10 flex items-center space-x-2"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedUser(user);
+                                    setShowBanModal(true);
+                                    setActionMenuOpen(null);
+                                  }}
+                                >
+                                  <Ban className="w-4 h-4" />
+                                  <span>Ban User</span>
+                                </button>
+                              ))}
                             <div className="border-t border-white/10 my-1"></div>
                             <button
                               className="w-full px-4 py-2 text-left text-sm text-red-400 hover:bg-white/10 flex items-center space-x-2"
@@ -961,7 +947,8 @@ export default function Users() {
                   <Button
                     onClick={() => {
                       const count = parseInt(
-                        (document.getElementById('user-count') as HTMLInputElement)?.value || '5'
+                        (document.getElementById('user-count') as HTMLInputElement)?.value || '5',
+                        10
                       );
                       handleSeedUsers(count);
                     }}
@@ -1271,10 +1258,12 @@ export default function Users() {
             <p className="text-gray-400 mb-4">
               Ban <strong>{selectedUser.name}</strong> from accessing the system.
             </p>
-            
+
             <div className="space-y-4 mb-6">
               <div>
-                <Label htmlFor="banReason" className="text-white">Ban Reason</Label>
+                <Label htmlFor="banReason" className="text-white">
+                  Ban Reason
+                </Label>
                 <Input
                   id="banReason"
                   value={banReason}
@@ -1283,14 +1272,18 @@ export default function Users() {
                   className="bg-black border border-dashed border-white/20 text-white rounded-none"
                 />
               </div>
-              
+
               <div>
-                <Label htmlFor="banExpires" className="text-white">Ban Duration (seconds)</Label>
+                <Label htmlFor="banExpires" className="text-white">
+                  Ban Duration (seconds)
+                </Label>
                 <Input
                   id="banExpires"
                   type="number"
                   value={banExpiresIn || ''}
-                  onChange={(e) => setBanExpiresIn(e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    setBanExpiresIn(e.target.value ? Number(e.target.value) : undefined)
+                  }
                   placeholder="Leave empty for permanent ban"
                   className="bg-black border border-dashed border-white/20 text-white rounded-none"
                 />
@@ -1299,7 +1292,7 @@ export default function Users() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex justify-end space-x-2">
               <Button
                 variant="outline"
@@ -1330,8 +1323,8 @@ export default function Users() {
           <div className="bg-black border border-dashed border-green-400/50 rounded-none p-6 w-full max-w-md">
             <h2 className="text-xl font-bold text-white mb-4">Unban User</h2>
             <p className="text-gray-400 mb-6">
-              Are you sure you want to unban <strong>{selectedUser.name}</strong>? This will restore their
-              access to the system.
+              Are you sure you want to unban <strong>{selectedUser.name}</strong>? This will restore
+              their access to the system.
             </p>
             <div className="flex justify-end space-x-2">
               <Button

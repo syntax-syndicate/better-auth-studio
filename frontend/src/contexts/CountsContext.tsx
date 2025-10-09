@@ -33,8 +33,7 @@ export function CountsProvider({ children }: CountsProviderProps) {
       const response = await fetch('/api/counts');
       const data = await response.json();
       setCounts(data);
-    } catch (error) {
-      console.error('Failed to fetch counts:', error);
+    } catch (_error) {
     } finally {
       setLoading(false);
     }
@@ -47,7 +46,7 @@ export function CountsProvider({ children }: CountsProviderProps) {
 
   useEffect(() => {
     fetchCounts();
-  }, []);
+  }, [fetchCounts]);
 
   return (
     <CountsContext.Provider value={{ counts, loading, refetchCounts }}>

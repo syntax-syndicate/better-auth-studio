@@ -1,44 +1,36 @@
-"use client"
+'use client';
 
-import * as React from "react"
-import { ChevronDownIcon } from "lucide-react"
-import { DateRange } from "react-day-picker"
+import { ChevronDownIcon } from 'lucide-react';
+import * as React from 'react';
+import type { DateRange } from 'react-day-picker';
 
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
 interface DateRangePickerProps {
-  value?: DateRange
-  onChange?: (range: DateRange | undefined) => void
-  className?: string
+  value?: DateRange;
+  onChange?: (range: DateRange | undefined) => void;
+  className?: string;
 }
 
-export function DateRangePicker({
-  value,
-  onChange,
-  className,
-}: DateRangePickerProps) {
-  const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState<DateRange | undefined>(value)
+export function DateRangePicker({ value, onChange, className }: DateRangePickerProps) {
+  const [open, setOpen] = React.useState(false);
+  const [date, setDate] = React.useState<DateRange | undefined>(value);
 
   React.useEffect(() => {
-    setDate(value)
-  }, [value])
+    setDate(value);
+  }, [value]);
 
   const handleSelect = (range: DateRange | undefined) => {
-    setDate(range)
-    onChange?.(range)
-    
+    setDate(range);
+    onChange?.(range);
+
     // Close popover when both dates are selected
     if (range?.from && range?.to) {
-      setOpen(false)
+      setOpen(false);
     }
-  }
+  };
 
   return (
     <div className={className}>
@@ -57,7 +49,7 @@ export function DateRangePicker({
                 date.from.toLocaleDateString()
               )
             ) : (
-              "Pick a date range"
+              'Pick a date range'
             )}
             <ChevronDownIcon className="h-4 w-4" />
           </Button>
@@ -74,6 +66,5 @@ export function DateRangePicker({
         </PopoverContent>
       </Popover>
     </div>
-  )
+  );
 }
-
