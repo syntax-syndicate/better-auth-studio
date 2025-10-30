@@ -3,13 +3,12 @@ import PixelCard from "@/components/PixelCard";
 
 export default function Changelog() {
   return (
-    <PixelLayout 
+    <PixelLayout
       currentPage="changelog"
-      title="CHANGELOG"
+      title="CHANGLOG"
       description="Track the Better Auth Studio development with detailed release notes and updates."
     >
       <div className="space-y-8">
-        {/* Latest Release */}
         <section>
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">LATEST RELEASE</h2>
           <PixelCard variant="highlight">
@@ -62,8 +61,7 @@ export default function Changelog() {
 
         <section>
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">RECENT UPDATES</h2>
-          
-          {/* v1.0.26 - Shadcn UI & Admin Features */}
+
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Shadcn UI Integration & Admin Functionality</h3>
@@ -91,7 +89,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🛡️ Admin Functionality</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -113,7 +111,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🔍 Advanced Filtering</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -125,7 +123,7 @@ export default function Changelog() {
               </div>
             </div>
           </PixelCard>
-          
+
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Advanced Session Management</h3>
@@ -141,7 +139,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">📊 Session Display</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -181,7 +179,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🔌 Plugin-Based Configuration</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -225,7 +223,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">⚙️ CLI Integration</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -246,7 +244,6 @@ export default function Changelog() {
             </div>
           </PixelCard>
 
-          {/* Biome Integration & CI/CD */}
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Biome Integration & CI/CD</h3>
@@ -274,7 +271,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🚀 CI/CD Pipeline</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -325,7 +322,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🎯 User Experience</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -345,8 +342,7 @@ export default function Changelog() {
               </div>
             </div>
           </PixelCard>
-          
-          {/* API Improvements */}
+
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">API Improvements</h3>
@@ -370,7 +366,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">⚡ Performance</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -407,7 +403,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">📱 Responsive Design</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -448,7 +444,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🛠️ Developer Experience</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -489,7 +485,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">v1.2.0 - Advanced Security</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -507,7 +503,7 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-              
+
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">v2.0.0 - Plugin System</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
@@ -542,7 +538,7 @@ export default function Changelog() {
                 Major release with Shadcn UI components, admin functionality for user banning/unbanning, advanced filtering system with date range picker, and pure black & white theme overhaul.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.23</h3>
@@ -552,7 +548,7 @@ export default function Changelog() {
                 Release with Database Schema Visualizer - an interactive ReactFlow-powered tool for visualizing Better Auth database schemas with plugin-based configuration.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.22</h3>
@@ -562,7 +558,7 @@ export default function Changelog() {
                 Release with enhanced session management and improved user interface components.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.21</h3>
@@ -572,7 +568,7 @@ export default function Changelog() {
                 Major beta release with advanced session management, IP geolocation, Biome integration, and comprehensive CI/CD pipeline.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.20-beta.5</h3>
@@ -582,7 +578,7 @@ export default function Changelog() {
                 Beta release with CSV export functionality and enhanced user management interface.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.16</h3>
@@ -592,7 +588,7 @@ export default function Changelog() {
                 Added CSV export functionality and enhanced user management interface with pixel-perfect design.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.15</h3>
@@ -602,7 +598,7 @@ export default function Changelog() {
                 Enhanced user interface with improved navigation and performance optimizations.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.14</h3>
@@ -612,7 +608,7 @@ export default function Changelog() {
                 Added comprehensive session management and organization features.
               </p>
             </PixelCard>
-            
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.13</h3>
