@@ -826,7 +826,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                     const fetchLimit = shouldPaginate ? limit : undefined;
                     const allUsers = await adapter.findMany({
                         model: 'user',
-                        limit: fetchLimit
+                        limit: fetchLimit,
                     });
                     let filteredUsers = allUsers || [];
                     if (search) {
@@ -2605,7 +2605,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 if (adapter && typeof adapter.findMany === 'function') {
                     const allOrganizations = await adapter.findMany({
                         model: 'organization',
-                        limit: limit
+                        limit: limit,
                     });
                     res.json({ organizations: allOrganizations });
                 }

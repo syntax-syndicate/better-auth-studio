@@ -10,7 +10,7 @@ import {
   Users,
   X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
@@ -70,7 +70,8 @@ export default function TeamDetails() {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [teamFormData, setTeamFormData] = useState({ name: '' });
 
-  const fetchTeam = async () => {
+  const fetchTeam = useCallback(async () => {
+    if (!teamId) return;
     try {
       const response = await fetch(`/api/teams/${teamId}`);
       const data = await response.json();
@@ -90,9 +91,10 @@ export default function TeamDetails() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [teamId]);
 
-  const fetchTeamMembers = async () => {
+  const fetchTeamMembers = useCallback(async () => {
+    if (!teamId) return;
     try {
       const response = await fetch(`/api/teams/${teamId}/members`);
       const data = await response.json();
@@ -103,7 +105,7 @@ export default function TeamDetails() {
     } catch (_error) {
       toast.error('Failed to load team members');
     }
-  };
+  }, [teamId]);
 
   const fetchAvailableUsers = async () => {
     try {
