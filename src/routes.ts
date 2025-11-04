@@ -263,7 +263,6 @@ export function createRoutes(
     });
   });
 
-  // Better-auth version check endpoint
   router.get('/api/version-check', async (_req: Request, res: Response) => {
     try {
       const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -843,7 +842,6 @@ export function createRoutes(
         id: userId,
         data: { banned: true },
       });
-
       res.json({ success: true, user });
     } catch (_error) {
       res.status(500).json({ error: 'Failed to ban user' });
@@ -994,7 +992,6 @@ export function createRoutes(
       try {
         const adapter = await getAuthAdapterWithConfig();
         if (adapter && typeof adapter.findMany === 'function') {
-          // If limit is very high (like 10000), fetch all users without pagination
           const shouldPaginate = limit < 1000;
           const fetchLimit = shouldPaginate ? limit : undefined;
 

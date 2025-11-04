@@ -54,18 +54,18 @@ export default {
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
   		},
-		fontFamily: {
-			sans: [
-				'Geist',
-				'system-ui',
-				'sans-serif'
-			],
-			mono: [
+  		fontFamily: {
+  			sans: [
+  				'Geist',
+  				'system-ui',
+  				'sans-serif'
+  			],
+  			mono: [
 				'Geist Mono',
-				'JetBrains Mono',
-				'monospace'
-			]
-		},
+  				'JetBrains Mono',
+  				'monospace'
+  			]
+  		},
   		animation: {
   			'fade-in': 'fadeIn 0.5s ease-in-out',
   			'slide-up': 'slideUp 0.3s ease-out',
