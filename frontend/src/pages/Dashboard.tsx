@@ -1,6 +1,5 @@
 import {
   ArrowRight,
-  ArrowUpRight,
   BarChart3,
   Building2,
   ChevronDown,
@@ -16,7 +15,7 @@ import {
   Clock,
   Calendar as CalendarIcon,
 } from '../components/PixelIcons';
-import { Shield, DollarSign } from 'lucide-react';
+import { Shield, DollarSign, ArrowUpRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
