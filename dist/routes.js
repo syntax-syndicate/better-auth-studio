@@ -7,6 +7,24 @@ import { createMockAccount, createMockSession, createMockUser, createMockVerific
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
+import { scryptAsync } from "@noble/hashes/scrypt.js";
+// @ts-ignoree
+import { hex } from "@better-auth/utils/hex";
+const config = {
+    N: 16384,
+    r: 16,
+    p: 1,
+    dkLen: 64,
+};
+async function generateKey(password, salt) {
+    return await scryptAsync(password.normalize("NFKC"), salt, {
+        N: config.N,
+        p: config.p,
+        r: config.r,
+        dkLen: config.dkLen,
+        maxmem: 128 * config.N * config.r * 2,
+    });
+}
 function getStudioVersion() {
     try {
         const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -623,6 +641,38 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
         }
         catch (_error) {
             res.status(500).json({ error: 'Failed to update user' });
+        }
+    });
+    router.put("/api/users/:userId/password", async (req, res) => {
+        try {
+            const { userId } = req.params;
+            const { password } = req.body;
+            if (!password) {
+                return res.status(400).json({ error: 'Password is required' });
+            }
+            const adapter = await getAuthAdapterWithConfig();
+            if (!adapter || !adapter.update) {
+                return res.status(500).json({ error: 'Auth adapter not available' });
+            }
+            let hashedPassword = password;
+            try {
+                const salt = hex.encode(crypto.getRandomValues(new Uint8Array(16)));
+                const key = await generateKey(password, salt);
+                hashedPassword = `${salt}:${hex.encode(key)}`;
+                console.log({ password, hashedPassword });
+            }
+            catch {
+                res.status(500).json({ error: 'Failed to hash password' });
+            }
+            const account = await adapter.update({
+                model: "account",
+                where: [{ field: 'userId', value: userId }, { field: "providerId", value: "credential" }],
+                update: { password: hashedPassword },
+            });
+            res.json({ success: true, account });
+        }
+        catch (error) {
+            res.status(500).json({ error: 'Failed to update password', message: error?.message });
         }
     });
     router.delete('/api/users/:userId', async (req, res) => {

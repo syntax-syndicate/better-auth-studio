@@ -14,6 +14,25 @@ import type { AuthConfig } from './config.js';
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
+import { scryptAsync } from "@noble/hashes/scrypt.js";
+import { hexToBytes } from "@noble/hashes/utils.js";
+// @ts-ignoree
+import { hex } from "@better-auth/utils/hex";
+const config = {
+  N: 16384,
+  r: 16,
+  p: 1,
+  dkLen: 64,
+};
+async function generateKey(password: string, salt: string) {
+  return await scryptAsync(password.normalize("NFKC"), salt, {
+    N: config.N,
+    p: config.p,
+    r: config.r,
+    dkLen: config.dkLen,
+    maxmem: 128 * config.N * config.r * 2,
+  });
+}
 
 function getStudioVersion(): string {
   try {
@@ -23,7 +42,7 @@ function getStudioVersion(): string {
       const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
       return packageJson.version || '1.0.0';
     }
-  } catch (_error) {}
+  } catch (_error) { }
   return '1.0.0';
 }
 
@@ -267,9 +286,9 @@ export function createRoutes(
     try {
       const __dirname = dirname(fileURLToPath(import.meta.url));
       const projectRoot = join(__dirname, '..');
-      
+
       let currentVersion = '1.0.0';
-      
+
       try {
         const betterAuthPkgPath = join(projectRoot, 'node_modules', 'better-auth', 'package.json');
         if (existsSync(betterAuthPkgPath)) {
@@ -282,23 +301,23 @@ export function createRoutes(
           const packageJsonPath = join(projectRoot, 'package.json');
           if (existsSync(packageJsonPath)) {
             const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-            let versionString = packageJson.dependencies?.['better-auth'] || 
-                              packageJson.devDependencies?.['better-auth'] || 
-                              '1.0.0';
+            let versionString = packageJson.dependencies?.['better-auth'] ||
+              packageJson.devDependencies?.['better-auth'] ||
+              '1.0.0';
             currentVersion = versionString.replace(/[\^~>=<]/g, '');
           }
-        } catch {}
+        } catch { }
       }
 
       let latestVersion = currentVersion; // Default to current if fetch fails
       let isOutdated = false;
-      
+
       try {
         const npmResponse = await fetch('https://registry.npmjs.org/better-auth/latest');
         if (npmResponse.ok) {
           const npmData = await npmResponse.json();
           latestVersion = (npmData as { version: string }).version || currentVersion;
-          
+
           // Compare versions
           isOutdated = currentVersion !== latestVersion;
         }
@@ -373,7 +392,7 @@ export function createRoutes(
         databaseAdapter = detectedDb.adapter || detectedDb.name;
         databaseVersion = detectedDb.version;
       }
-    } catch (_error) {}
+    } catch (_error) { }
 
     if (databaseType === 'unknown') {
       const configPath = await findAuthConfigPath();
@@ -435,12 +454,12 @@ export function createRoutes(
 
       socialProviders: authConfig.socialProviders
         ? authConfig.socialProviders.map((provider: any) => ({
-            type: provider.id,
-            clientId: provider.clientId,
-            clientSecret: provider.clientSecret,
-            redirectUri: provider.redirectUri,
-            ...provider,
-          }))
+          type: provider.id,
+          clientId: provider.clientId,
+          clientSecret: provider.clientSecret,
+          redirectUri: provider.redirectUri,
+          ...provider,
+        }))
         : authConfig.providers || [],
 
       user: {
@@ -599,14 +618,14 @@ export function createRoutes(
             const users = await adapter.findMany({ model: 'user', limit: 100000 });
             userCount = users?.length || 0;
           }
-        } catch (_error) {}
+        } catch (_error) { }
 
         try {
           if (typeof adapter.findMany === 'function') {
             const sessions = await adapter.findMany({ model: 'session', limit: 100000 });
             sessionCount = sessions?.length || 0;
           }
-        } catch (_error) {}
+        } catch (_error) { }
 
         if (organizationPluginEnabled) {
           try {
@@ -655,7 +674,7 @@ export function createRoutes(
       } else if (adapter.getUsers) {
         users = await adapter.getUsers();
       }
-      
+
       res.json({ success: true, users });
     } catch (_error) {
       res.status(500).json({ error: 'Failed to fetch users' });
@@ -706,7 +725,39 @@ export function createRoutes(
       res.status(500).json({ error: 'Failed to update user' });
     }
   });
+  router.put("/api/users/:userId/password", async (req: Request, res: Response) => {
+    try {
+      const { userId } = req.params;
+      const { password } = req.body;
 
+      if (!password) {
+        return res.status(400).json({ error: 'Password is required' });
+      }
+
+      const adapter = await getAuthAdapterWithConfig();
+      if (!adapter || !adapter.update) {
+        return res.status(500).json({ error: 'Auth adapter not available' });
+      }
+
+      let hashedPassword = password;
+      try {
+        const salt = hex.encode(crypto.getRandomValues(new Uint8Array(16)));
+        const key = await generateKey(password, salt);
+        hashedPassword = `${salt}:${hex.encode(key)}`
+      } catch {
+        res.status(500).json({ error: 'Failed to hash password' });
+      }
+      const account = await adapter.update({
+        model: "account",
+        where: [{ field: 'userId', value: userId }, { field: "providerId", value: "credential" }],
+        update: { password: hashedPassword },
+      });
+
+      res.json({ success: true, account });
+    } catch (error: any) {
+      res.status(500).json({ error: 'Failed to update password', message: error?.message });
+    }
+  });
   router.delete('/api/users/:userId', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
@@ -743,18 +794,18 @@ export function createRoutes(
           id: membership.id,
           organization: organization
             ? {
-                id: organization.id,
-                name: organization.name || 'Unknown Organization',
-                slug: organization.slug || 'unknown',
-                image: organization.image,
-                createdAt: organization.createdAt,
-              }
+              id: organization.id,
+              name: organization.name || 'Unknown Organization',
+              slug: organization.slug || 'unknown',
+              image: organization.image,
+              createdAt: organization.createdAt,
+            }
             : {
-                id: membership.organizationId,
-                name: 'Unknown Organization',
-                slug: 'unknown',
-                createdAt: membership.createdAt,
-              },
+              id: membership.organizationId,
+              name: 'Unknown Organization',
+              slug: 'unknown',
+              createdAt: membership.createdAt,
+            },
           role: membership.role || 'member',
           joinedAt: membership.createdAt,
         };
@@ -792,23 +843,23 @@ export function createRoutes(
           id: membership.id,
           team: team
             ? {
-                id: team.id,
-                name: team.name || 'Unknown Team',
-                organizationId: team.organizationId,
-                organizationName: organization
-                  ? organization.name || 'Unknown Organization'
-                  : 'Unknown Organization',
-                organizationSlug: organization
-                  ? organization.slug || 'unknown'
-                  : 'unknown',
-              }
+              id: team.id,
+              name: team.name || 'Unknown Team',
+              organizationId: team.organizationId,
+              organizationName: organization
+                ? organization.name || 'Unknown Organization'
+                : 'Unknown Organization',
+              organizationSlug: organization
+                ? organization.slug || 'unknown'
+                : 'unknown',
+            }
             : {
-                id: membership.teamId,
-                name: 'Unknown Team',
-                organizationId: 'unknown',
-                organizationName: 'Unknown Organization',
-                organizationSlug: 'unknown',
-              },
+              id: membership.teamId,
+              name: 'Unknown Team',
+              organizationId: 'unknown',
+              organizationName: 'Unknown Organization',
+              organizationSlug: 'unknown',
+            },
           role: membership.role || 'member',
           joinedAt: membership.createdAt,
         };
@@ -946,7 +997,7 @@ export function createRoutes(
           limit: 1,
         });
         organization = orgs && orgs.length > 0 ? orgs[0] : null;
-      } catch (_error) {}
+      } catch (_error) { }
 
       const transformedTeam = {
         id: team.id,
@@ -958,9 +1009,9 @@ export function createRoutes(
         memberCount: team.memberCount || 0,
         organization: organization
           ? {
-              id: organization.id,
-              name: organization.name,
-            }
+            id: organization.id,
+            name: organization.name,
+          }
           : null,
       };
 
@@ -1057,7 +1108,7 @@ export function createRoutes(
           res.json({ users: transformedUsers });
           return;
         }
-      } catch (_adapterError) {}
+      } catch (_adapterError) { }
 
       const result = await getAuthData(authConfig, 'users', { page, limit, search }, configPath);
 
@@ -1188,7 +1239,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) {}
+        } catch (_fallbackError) { }
 
         res.json({
           plugins: [],
@@ -1243,7 +1294,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) {}
+        } catch (_fallbackError) { }
 
         res.json({
           database: null,
@@ -2186,7 +2237,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) {}
+        } catch (_fallbackError) { }
 
         res.json({
           enabled: false,
@@ -2227,7 +2278,7 @@ export function createRoutes(
           }));
           res.json({ success: true, invitations: transformedInvitations });
           return;
-        } catch (_error) {}
+        } catch (_error) { }
       }
 
       res.json({ success: true, invitations: [] });
@@ -2266,12 +2317,12 @@ export function createRoutes(
                     joinedAt: member.joinedAt || member.createdAt,
                     user: user
                       ? {
-                          id: user.id,
-                          name: user.name,
-                          email: user.email,
-                          image: user.image,
-                          emailVerified: user.emailVerified,
-                        }
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        image: user.image,
+                        emailVerified: user.emailVerified,
+                      }
                       : null,
                   };
                 }
@@ -2286,7 +2337,7 @@ export function createRoutes(
 
           res.json({ success: true, members: validMembers });
           return;
-        } catch (_error) {}
+        } catch (_error) { }
       }
 
       res.json({ success: true, members: [] });
@@ -2629,7 +2680,7 @@ export function createRoutes(
 
           res.json({ success: true, teams: transformedTeams });
           return;
-        } catch (_error) {}
+        } catch (_error) { }
       }
 
       res.json({ success: true, teams: [] });
@@ -2710,12 +2761,12 @@ export function createRoutes(
                     joinedAt: member.joinedAt || member.createdAt,
                     user: user
                       ? {
-                          id: user.id,
-                          name: user.name,
-                          email: user.email,
-                          image: user.image,
-                          emailVerified: user.emailVerified,
-                        }
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        image: user.image,
+                        emailVerified: user.emailVerified,
+                      }
                       : null,
                   };
                 }
@@ -2730,7 +2781,7 @@ export function createRoutes(
 
           res.json({ success: true, members: validMembers });
           return;
-        } catch (_error) {}
+        } catch (_error) { }
       }
 
       res.json({ success: true, members: [] });
@@ -2904,7 +2955,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) {}
+        } catch (_fallbackError) { }
 
         res.json({
           enabled: false,

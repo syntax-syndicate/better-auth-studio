@@ -545,11 +545,11 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
     let data: number[] = [];
     
     if (type === 'users') {
-      // For total users, we want cumulative count up to each bucket
+      // For users, count users created within each bucket (non-cumulative)
       data = buckets.map(bucket => {
         return users.filter((user: any) => {
           const createdAt = new Date(user.createdAt);
-          return createdAt < bucket.end; // All users created before this bucket ends
+          return createdAt >= bucket.start && createdAt < bucket.end;
         }).length;
       });
     } else if (type === 'newUsers') {
@@ -571,19 +571,19 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
         return new Set(activeSessions.map((s: any) => s.userId)).size;
       });
     } else if (type === 'organizations') {
-      // For total organizations, we want cumulative count up to each bucket
+      // For organizations, count orgs created within each bucket (non-cumulative)
       data = buckets.map(bucket => {
         return organizations.filter((org: any) => {
           const createdAt = new Date(org.createdAt);
-          return createdAt < bucket.end; // All orgs created before this bucket ends
+          return createdAt >= bucket.start && createdAt < bucket.end;
         }).length;
       });
     } else if (type === 'teams') {
-      // For total teams, we want cumulative count up to each bucket
+      // For teams, count teams created within each bucket (non-cumulative)
       data = buckets.map(bucket => {
         return teams.filter((team: any) => {
           const createdAt = new Date(team.createdAt);
-          return createdAt < bucket.end; // All teams created before this bucket ends
+          return createdAt >= bucket.start && createdAt < bucket.end;
         }).length;
       });
     }

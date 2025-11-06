@@ -14,6 +14,12 @@ importers:
       '@babel/preset-typescript':
         specifier: ^7.27.1
         version: 7.28.5(@babel/core@7.28.5)
+      '@better-auth/utils':
+        specifier: ^0.3.0
+        version: 0.3.0
+      '@noble/hashes':
+        specifier: ^2.0.1
+        version: 2.0.1
       '@types/chokidar':
         specifier: ^2.1.7
         version: 2.1.7

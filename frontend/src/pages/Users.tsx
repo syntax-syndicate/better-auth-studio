@@ -12,6 +12,7 @@ import {
   MoreVertical,
   Plus,
   Search,
+  Shield,
   Trash2,
   UserPlus,
   Users as UsersIcon,
@@ -68,6 +69,7 @@ export default function Users() {
   const [showSeedModal, setShowSeedModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showUnbanModal, setShowUnbanModal] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
   const [banReason, setBanReason] = useState('');
@@ -391,6 +393,43 @@ export default function Users() {
       }
     } catch (_error) {
       toast.error('Error unbanning user', { id: toastId });
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!selectedUser) {
+      toast.error('No user selected');
+      return;
+    }
+
+    const password = (document.getElementById('update-password') as HTMLInputElement)?.value;
+
+    if (!password) {
+      toast.error('Please enter a new password');
+      return;
+    }
+
+    const toastId = toast.loading('Updating password...');
+
+    try {
+      const response = await fetch(`/api/users/${selectedUser.id}/password`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success('Password updated successfully!', { id: toastId });
+        setShowPasswordModal(false);
+        setSelectedUser(null);
+        (document.getElementById('update-password') as HTMLInputElement).value = '';
+      } else {
+        toast.error(`Error updating password: ${result.error || 'Unknown error'}`, { id: toastId });
+      }
+    } catch (_error) {
+      toast.error('Error updating password', { id: toastId });
     }
   };
 
@@ -888,6 +927,18 @@ export default function Users() {
                             >
                               <Edit className="w-4 h-4" />
                               <span>Edit User</span>
+                            </button>
+                            <button
+                              className="w-full px-4 py-2 text-left text-sm text-white hover:bg-white/10 flex items-center space-x-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setActionMenuOpen(null);
+                                setSelectedUser(user);
+                                setShowPasswordModal(true);
+                              }}
+                            >
+                              <Shield className="w-4 h-4" />
+                              <span>Update Password</span>
                             </button>
                             {adminPluginEnabled &&
                               (user.banned ? (
@@ -1394,6 +1445,75 @@ export default function Users() {
                 className="bg-green-600 text-white hover:bg-green-700 rounded-none"
               >
                 Unban User
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Update Password Modal */}
+      {showPasswordModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg text-white font-light">Update Password</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setSelectedUser(null);
+                  (document.getElementById('update-password') as HTMLInputElement).value = '';
+                }}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <img
+                  src={
+                    selectedUser.image ||
+                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.id}`
+                  }
+                  alt={selectedUser.name}
+                  className="w-16 h-16 rounded-none border border-dashed border-white/20"
+                />
+                <div>
+                  <div className="text-white font-light">{selectedUser.name}</div>
+                  <div className="text-sm text-gray-400">{selectedUser.email}</div>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="update-password" className="text-sm text-gray-400 font-light">
+                  New Password
+                </Label>
+                <Input
+                  id="update-password"
+                  type="password"
+                  placeholder="Enter new password"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowPasswordModal(false);
+                  setSelectedUser(null);
+                  (document.getElementById('update-password') as HTMLInputElement).value = '';
+                }}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdatePassword}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+              >
+                Update Password
               </Button>
             </div>
           </div>
