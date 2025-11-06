@@ -11,13 +11,12 @@ import {
   Search,
   X,
   Zap,
-  Shield,
   AlertTriangle,
   CheckCircle,
   Clock,
-  DollarSign,
   Calendar as CalendarIcon,
-} from 'lucide-react';
+} from '../components/PixelIcons';
+import { Shield, DollarSign } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -92,6 +91,12 @@ export default function Dashboard() {
   const [activeUsersPercentage, setActiveUsersPercentage] = useState(0);
   const [organizationsPercentage, setOrganizationsPercentage] = useState(0);
   const [teamsPercentage, setTeamsPercentage] = useState(0);
+  
+  // Daily percentages for stats bar
+  const [usersDailyPercentage, setUsersDailyPercentage] = useState(0);
+  const [organizationsDailyPercentage, setOrganizationsDailyPercentage] = useState(0);
+  const [sessionsDailyPercentage, setSessionsDailyPercentage] = useState(0);
+  const [revenueDailyPercentage, setRevenueDailyPercentage] = useState(0);
 
   // Store all users for client-side filtering
   const [allUsers, setAllUsers] = useState<any[]>([]);
@@ -121,10 +126,10 @@ export default function Dashboard() {
     } else if (betterAuthVersion) {
       patches.push({
         id: 'version-check',
-        title: `Better-Auth v${betterAuthVersion.current} (Up to date)`,
+        title: `Better-Auth is Up to date`,
         severity: 'low',
         date: new Date().toISOString().split('T')[0],
-        description: `You are running the latest version of better-auth (v${betterAuthVersion.latest}). Great job keeping your dependencies up to date!`,
+        description: `You are running the latest version of better-auth. Great job keeping your dependencies up to date!`,
         affectedComponents: ['All Components'],
         status: 'applied',
         cve: '',
@@ -411,6 +416,28 @@ export default function Dashboard() {
       if (data) setTeamsPercentage(data.percentageChange || 0);
     };
     fetchData();
+  }, []);
+
+  // Fetch daily percentages for stats bar
+  useEffect(() => {
+    const fetchDailyPercentages = async () => {
+      // Fetch Users daily percentage
+      const usersData = await fetchAnalytics('users', '1D');
+      if (usersData) setUsersDailyPercentage(usersData.percentageChange || 0);
+
+      // Fetch Organizations daily percentage
+      const orgsData = await fetchAnalytics('organizations', '1D');
+      if (orgsData) setOrganizationsDailyPercentage(orgsData.percentageChange || 0);
+
+      // Fetch Sessions daily percentage (using activeUsers as proxy for sessions)
+      const sessionsData = await fetchAnalytics('activeUsers', '1D');
+      if (sessionsData) setSessionsDailyPercentage(sessionsData.percentageChange || 0);
+
+      // For Revenue, we'll use newUsers as a proxy since revenue is typically tied to new signups
+      const revenueData = await fetchAnalytics('newUsers', '1D');
+      if (revenueData) setRevenueDailyPercentage(revenueData.percentageChange || 0);
+    };
+    fetchDailyPercentages();
   }, []);
 
   useEffect(() => {
@@ -722,15 +749,15 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 min-w-fit">
             <div className="w-10 h-10 rounded-none bg-white/5 border border-dashed border-white/10 flex items-center justify-center flex-shrink-0">
               <Users className="w-5 h-5 text-white" />
-            </div>
+      </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm uppercase tracking-wide">Users</span>
               <span className="text-white text-lg font-medium">{loading ? '...' : formatNumber(counts.users)}</span>
-              <div className="flex items-center gap-1 text-green-500">
-                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+              <div className={`flex items-center gap-1 ${usersDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <svg className={`w-3 h-3 ${usersDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">12%</span>
+                <span className="text-sm font-medium">{Math.abs(usersDailyPercentage).toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -748,11 +775,11 @@ export default function Dashboard() {
               <span className="text-white text-lg font-medium">
                 {loading ? '...' : formatNumber(counts.organizations)}
               </span>
-              <div className="flex items-center gap-1 text-green-500">
-                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+              <div className={`flex items-center gap-1 ${organizationsDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <svg className={`w-3 h-3 ${organizationsDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">8%</span>
+                <span className="text-sm font-medium">{Math.abs(organizationsDailyPercentage).toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -766,11 +793,11 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm uppercase tracking-wide">Sessions</span>
               <span className="text-white text-lg font-medium">{loading ? '...' : formatNumber(counts.sessions)}</span>
-              <div className="flex items-center gap-1 text-green-500">
-                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor">
+              <div className={`flex items-center gap-1 ${sessionsDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <svg className={`w-3 h-3 ${sessionsDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">24%</span>
+                <span className="text-sm font-medium">{Math.abs(sessionsDailyPercentage).toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -788,11 +815,11 @@ export default function Dashboard() {
               <span className="text-white text-lg font-medium">
                 ${totalSubscription !== null ? formatNumber(totalSubscription) : '1.2k'}
               </span>
-              <div className="flex items-center gap-1 text-red-500">
-                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="currentColor" style={{ transform: 'rotate(180deg)' }}>
+              <div className={`flex items-center gap-1 ${revenueDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <svg className={`w-3 h-3 ${revenueDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">2%</span>
+                <span className="text-sm font-medium">{Math.abs(revenueDailyPercentage).toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -1153,21 +1180,21 @@ export default function Dashboard() {
                           {period}
                         </button>
                       ))}
-                    </div>
+              </div>
                   )}
-                </div>
+            </div>
 
                 {activeUsersPeriod === 'Custom' && (
                   <div className="h-0 flex items-center gap-2">
                     <Popover >
                       <PopoverTrigger asChild>
-                        <Button
+            <Button 
                           variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-                        >
+            >
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {activeUsersDateFrom ? format(activeUsersDateFrom, 'MMM dd yyyy') : 'From'}
-                        </Button>
+            </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1201,9 +1228,9 @@ export default function Dashboard() {
                         />
                       </PopoverContent>
                     </Popover>
-                  </div>
-                )}
               </div>
+                )}
+            </div>
               <hr className='mb-2 -mx-10 border-white/10' />
               <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">Active Users</h4>
               <p className="text-xs text-gray-400 mb-3">Users with active session in the time frame</p>
@@ -1266,13 +1293,13 @@ export default function Dashboard() {
                   <div className="h-0 flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
+            <Button
+              variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-                        >
+            >
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {newUsersDateFrom ? format(newUsersDateFrom, 'MMM dd yyyy') : 'From'}
-                        </Button>
+            </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1306,9 +1333,9 @@ export default function Dashboard() {
                         />
                       </PopoverContent>
                     </Popover>
-                  </div>
-                )}
               </div>
+                )}
+            </div>
               <hr className='mb-2 -mx-10 border-white/10' />
               <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">New Users</h4>
               <p className="text-xs text-gray-400 mb-3">
@@ -1377,13 +1404,13 @@ export default function Dashboard() {
                   <div className="h-0 flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
+            <Button
+              variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-                        >
+            >
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {organizationsDateFrom ? format(organizationsDateFrom, 'MMM dd yyyy') : 'From'}
-                        </Button>
+            </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1417,9 +1444,9 @@ export default function Dashboard() {
                         />
                       </PopoverContent>
                     </Popover>
-                  </div>
-                )}
               </div>
+                )}
+            </div>
               <hr className='mb-2 -mx-10 border-white/10' />
               <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">Organizations</h4>
               <p className="text-xs text-gray-400 mb-3">Total organizations in the time frame</p>
@@ -1483,13 +1510,13 @@ export default function Dashboard() {
                   <div className="h-0 flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-                        <Button
-                          variant="outline"
+            <Button
+              variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-                        >
+            >
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {teamsDateFrom ? format(teamsDateFrom, 'MMM dd yyyy') : 'From'}
-                        </Button>
+            </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1659,16 +1686,16 @@ export default function Dashboard() {
 
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
-        {activeTab === 'overview' ? (
-          renderOverview()
-        ) : activeTab === 'users' ? (
-          <UsersPage />
-        ) : activeTab === 'organizations' ? (
-          <OrganizationsPage />
-        ) : (
-          //  activeTab === 'sessions' ? <SessionsPage /> :
-          renderOverview()
-        )}
+      {activeTab === 'overview' ? (
+        renderOverview()
+      ) : activeTab === 'users' ? (
+        <UsersPage />
+      ) : activeTab === 'organizations' ? (
+        <OrganizationsPage />
+      ) : (
+        //  activeTab === 'sessions' ? <SessionsPage /> :
+        renderOverview()
+      )}
       </div>
 
       {/* Quick Actions Modal */}

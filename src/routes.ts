@@ -582,7 +582,7 @@ export function createRoutes(
             const plugins = betterAuthConfig.plugins || [];
             const organizationPlugin = plugins.find((plugin: any) => plugin.id === 'organization');
             organizationPluginEnabled = !!organizationPlugin;
-
+            teamsPluginEnabled = !!organizationPlugin?.options?.teams?.enabled;
             if (organizationPlugin) {
               teamsPluginEnabled = organizationPlugin.options?.teams?.enabled === true;
             }
@@ -798,12 +798,16 @@ export function createRoutes(
                 organizationName: organization
                   ? organization.name || 'Unknown Organization'
                   : 'Unknown Organization',
+                organizationSlug: organization
+                  ? organization.slug || 'unknown'
+                  : 'unknown',
               }
             : {
                 id: membership.teamId,
                 name: 'Unknown Team',
                 organizationId: 'unknown',
                 organizationName: 'Unknown Organization',
+                organizationSlug: 'unknown',
               },
           role: membership.role || 'member',
           joinedAt: membership.createdAt,

@@ -4,7 +4,6 @@ import {
   Calendar,
   Clock,
   Database,
-  Edit,
   Globe,
   HashIcon,
   Loader,
@@ -15,12 +14,12 @@ import {
   UserMinus,
   Users,
   X,
-} from 'lucide-react';
+} from '../components/PixelIcons';
+import { Edit } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Terminal } from '../components/Terminal';
-import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -56,6 +55,7 @@ interface Team {
   name: string;
   organizationId: string;
   organizationName: string;
+  organizationSlug?: string;
   role: string;
   createdAt: string;
 }
@@ -539,46 +539,17 @@ export default function UserDetails() {
 
   return (
     <div className="min-h-screen bg-black w-full">
-      <div className="w-full flex flex-col px-6 py-8">
+      <div className="w-full flex flex-col px-6 py-8 pt-4">
         <span
-          onClick={() => navigate('/users')}
           className="mb-4 ml-0 flex justify-start items-start text-left border-none text-white"
         >
           <span className='font-light'>
-            <span className='uppercase text-white/80 font-mono text-sm'>users / </span>
+            <span
+              onClick={() => navigate('/users')}
+              className='uppercase cursor-pointer text-white/80 font-mono text-sm'>users / </span>
             <span className='text-white font-mono text-sm'>{user.id}</span>
           </span>
         </span>
-        {/* {user.banned && (
-          <div className="mb-6 border-l-4 border-red-500 bg-red-500/10 p-4">
-            <div className="flex items-start space-x-3">
-              <Ban className="w-5 h-5 text-red-400 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="text-red-400 font-semibold text-sm uppercase tracking-wide">
-                  User Account Banned
-                </h3>
-                <p className="text-red-300 text-sm mt-1">
-                  This user has been banned from accessing the system.
-                </p>
-                {user.banReason && (
-                  <div className="mt-2 text-sm">
-                    <span className="text-gray-400">Reason: </span>
-                    <span className="text-red-300">{user.banReason}</span>
-                  </div>
-                )}
-                {user.banExpires && (
-                  <div className="mt-1 text-sm">
-                    <span className="text-gray-400">Ban expires: </span>
-                    <span className="text-yellow-400">
-                      {new Date(user.banExpires).toLocaleString()}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )} */}
-
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -590,10 +561,10 @@ export default function UserDetails() {
                 )}
               </div>
               <div>
-                <h1 className="text-3xl font-light text-white inline-flex items-start">
+                <h1 className="text-3xl font-light text-white inline-flex items-center">
                   {user.name}
                   <sup
-                    className="text-xs text-gray-500 ml-2 mt-1 cursor-pointer hover:text-white transition-colors"
+                    className="text-xs text-gray-500 ml-2 cursor-pointer hover:text-white transition-colors"
                     onClick={() => {
                       navigator.clipboard.writeText(user.id);
                       toast.success('User ID copied to clipboard');
@@ -605,9 +576,9 @@ export default function UserDetails() {
                     <span className='ml-1'>]</span>
                   </sup>
                   {user.banned && (
-                    <span className="ml-2 mt-1 px-2 py-0.5 text-[10px] font-mono uppercase border border-dashed border-red-500/30 bg-red-500/10 text-red-400/80 rounded-none">
+                    <sup className="ml-2 px-2 pt-2 py-0.5 text-[10px] font-mono uppercase border border-dashed border-red-500/30 bg-red-500/10 text-red-400/80 rounded-none">
                       Banned
-                    </span>
+                    </sup>
                   )}
                 </h1>
                 <p className="text-gray-400 font-mono text-sm">{user.email}</p>
@@ -802,9 +773,9 @@ export default function UserDetails() {
                         key={membership.id}
                         className="border border-dashed border-white/10 rounded-none p-4 hover:bg-white/5 transition-colors"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gray-800 border border-dashed border-white/20 flex items-center justify-center">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <div className="w-12 h-12 bg-black/80 border border-dashed border-white/20 flex items-center justify-center rounded-none">
                               {membership.organization.image ? (
                                 <img
                                   src={membership.organization.image}
@@ -815,28 +786,44 @@ export default function UserDetails() {
                                 <Building2 className="w-6 h-6 text-white" />
                               )}
                             </div>
-                            <div>
-                              <h3 className="text-white font-medium">
+                            <div className="flex-1">
+                              <h3 className="text-white font-light inline-flex items-start">
                                 {membership.organization.name}
+                                <sup className="text-xs text-gray-500 ml-2 mt-0.5">
+                                  <span className='mr-1'>[</span>
+                                  <span className='text-white/80 font-mono text-xs'>{membership.organization.slug}</span>
+                                  <span className='ml-1'>]</span>
+                                </sup>
                               </h3>
-                              <p className="text-gray-400 text-sm">
-                                @{membership.organization.slug}
+                              <p className="text-gray-400 text-sm font-sans mt-1">
+                                in {membership.organization.slug}
                               </p>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <Badge variant="outline" className="rounded-none text-xs">
-                                  {membership.role}
-                                </Badge>
-                                <span className="text-gray-400 text-xs">
-                                  Joined {new Date(membership.joinedAt).toLocaleDateString()}
-                                </span>
-                              </div>
                             </div>
                           </div>
+                          <div className="flex flex-col items-end space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-500 font-mono text-xs uppercase">Joined: </span>
+                              <span className="text-white font-mono text-xs">
+                                {new Date(membership.joinedAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                                , {new Date(membership.joinedAt).toLocaleTimeString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                  hour12: true,
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleRemoveFromOrganization(membership.id)}
-                            className="border border-dashed border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-none"
+                            className="border border-dashed border-red-400/20 text-red-400 hover:bg-red-400/10 rounded-none"
                           >
                             <UserMinus className="w-4 h-4 mr-1" />
                             Remove
@@ -864,31 +851,49 @@ export default function UserDetails() {
                         key={membership.id}
                         className="border border-dashed border-white/10 rounded-none p-4 hover:bg-white/5 transition-colors"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-black/80 border border-dashed border-white/20 flex items-center justify-center">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex items-center space-x-4 flex-1">
+                            <div className="w-12 h-12 bg-black/80 border border-dashed border-white/20 flex items-center justify-center rounded-none">
                               <Users className="w-6 h-6 text-white" />
                             </div>
-                            <div>
-                              <h3 className="text-white font-medium">{membership.team.name}</h3>
-                              <p className="text-gray-400 text-sm">
-                                in {membership.team.organizationName}
+                            <div className="flex-1">
+                              <h3 className="text-white font-light inline-flex items-start">
+                                {membership.team.name}
+                                <sup className="text-xs text-gray-500 ml-2 mt-0.5">
+                                  <span className='mr-1'>[</span>
+                                  <span className='text-white/80 font-mono text-xs'>{membership.team.organizationSlug || membership.team.organizationName}</span>
+                                  <span className='ml-1'>]</span>
+                                </sup>
+                              </h3>
+                              <p className="text-gray-400 text-sm font-sans mt-1">
+                                in {membership.team.organizationSlug || membership.team.organizationName}
                               </p>
-                              <div className="flex items-center space-x-2 mt-1">
-                                <Badge variant="outline" className="rounded-none text-xs">
-                                  {membership.role}
-                                </Badge>
-                                <span className="text-gray-400 text-xs">
-                                  Joined {new Date(membership.joinedAt).toLocaleDateString()}
-                                </span>
-                              </div>
                             </div>
                           </div>
+                          <div className="flex flex-col items-end space-y-2">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-500 font-mono text-xs uppercase">Joined: </span>
+                              <span className="text-white font-mono text-xs">
+                                {new Date(membership.joinedAt).toLocaleDateString('en-US', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                                , {new Date(membership.joinedAt).toLocaleTimeString('en-US', {
+                                  hour: 'numeric',
+                                  minute: '2-digit',
+                                  hour12: true,
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-end">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => handleRemoveFromTeam(membership.id)}
-                            className="border border-dashed border-red-400/50 text-red-400 hover:bg-red-400/10 rounded-none"
+                            className="border border-dashed border-red-400/20 text-red-400 hover:bg-red-400/10 rounded-none"
                           >
                             <UserMinus className="w-4 h-4 mr-1" />
                             Remove
