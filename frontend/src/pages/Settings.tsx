@@ -353,7 +353,9 @@ export default function Settings() {
       <div className="flex items-center justify-between p-5 pt-7">
         <div>
           <h1 className="text-3xl font-normal text-white tracking-tight">Settings</h1>
-          <p className="text-gray-300 mt-2 uppercase font-mono font-light text-xs">Configure your Better Auth application</p>
+          <p className="text-gray-300 mt-2 uppercase font-mono font-light text-xs">
+            Configure your Better Auth application
+          </p>
         </div>
       </div>
       <hr className="w-full border-white/15 h-px" />
@@ -361,14 +363,26 @@ export default function Settings() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-5">
         {/* Application Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <SettingsIcon className="w-4 h-4 text-white" />
               <span>Application</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Basic application configuration</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Basic application configuration
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="space-y-0 px-0 pb-0 border-b-none">
@@ -377,7 +391,9 @@ export default function Settings() {
                 <Globe className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">App Name</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Application display name</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Application display name
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -390,7 +406,9 @@ export default function Settings() {
                 <Key className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Base URL</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Application base URL</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Application base URL
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -405,7 +423,9 @@ export default function Settings() {
                 <Lock className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Base Path</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Auth API base path</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Auth API base path
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -420,7 +440,9 @@ export default function Settings() {
                 <Shield className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Secret</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Encryption secret</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Encryption secret
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -434,14 +456,26 @@ export default function Settings() {
 
         {/* Enhanced Database Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <Database className="w-4 h-4 text-white" />
               <span>Database</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Database connection and configuration</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Database connection and configuration
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="space-y-0 px-0 pb-0 border-b-none">
@@ -454,10 +488,12 @@ export default function Settings() {
                     {databaseInfo?.displayName ||
                       (config?.database?.type &&
                         config?.database?.type.charAt(0).toUpperCase() +
-                        config?.database?.type.slice(1)) ||
+                          config?.database?.type.slice(1)) ||
                       'Unknown'}
                   </p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Database Type</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Database Type
+                  </p>
                 </div>
               </div>
               {(databaseInfo?.name || config?.database?.type) &&
@@ -471,7 +507,9 @@ export default function Settings() {
                     <Database className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Dialect</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Database dialect</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Database dialect
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -488,7 +526,9 @@ export default function Settings() {
                   <Key className="w-5 h-5 text-white" />
                   <div>
                     <p className="text-sm font-light uppercase text-white">Connection URL</p>
-                    <p className="text-[10px] font-light uppercase font-mono text-gray-400">Database connection string</p>
+                    <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                      Database connection string
+                    </p>
                   </div>
                 </div>
                 <Badge
@@ -508,7 +548,9 @@ export default function Settings() {
                   <SettingsIcon className="w-5 h-5 text-white" />
                   <div>
                     <p className="text-sm font-light uppercase text-white">Casing</p>
-                    <p className="text-[10px] font-light uppercase font-mono text-gray-400">Table name casing</p>
+                    <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                      Table name casing
+                    </p>
                   </div>
                 </div>
                 <div className="text-right">
@@ -526,7 +568,9 @@ export default function Settings() {
                   <RefreshCw className="w-5 h-5 text-white" />
                   <div>
                     <p className="text-sm font-light uppercase text-white">Debug Logs</p>
-                    <p className="text-[10px] font-light uppercase font-mono text-gray-400">Database debug logging</p>
+                    <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                      Database debug logging
+                    </p>
                   </div>
                 </div>
                 <Badge
@@ -556,7 +600,9 @@ export default function Settings() {
                     <Puzzle className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Adapter ID</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Adapter identifier</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Adapter identifier
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -572,7 +618,9 @@ export default function Settings() {
                       <Puzzle className="w-5 h-5 text-white" />
                       <div>
                         <p className="text-sm font-light uppercase text-white">Adapter Name</p>
-                        <p className="text-[10px] font-light uppercase font-mono text-gray-400">Adapter display name</p>
+                        <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                          Adapter display name
+                        </p>
                       </div>
                     </div>
                     <div className="text-right">
@@ -588,7 +636,9 @@ export default function Settings() {
                     <Zap className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Adapter Features</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Supported capabilities</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Supported capabilities
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 justify-end">
@@ -638,7 +688,9 @@ export default function Settings() {
                     <SettingsIcon className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Adapter Settings</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Configuration options</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Configuration options
+                      </p>
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-2 justify-end">
@@ -696,14 +748,26 @@ export default function Settings() {
 
         {/* Authentication Providers */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <Shield className="w-4 h-4 text-white" />
               <span>Providers</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Configured authentication providers</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Configured authentication providers
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="p-0">
@@ -716,7 +780,9 @@ export default function Settings() {
                   <div className="flex items-center space-x-3">
                     {getProviderIcon(provider.type)}
                     <div>
-                      <p className="text-sm font-light uppercase text-white capitalize">{provider.type}</p>
+                      <p className="text-sm font-light uppercase text-white capitalize">
+                        {provider.type}
+                      </p>
                       <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                         {provider.clientId ? 'Configured' : 'Not configured'}
                       </p>
@@ -751,14 +817,26 @@ export default function Settings() {
 
         {/* Email & Password */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <Mail className="w-4 h-4 text-white" />
               <span>Email & Password</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Email authentication settings</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Email authentication settings
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="p-0">
@@ -767,7 +845,9 @@ export default function Settings() {
                 <Mail className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Email Authentication</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Allow users to sign up with email</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Allow users to sign up with email
+                  </p>
                 </div>
               </div>
               <Badge
@@ -795,7 +875,9 @@ export default function Settings() {
                     <Users className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Sign Up</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Allow new user registration</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Allow new user registration
+                      </p>
                     </div>
                   </div>
                   <Badge
@@ -821,7 +903,9 @@ export default function Settings() {
                     <Shield className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Email Verification</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Require email verification</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Require email verification
+                      </p>
                     </div>
                   </div>
                   <Badge
@@ -847,7 +931,9 @@ export default function Settings() {
                     <Lock className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Password Length</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Min/Max password length</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Min/Max password length
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -863,7 +949,9 @@ export default function Settings() {
                     <Zap className="w-5 h-5 text-white" />
                     <div>
                       <p className="text-sm font-light uppercase text-white">Auto Sign In</p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">Auto sign in after registration</p>
+                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        Auto sign in after registration
+                      </p>
                     </div>
                   </div>
                   <Badge
@@ -890,14 +978,26 @@ export default function Settings() {
 
         {/* Session Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <Clock className="w-4 h-4 text-white" />
               <span>Session</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Session management settings</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Session management settings
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="p-0">
@@ -906,7 +1006,9 @@ export default function Settings() {
                 <Clock className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Session Duration</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">How long sessions last</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    How long sessions last
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -924,7 +1026,9 @@ export default function Settings() {
                 <RefreshCw className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Update Age</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Session refresh interval</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Session refresh interval
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -941,7 +1045,9 @@ export default function Settings() {
                 <Zap className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Session Refresh</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Auto refresh sessions</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Auto refresh sessions
+                  </p>
                 </div>
               </div>
               <Badge
@@ -967,7 +1073,9 @@ export default function Settings() {
                 <Database className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Store in Database</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Store sessions in database</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Store sessions in database
+                  </p>
                 </div>
               </div>
               <Badge
@@ -992,14 +1100,26 @@ export default function Settings() {
 
         {/* Rate Limiting */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <Shield className="w-4 h-4 text-white" />
               <span>Rate Limiting</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              API rate limiting configuration</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              API rate limiting configuration
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="p-0">
@@ -1008,7 +1128,9 @@ export default function Settings() {
                 <Shield className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Rate Limiting</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Enable rate limiting</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Enable rate limiting
+                  </p>
                 </div>
               </div>
               <Badge
@@ -1034,7 +1156,9 @@ export default function Settings() {
                 <Clock className="w-5 h-5 text-red-400" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Rate Limit Window</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Time window for rate limiting</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Time window for rate limiting
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1050,7 +1174,9 @@ export default function Settings() {
                 <Shield className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Max Requests</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Maximum requests per window</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Maximum requests per window
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1064,7 +1190,9 @@ export default function Settings() {
                 <Database className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Storage</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Rate limit storage type</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Rate limit storage type
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1078,14 +1206,26 @@ export default function Settings() {
 
         {/* Advanced Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <SettingsIcon className="w-4 h-4 text-white" />
               <span>Advanced</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Advanced configuration options</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Advanced configuration options
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="p-0">
@@ -1094,7 +1234,9 @@ export default function Settings() {
                 <Lock className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Secure Cookies</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Use secure cookies</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Use secure cookies
+                  </p>
                 </div>
               </div>
               <Badge
@@ -1120,7 +1262,9 @@ export default function Settings() {
                 <Shield className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">CSRF Check</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">CSRF protection</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    CSRF protection
+                  </p>
                 </div>
               </div>
               <Badge
@@ -1146,7 +1290,9 @@ export default function Settings() {
                 <Eye className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">IP Tracking</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Track IP addresses</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Track IP addresses
+                  </p>
                 </div>
               </div>
               <Badge
@@ -1172,7 +1318,9 @@ export default function Settings() {
                 <Bell className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Telemetry</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Usage analytics</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Usage analytics
+                  </p>
                 </div>
               </div>
               <Badge
@@ -1197,14 +1345,26 @@ export default function Settings() {
 
         {/* System Information */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
-          <CardHeader className='space-y-0'>
+          <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
               <Info className="w-4 h-4 text-white" />
               <span>System Info</span>
             </CardTitle>
             <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-              <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-              Better Auth Studio system information</CardDescription>
+              <svg
+                className="w-3 h-3 inline-flex text-gray-400"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                {' '}
+                <path
+                  d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                  fill="currentColor"
+                />{' '}
+              </svg>
+              Better Auth Studio system information
+            </CardDescription>
           </CardHeader>
           <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
           <CardContent className="p-0">
@@ -1213,7 +1373,9 @@ export default function Settings() {
                 <Zap className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Studio Version</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Better Auth Studio</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Better Auth Studio
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1227,7 +1389,9 @@ export default function Settings() {
                 <Info className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Node.js Version</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Runtime environment</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Runtime environment
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1243,7 +1407,9 @@ export default function Settings() {
                 <Globe className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Platform</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Operating system</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Operating system
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1257,7 +1423,9 @@ export default function Settings() {
                 <Clock className="w-5 h-5 text-white" />
                 <div>
                   <p className="text-sm font-light uppercase text-white">Uptime</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">Service uptime</p>
+                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                    Service uptime
+                  </p>
                 </div>
               </div>
               <div className="text-right">
@@ -1268,15 +1436,27 @@ export default function Settings() {
           </CardContent>
         </Card>
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none lg:col-span-2">
-          <div className='flex justify-between items-center'>
-            <CardHeader className='space-y-0'>
+          <div className="flex justify-between items-center">
+            <CardHeader className="space-y-0">
               <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
                 <Puzzle className="w-4 h-4 text-white" />
                 <span>Plugins</span>
               </CardTitle>
               <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-                <svg className="w-3 h-3 inline-flex text-gray-400" fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z" fill="currentColor" /> </svg>
-                Better Auth plugins enabled in your configuration</CardDescription>
+                <svg
+                  className="w-3 h-3 inline-flex text-gray-400"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                >
+                  {' '}
+                  <path
+                    d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
+                    fill="currentColor"
+                  />{' '}
+                </svg>
+                Better Auth plugins enabled in your configuration
+              </CardDescription>
             </CardHeader>
             <div className="pr-6">
               <p className="text-sm font-medium text-white">{plugins?.totalPlugins || 0}</p>
@@ -1299,7 +1479,9 @@ export default function Settings() {
                           {plugin.name.slice(0, 1).toUpperCase() +
                             plugin.name.slice(1).replace('-', ' ')}
                         </p>
-                        <p className="text-[10px] font-light uppercase font-mono text-gray-400">{plugin.description}</p>
+                        <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                          {plugin.description}
+                        </p>
                       </div>
                     </div>
                     <div className="text-right flex items-center space-x-2">

@@ -289,12 +289,16 @@ async function getRealAnalytics(adapter, options) {
             users = adapter.getUsers ? await adapter.getUsers() : [];
             sessions = adapter.getSessions ? await adapter.getSessions() : [];
         }
-        const organizations = adapter.findMany ? await adapter.findMany({ model: 'organization', limit: 100000 }).catch(() => []) : [];
-        const teams = adapter.findMany ? await adapter.findMany({ model: 'team', limit: 100000 }).catch(() => []) : [];
+        const organizations = adapter.findMany
+            ? await adapter.findMany({ model: 'organization', limit: 100000 }).catch(() => [])
+            : [];
+        const teams = adapter.findMany
+            ? await adapter.findMany({ model: 'team', limit: 100000 }).catch(() => [])
+            : [];
         // Determine the time range
         const now = new Date();
         let startDate;
-        let endDate = to ? new Date(to) : now;
+        const endDate = to ? new Date(to) : now;
         if (from) {
             startDate = new Date(from);
         }
@@ -323,14 +327,17 @@ async function getRealAnalytics(adapter, options) {
                     startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
                     break;
                 case 'ALL':
-                default:
+                default: {
                     // Get the earliest creation date from users
                     const earliestUser = users.reduce((earliest, user) => {
                         const userDate = new Date(user.createdAt);
                         return !earliest || userDate < new Date(earliest.createdAt) ? user : earliest;
                     }, null);
-                    startDate = earliestUser ? new Date(earliestUser.createdAt) : new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+                    startDate = earliestUser
+                        ? new Date(earliestUser.createdAt)
+                        : new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
                     break;
+                }
             }
         }
         // Generate time buckets based on period
@@ -447,7 +454,7 @@ async function getRealAnalytics(adapter, options) {
         let data = [];
         if (type === 'users') {
             // For users, count users created within each bucket (non-cumulative)
-            data = buckets.map(bucket => {
+            data = buckets.map((bucket) => {
                 return users.filter((user) => {
                     const createdAt = new Date(user.createdAt);
                     return createdAt >= bucket.start && createdAt < bucket.end;
@@ -456,7 +463,7 @@ async function getRealAnalytics(adapter, options) {
         }
         else if (type === 'newUsers') {
             // For new users, count users created within each bucket
-            data = buckets.map(bucket => {
+            data = buckets.map((bucket) => {
                 return users.filter((user) => {
                     const createdAt = new Date(user.createdAt);
                     return createdAt >= bucket.start && createdAt < bucket.end;
@@ -465,18 +472,20 @@ async function getRealAnalytics(adapter, options) {
         }
         else if (type === 'activeUsers') {
             // Active users = users with active sessions in that period
-            data = buckets.map(bucket => {
+            data = buckets.map((bucket) => {
                 const activeSessions = sessions.filter((session) => {
                     const sessionCreated = new Date(session.createdAt);
                     const sessionExpires = new Date(session.expiresAt || session.expires);
-                    return sessionCreated >= bucket.start && sessionCreated < bucket.end && sessionExpires > bucket.start;
+                    return (sessionCreated >= bucket.start &&
+                        sessionCreated < bucket.end &&
+                        sessionExpires > bucket.start);
                 });
                 return new Set(activeSessions.map((s) => s.userId)).size;
             });
         }
         else if (type === 'organizations') {
             // For organizations, count orgs created within each bucket (non-cumulative)
-            data = buckets.map(bucket => {
+            data = buckets.map((bucket) => {
                 return organizations.filter((org) => {
                     const createdAt = new Date(org.createdAt);
                     return createdAt >= bucket.start && createdAt < bucket.end;
@@ -485,7 +494,7 @@ async function getRealAnalytics(adapter, options) {
         }
         else if (type === 'teams') {
             // For teams, count teams created within each bucket (non-cumulative)
-            data = buckets.map(bucket => {
+            data = buckets.map((bucket) => {
                 return teams.filter((team) => {
                     const createdAt = new Date(team.createdAt);
                     return createdAt >= bucket.start && createdAt < bucket.end;
@@ -500,7 +509,7 @@ async function getRealAnalytics(adapter, options) {
         const percentageChange = previousValue > 0 ? ((lastValue - previousValue) / previousValue) * 100 : 0;
         return {
             data,
-            labels: buckets.map(b => b.label),
+            labels: buckets.map((b) => b.label),
             total,
             average: Math.round(average),
             percentageChange: Math.round(percentageChange * 10) / 10,

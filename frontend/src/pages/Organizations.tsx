@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import {
   Building2,
   Calendar as CalendarIcon,
@@ -14,22 +15,16 @@ import {
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Terminal } from '../components/Terminal';
 import { Button } from '../components/ui/button';
 import { Calendar } from '../components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Pagination } from '../components/ui/pagination';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from '../components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '../components/ui/select';
 import { useCounts } from '../contexts/CountsContext';
 
 interface Organization {
@@ -52,13 +47,13 @@ interface PluginStatus {
 export default function Organizations() {
   const navigate = useNavigate();
   const { counts, refetchCounts } = useCounts();
-  
+
   interface FilterConfig {
     type: string;
     value?: any;
     dateRange?: DateRange;
   }
-  
+
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [pluginStatus, setPluginStatus] = useState<PluginStatus | null>(null);
@@ -417,9 +412,7 @@ export default function Organizations() {
   };
 
   const updateFilterDateRange = (filterType: string, dateRange: DateRange | undefined) => {
-    setActiveFilters((prev) =>
-      prev.map((f) => (f.type === filterType ? { ...f, dateRange } : f))
-    );
+    setActiveFilters((prev) => prev.map((f) => (f.type === filterType ? { ...f, dateRange } : f)));
   };
 
   const filteredOrganizations = organizations.filter((organization) => {
@@ -577,12 +570,14 @@ export default function Organizations() {
           <h1 className="text-2xl relative text-white font-light inline-flex items-start">
             Organizations
             <sup className="text-xs text-gray-500 ml-1 mt-0">
-              <span className='mr-1'>[</span>
-              <span className='text-white font-mono text-sm'>{counts.organizations}</span>
-              <span className='ml-1'>]</span>
+              <span className="mr-1">[</span>
+              <span className="text-white font-mono text-sm">{counts.organizations}</span>
+              <span className="ml-1">]</span>
             </sup>
           </h1>
-          <p className="text-gray-400 font-light text-sm mt-1 uppercase font-mono">Manage your organizations and teams</p>
+          <p className="text-gray-400 font-light text-sm mt-1 uppercase font-mono">
+            Manage your organizations and teams
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <Button
@@ -599,7 +594,7 @@ export default function Organizations() {
             <Database className="w-4 h-4 mr-2" />
             Seed
           </Button>
-          
+
           <Button
             className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
             onClick={() => setShowCreateModal(true)}
@@ -641,9 +636,7 @@ export default function Organizations() {
 
           {activeFilters.length > 0 && (
             <div className="flex items-center space-x-2">
-              <Button onClick={clearFilters}>
-                Clear all
-              </Button>
+              <Button onClick={clearFilters}>Clear all</Button>
             </div>
           )}
         </div>
@@ -669,7 +662,9 @@ export default function Organizations() {
                             className="h-8 px-3 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
                           >
                             <CalendarIcon className="mr-1 h-3 w-3" />
-                            {filter.dateRange?.from ? format(filter.dateRange.from, 'MMM dd yyyy') : 'From'}
+                            {filter.dateRange?.from
+                              ? format(filter.dateRange.from, 'MMM dd yyyy')
+                              : 'From'}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-black border-white/10">
@@ -677,7 +672,10 @@ export default function Organizations() {
                             mode="single"
                             selected={filter.dateRange?.from}
                             onSelect={(date) =>
-                              updateFilterDateRange('createdAt', { from: date, to: filter.dateRange?.to })
+                              updateFilterDateRange('createdAt', {
+                                from: date,
+                                to: filter.dateRange?.to,
+                              })
                             }
                             initialFocus
                             className="rounded-none"
@@ -692,7 +690,9 @@ export default function Organizations() {
                             className="h-8 px-3 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
                           >
                             <CalendarIcon className="mr-1 h-3 w-3" />
-                            {filter.dateRange?.to ? format(filter.dateRange.to, 'MMM dd yyyy') : 'To'}
+                            {filter.dateRange?.to
+                              ? format(filter.dateRange.to, 'MMM dd yyyy')
+                              : 'To'}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-black border-white/10">
@@ -700,10 +700,15 @@ export default function Organizations() {
                             mode="single"
                             selected={filter.dateRange?.to}
                             onSelect={(date) =>
-                              updateFilterDateRange('createdAt', { from: filter.dateRange?.from, to: date })
+                              updateFilterDateRange('createdAt', {
+                                from: filter.dateRange?.from,
+                                to: date,
+                              })
                             }
                             initialFocus
-                            disabled={(date) => (filter.dateRange?.from ? date < filter.dateRange.from : false)}
+                            disabled={(date) =>
+                              filter.dateRange?.from ? date < filter.dateRange.from : false
+                            }
                             className="rounded-none"
                           />
                         </PopoverContent>

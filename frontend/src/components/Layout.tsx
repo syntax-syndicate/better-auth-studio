@@ -1,4 +1,12 @@
-import { Building2, Database, LayoutDashboard, Search, Settings, Users, Wrench } from 'lucide-react';
+import {
+  Building2,
+  Database,
+  LayoutDashboard,
+  Search,
+  Settings,
+  Users,
+  Wrench,
+} from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCounts } from '../contexts/CountsContext';
@@ -35,7 +43,7 @@ export default function Layout({ children }: LayoutProps) {
         if (data.studio?.version) {
           setStudioVersion(`v${data.studio.version}`);
         }
-      } catch (_error) { }
+      } catch (_error) {}
     };
 
     fetchVersion();
@@ -76,12 +84,15 @@ export default function Layout({ children }: LayoutProps) {
               <div className="w-7 h-7 border border-dashed border-white/20 rounded-lg flex items-center justify-center">
                 <span className="text-black font-bold text-md">⚡</span>
               </div>
-              <div className='mb-0'>
-                <h1 className="text-md inline-flex mb-0 items-start font-light font-mono uppercase text-white">Better-Auth Studio
+              <div className="mb-0">
+                <h1 className="text-md inline-flex mb-0 items-start font-light font-mono uppercase text-white">
+                  Better-Auth Studio
                   <sup className="text-sm text-gray-500 ml-1 mt-0">
-                    <span className='mr-1'>[</span>
-                    <span className='text-white/80 lowercase font-mono text-xs'>{studioVersion}</span>
-                    <span className='ml-1'>]</span>
+                    <span className="mr-1">[</span>
+                    <span className="text-white/80 lowercase font-mono text-xs">
+                      {studioVersion}
+                    </span>
+                    <span className="ml-1">]</span>
                   </sup>
                 </h1>
                 {/* <p className="text-xs text-gray-300">{studioVersion}</p> */}
@@ -132,19 +143,20 @@ export default function Layout({ children }: LayoutProps) {
                 <Link
                   key={item.name}
                   to={item.href}
-                  className={`flex items-center space-x-2 px-3 py-4 text-sm font-medium border-b-2 transition-all duration-200 ${isActive
+                  className={`flex items-center space-x-2 px-3 py-4 text-sm font-medium border-b-2 transition-all duration-200 ${
+                    isActive
                       ? 'border-white text-white'
                       : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'
-                    }`}
+                  }`}
                 >
                   <item.icon className="w-4 h-4" />
                   <span className="inline-flex items-start">
                     {item.name}
                     {item.badge && (
                       <sup className="text-xs text-gray-500 ml-1">
-                        <span className='mr-0.5'>[</span>
-                        <span className='text-white/80 font-mono text-xs'>{item.badge}</span>
-                        <span className='ml-0.5'>]</span>
+                        <span className="mr-0.5">[</span>
+                        <span className="text-white/80 font-mono text-xs">{item.badge}</span>
+                        <span className="ml-0.5">]</span>
                       </sup>
                     )}
                   </span>

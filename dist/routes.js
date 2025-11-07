@@ -1,15 +1,15 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+// @ts-expect-error
+import { hex } from '@better-auth/utils/hex';
+import { scryptAsync } from '@noble/hashes/scrypt.js';
 import { Router } from 'express';
 import { createJiti } from 'jiti';
 import { createMockAccount, createMockSession, createMockUser, createMockVerification, getAuthAdapter, } from './auth-adapter.js';
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
-import { scryptAsync } from "@noble/hashes/scrypt.js";
-// @ts-ignore
-import { hex } from "@better-auth/utils/hex";
 const config = {
     N: 16384,
     r: 16,
@@ -17,7 +17,7 @@ const config = {
     dkLen: 64,
 };
 async function generateKey(password, salt) {
-    return await scryptAsync(password.normalize("NFKC"), salt, {
+    return await scryptAsync(password.normalize('NFKC'), salt, {
         N: config.N,
         p: config.p,
         r: config.r,
@@ -247,7 +247,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                     const packageJsonPath = join(projectRoot, 'package.json');
                     if (existsSync(packageJsonPath)) {
                         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-                        let versionString = packageJson.dependencies?.['better-auth'] ||
+                        const versionString = packageJson.dependencies?.['better-auth'] ||
                             packageJson.devDependencies?.['better-auth'] ||
                             '1.0.0';
                         currentVersion = versionString.replace(/[\^~>=<]/g, '');
@@ -327,8 +327,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 adapterConfig = adapterResult.options.adapterConfig;
             }
         }
-        catch (_error) {
-        }
+        catch (_error) { }
         try {
             const detectedDb = await detectDatabaseWithDialect();
             if (detectedDb) {
@@ -651,7 +650,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({ error: 'Failed to update user' });
         }
     });
-    router.put("/api/users/:userId/password", async (req, res) => {
+    router.put('/api/users/:userId/password', async (req, res) => {
         try {
             const { userId } = req.params;
             const { password } = req.body;
@@ -672,8 +671,11 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 res.status(500).json({ error: 'Failed to hash password' });
             }
             const account = await adapter.update({
-                model: "account",
-                where: [{ field: 'userId', value: userId }, { field: "providerId", value: "credential" }],
+                model: 'account',
+                where: [
+                    { field: 'userId', value: userId },
+                    { field: 'providerId', value: 'credential' },
+                ],
                 update: { password: hashedPassword },
             });
             res.json({ success: true, account });
@@ -764,9 +766,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                             organizationName: organization
                                 ? organization.name || 'Unknown Organization'
                                 : 'Unknown Organization',
-                            organizationSlug: organization
-                                ? organization.slug || 'unknown'
-                                : 'unknown',
+                            organizationSlug: organization ? organization.slug || 'unknown' : 'unknown',
                         }
                         : {
                             id: membership.teamId,
@@ -1186,7 +1186,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({ error: 'Failed to fetch database info' });
         }
     });
-    router.get("/api/database/test", async (_req, res) => {
+    router.get('/api/database/test', async (_req, res) => {
         try {
             const adapter = await getAuthAdapterWithConfig();
             if (!adapter || !adapter.findMany) {
@@ -2333,7 +2333,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 'Operations',
                 'Finance',
                 'HR',
-                'Legal'
+                'Legal',
             ];
             const results = [];
             for (let i = 0; i < count; i++) {
@@ -3248,7 +3248,7 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({
                 success: false,
                 error: 'Failed to initiate OAuth test',
-                details: error instanceof Error ? error.message : String(error)
+                details: error instanceof Error ? error.message : String(error),
             });
         }
     });
@@ -3259,11 +3259,15 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
         try {
             const { testSessionId, provider } = req.query;
             if (!testSessionId || !provider) {
-                return res.status(400).send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Missing test session or provider</body></html>');
+                return res
+                    .status(400)
+                    .send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Missing test session or provider</body></html>');
             }
             const session = oauthTestSessions.get(testSessionId);
             if (!session || session.provider !== provider) {
-                return res.status(404).send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">OAuth test session not found</body></html>');
+                return res
+                    .status(404)
+                    .send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">OAuth test session not found</body></html>');
             }
             const authBaseUrl = authConfig.baseURL || 'http://localhost:3000';
             const basePath = authConfig.basePath || '/api/auth';
@@ -3423,7 +3427,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
         }
         catch (error) {
             console.error('OAuth start error:', error);
-            res.status(500).send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Failed to start OAuth test</body></html>');
+            res
+                .status(500)
+                .send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Failed to start OAuth test</body></html>');
         }
     });
     router.get('/api/tools/oauth/callback', async (req, res) => {
@@ -3572,7 +3578,10 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 const sessionCandidate = sessions
                     .map((sessionItem) => ({
                     session: sessionItem,
-                    created: parseDate(sessionItem.createdAt || sessionItem.created_at || sessionItem.updatedAt || sessionItem.updated_at),
+                    created: parseDate(sessionItem.createdAt ||
+                        sessionItem.created_at ||
+                        sessionItem.updatedAt ||
+                        sessionItem.updated_at),
                 }))
                     .filter((entry) => entry.created >= threshold)
                     .sort((a, b) => b.created - a.created)[0];

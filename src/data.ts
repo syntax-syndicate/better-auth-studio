@@ -42,7 +42,14 @@ export interface PaginatedResult<T> {
 
 export async function getAuthData(
   _authConfig: AuthConfig,
-  type: 'stats' | 'users' | 'sessions' | 'providers' | 'deleteUser' | 'updateUser' | 'analytics' = 'stats',
+  type:
+    | 'stats'
+    | 'users'
+    | 'sessions'
+    | 'providers'
+    | 'deleteUser'
+    | 'updateUser'
+    | 'analytics' = 'stats',
   options?: any,
   configPath?: string
 ): Promise<any> {
@@ -81,7 +88,7 @@ async function getRealStats(adapter: any): Promise<AuthStats> {
     // Use findMany with high limit to get all records
     let users: any[] = [];
     let sessions: any[] = [];
-    
+
     if (adapter.findMany) {
       users = await adapter.findMany({ model: 'user', limit: 100000 }).catch(() => []);
       sessions = await adapter.findMany({ model: 'session', limit: 100000 }).catch(() => []);
@@ -372,14 +379,17 @@ function generateMockSessions(count: number): Session[] {
   return sessions;
 }
 
-async function getRealAnalytics(adapter: any, options: { period: string; type: string; from?: string; to?: string }): Promise<any> {
+async function getRealAnalytics(
+  adapter: any,
+  options: { period: string; type: string; from?: string; to?: string }
+): Promise<any> {
   try {
     const { period, type, from, to } = options;
-    
+
     // Get all users and sessions from the database
     let users: any[] = [];
     let sessions: any[] = [];
-    
+
     // Try to fetch with higher limits
     if (adapter.findMany) {
       users = await adapter.findMany({ model: 'user', limit: 100000 }).catch(() => []);
@@ -388,15 +398,19 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
       users = adapter.getUsers ? await adapter.getUsers() : [];
       sessions = adapter.getSessions ? await adapter.getSessions() : [];
     }
-    
-    const organizations = adapter.findMany ? await adapter.findMany({ model: 'organization', limit: 100000 }).catch(() => []) : [];
-    const teams = adapter.findMany ? await adapter.findMany({ model: 'team', limit: 100000 }).catch(() => []) : [];
-    
+
+    const organizations = adapter.findMany
+      ? await adapter.findMany({ model: 'organization', limit: 100000 }).catch(() => [])
+      : [];
+    const teams = adapter.findMany
+      ? await adapter.findMany({ model: 'team', limit: 100000 }).catch(() => [])
+      : [];
+
     // Determine the time range
     const now = new Date();
     let startDate: Date;
-    let endDate = to ? new Date(to) : now;
-    
+    const endDate = to ? new Date(to) : now;
+
     if (from) {
       startDate = new Date(from);
     } else {
@@ -424,20 +438,23 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
           startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
           break;
         case 'ALL':
-        default:
+        default: {
           // Get the earliest creation date from users
           const earliestUser = users.reduce((earliest: any, user: any) => {
             const userDate = new Date(user.createdAt);
             return !earliest || userDate < new Date(earliest.createdAt) ? user : earliest;
           }, null);
-          startDate = earliestUser ? new Date(earliestUser.createdAt) : new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+          startDate = earliestUser
+            ? new Date(earliestUser.createdAt)
+            : new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
           break;
+        }
       }
     }
-    
+
     // Generate time buckets based on period
     const buckets: { start: Date; end: Date; label: string }[] = [];
-    
+
     if (period === '1D') {
       // 24 hours - last 24 hours from now
       for (let i = 0; i < 24; i++) {
@@ -515,16 +532,19 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
       }
     } else if (period === 'Custom' || period === 'ALL') {
       // Custom or ALL - divide into equal buckets
-      const totalDays = Math.ceil((endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000));
+      const totalDays = Math.ceil(
+        (endDate.getTime() - startDate.getTime()) / (24 * 60 * 60 * 1000)
+      );
       const bucketCount = Math.min(Math.max(totalDays, 1), 30); // Max 30 buckets, min 1
       const bucketSize = totalDays / bucketCount;
-      
+
       for (let i = 0; i < bucketCount; i++) {
         const bucketStart = new Date(startDate.getTime() + i * bucketSize * 24 * 60 * 60 * 1000);
-        const bucketEnd = i === bucketCount - 1 
-          ? endDate 
-          : new Date(bucketStart.getTime() + bucketSize * 24 * 60 * 60 * 1000);
-        
+        const bucketEnd =
+          i === bucketCount - 1
+            ? endDate
+            : new Date(bucketStart.getTime() + bucketSize * 24 * 60 * 60 * 1000);
+
         // Generate better labels based on date range
         let label: string;
         if (totalDays <= 7) {
@@ -540,13 +560,13 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
         buckets.push({ start: bucketStart, end: bucketEnd, label });
       }
     }
-    
+
     // Count items in each bucket based on type
     let data: number[] = [];
-    
+
     if (type === 'users') {
       // For users, count users created within each bucket (non-cumulative)
-      data = buckets.map(bucket => {
+      data = buckets.map((bucket) => {
         return users.filter((user: any) => {
           const createdAt = new Date(user.createdAt);
           return createdAt >= bucket.start && createdAt < bucket.end;
@@ -554,7 +574,7 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
       });
     } else if (type === 'newUsers') {
       // For new users, count users created within each bucket
-      data = buckets.map(bucket => {
+      data = buckets.map((bucket) => {
         return users.filter((user: any) => {
           const createdAt = new Date(user.createdAt);
           return createdAt >= bucket.start && createdAt < bucket.end;
@@ -562,17 +582,21 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
       });
     } else if (type === 'activeUsers') {
       // Active users = users with active sessions in that period
-      data = buckets.map(bucket => {
+      data = buckets.map((bucket) => {
         const activeSessions = sessions.filter((session: any) => {
           const sessionCreated = new Date(session.createdAt);
           const sessionExpires = new Date(session.expiresAt || session.expires);
-          return sessionCreated >= bucket.start && sessionCreated < bucket.end && sessionExpires > bucket.start;
+          return (
+            sessionCreated >= bucket.start &&
+            sessionCreated < bucket.end &&
+            sessionExpires > bucket.start
+          );
         });
         return new Set(activeSessions.map((s: any) => s.userId)).size;
       });
     } else if (type === 'organizations') {
       // For organizations, count orgs created within each bucket (non-cumulative)
-      data = buckets.map(bucket => {
+      data = buckets.map((bucket) => {
         return organizations.filter((org: any) => {
           const createdAt = new Date(org.createdAt);
           return createdAt >= bucket.start && createdAt < bucket.end;
@@ -580,24 +604,25 @@ async function getRealAnalytics(adapter: any, options: { period: string; type: s
       });
     } else if (type === 'teams') {
       // For teams, count teams created within each bucket (non-cumulative)
-      data = buckets.map(bucket => {
+      data = buckets.map((bucket) => {
         return teams.filter((team: any) => {
           const createdAt = new Date(team.createdAt);
           return createdAt >= bucket.start && createdAt < bucket.end;
         }).length;
       });
     }
-    
+
     // Calculate percentage change
     const total = data.reduce((sum, val) => sum + val, 0);
     const average = total / data.length;
     const lastValue = data[data.length - 1] || 0;
     const previousValue = data[data.length - 2] || average;
-    const percentageChange = previousValue > 0 ? ((lastValue - previousValue) / previousValue) * 100 : 0;
-    
+    const percentageChange =
+      previousValue > 0 ? ((lastValue - previousValue) / previousValue) * 100 : 0;
+
     return {
       data,
-      labels: buckets.map(b => b.label),
+      labels: buckets.map((b) => b.label),
       total,
       average: Math.round(average),
       percentageChange: Math.round(percentageChange * 10) / 10,

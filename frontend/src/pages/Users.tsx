@@ -1,3 +1,4 @@
+import { format } from 'date-fns';
 import {
   Ban,
   Calendar as CalendarIcon,
@@ -20,16 +21,15 @@ import {
 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import type { DateRange } from 'react-day-picker';
-import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Terminal } from '../components/Terminal';
 import { Button } from '../components/ui/button';
 import { Calendar } from '../components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Pagination } from '../components/ui/pagination';
+import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../components/ui/select';
 import { useCounts } from '../contexts/CountsContext';
 
@@ -553,12 +553,14 @@ export default function Users() {
           <h1 className="text-2xl relative text-white font-light inline-flex items-start">
             Users
             <sup className="text-xs text-gray-500 ml-1 mt-0">
-              <span className='mr-1'>[</span>
-              <span className='text-white font-mono text-sm'>{counts.users}</span>
-              <span className='ml-1'>]</span>
+              <span className="mr-1">[</span>
+              <span className="text-white font-mono text-sm">{counts.users}</span>
+              <span className="ml-1">]</span>
             </sup>
           </h1>
-          <p className="text-gray-400 font-light text-sm mt-1 uppercase font-mono">Manage your application users</p>
+          <p className="text-gray-400 font-light text-sm mt-1 uppercase font-mono">
+            Manage your application users
+          </p>
           <div className="flex items-center space-x-4 mt-2">
             {bannedCount > 0 && (
               <span className="text-sm text-red-400 flex items-center space-x-1">
@@ -632,14 +634,11 @@ export default function Users() {
           </div>
           {activeFilters.length > 0 && (
             <div className="flex items-center space-x-2">
-              <Button
-                onClick={() => setActiveFilters([])}
-                className=""
-              >
+              <Button onClick={() => setActiveFilters([])} className="">
                 Clear all
               </Button>
             </div>
-            )}
+          )}
         </div>
 
         {/* Active Filters */}
@@ -711,14 +710,21 @@ export default function Users() {
                             className="h-8 px-3 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
                           >
                             <CalendarIcon className="mr-1 h-3 w-3" />
-                            {filter.dateRange?.from ? format(filter.dateRange.from, 'MMM dd yyyy') : 'From'}
+                            {filter.dateRange?.from
+                              ? format(filter.dateRange.from, 'MMM dd yyyy')
+                              : 'From'}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-black border-white/10">
                           <Calendar
                             mode="single"
                             selected={filter.dateRange?.from}
-                            onSelect={(date) => updateFilterDateRange('createdAt', { from: date, to: filter.dateRange?.to })}
+                            onSelect={(date) =>
+                              updateFilterDateRange('createdAt', {
+                                from: date,
+                                to: filter.dateRange?.to,
+                              })
+                            }
                             initialFocus
                             className="rounded-none"
                           />
@@ -732,16 +738,25 @@ export default function Users() {
                             className="h-8 px-3 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
                           >
                             <CalendarIcon className="mr-1 h-3 w-3" />
-                            {filter.dateRange?.to ? format(filter.dateRange.to, 'MMM dd yyyy') : 'To'}
+                            {filter.dateRange?.to
+                              ? format(filter.dateRange.to, 'MMM dd yyyy')
+                              : 'To'}
                           </Button>
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-0 bg-black border-white/10">
                           <Calendar
                             mode="single"
                             selected={filter.dateRange?.to}
-                            onSelect={(date) => updateFilterDateRange('createdAt', { from: filter.dateRange?.from, to: date })}
+                            onSelect={(date) =>
+                              updateFilterDateRange('createdAt', {
+                                from: filter.dateRange?.from,
+                                to: date,
+                              })
+                            }
                             initialFocus
-                            disabled={(date) => filter.dateRange?.from ? date < filter.dateRange.from : false}
+                            disabled={(date) =>
+                              filter.dateRange?.from ? date < filter.dateRange.from : false
+                            }
                             className="rounded-none"
                           />
                         </PopoverContent>
@@ -828,7 +843,8 @@ export default function Users() {
                 currentUsers.map((user) => (
                   <tr
                     key={user.id}
-                    className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${user.banned ? 'border-red-500/30 bg-red-500/5' : 'border-white/5'
+                    className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${
+                      user.banned ? 'border-red-500/30 bg-red-500/5' : 'border-white/5'
                     }`}
                     onClick={() => navigate(`/users/${user.id}`)}
                   >
@@ -841,7 +857,8 @@ export default function Users() {
                               `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`
                             }
                             alt={user.name}
-                            className={`w-10 h-10 rounded-none border border-dashed ${user.banned ? 'border-red-400/50 opacity-60' : 'border-white/20'
+                            className={`w-10 h-10 rounded-none border border-dashed ${
+                              user.banned ? 'border-red-400/50 opacity-60' : 'border-white/20'
                             }`}
                           />
                           {user.banned && (
@@ -1008,14 +1025,10 @@ export default function Users() {
           <div className="overflow-x-hidden bg-black/90 border border-white/10 p-6 w-full pt-4 max-w-2xl rounded-none">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm text-white flex items-center justify-center font-light uppercase">
-                <span className='text-white/50 mr-2'>
-                  [
-                </span>
-                  <UsersIcon className="inline mr-2 w-3 h-3 text-white" />
-                <span className='font-mono text-white/70 uppercase'>Seed User</span>
-                <span className='text-white/50 ml-2'>
-                  ]
-                </span>
+                <span className="text-white/50 mr-2">[</span>
+                <UsersIcon className="inline mr-2 w-3 h-3 text-white" />
+                <span className="font-mono text-white/70 uppercase">Seed User</span>
+                <span className="text-white/50 ml-2">]</span>
               </h3>
               <Button
                 variant="ghost"

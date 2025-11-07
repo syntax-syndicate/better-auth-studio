@@ -1,3 +1,7 @@
+import { Clock1, Edit } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Ban,
   Building2,
@@ -14,10 +18,6 @@ import {
   Users,
   X,
 } from '../components/PixelIcons';
-import { Clock1, Edit } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
 import { Terminal } from '../components/Terminal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -35,8 +35,8 @@ interface User {
   banned?: boolean;
   banReason?: string;
   banExpires?: string;
-  phoneNumber?: string
-  username?: string
+  phoneNumber?: string;
+  username?: string;
   role?: string;
 }
 
@@ -233,7 +233,7 @@ export default function UserDetails() {
         // Resolve locations for sessions
         resolveSessionLocations(sessions);
       }
-    } catch (_error) { }
+    } catch (_error) {}
   }, [userId]);
 
   const handleEditUser = async () => {
@@ -539,14 +539,15 @@ export default function UserDetails() {
   return (
     <div className="space-y-6 p-6 bg-black w-full">
       <div className="w-full flex flex-col">
-        <span
-          className="mb-4 ml-0 flex justify-start items-start text-left border-none text-white"
-        >
-          <span className='font-light'>
+        <span className="mb-4 ml-0 flex justify-start items-start text-left border-none text-white">
+          <span className="font-light">
             <span
               onClick={() => navigate('/users')}
-              className='uppercase cursor-pointer text-white/80 font-mono text-sm'>users / </span>
-            <span className='text-white font-mono text-sm'>{user.id}</span>
+              className="uppercase cursor-pointer text-white/80 font-mono text-sm"
+            >
+              users /{' '}
+            </span>
+            <span className="text-white font-mono text-sm">{user.id}</span>
           </span>
         </span>
         <div className="mb-8 mt-4">
@@ -570,9 +571,11 @@ export default function UserDetails() {
                     }}
                     title="Click to copy User ID"
                   >
-                    <span className='mr-1'>[</span>
-                    <span className='text-white/80 font-mono text-xs'>{user.id.slice(0, 8)}...</span>
-                    <span className='ml-1'>]</span>
+                    <span className="mr-1">[</span>
+                    <span className="text-white/80 font-mono text-xs">
+                      {user.id.slice(0, 8)}...
+                    </span>
+                    <span className="ml-1">]</span>
                   </sup>
                   {user.banned && (
                     <sup className="ml-2 px-2 pt-2 pb-2 -mt-1 py-0.5 text-[10px] font-mono uppercase border border-dashed border-red-500/30 bg-red-500/10 text-red-400/80 rounded-none">
@@ -643,19 +646,20 @@ export default function UserDetails() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === tab.id
-                    ? 'border-white text-white'
-                    : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-                    }`}
+                  className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-white text-white'
+                      : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
+                  }`}
                 >
                   <tab.icon className="w-4 h-4 text-white/90" />
                   <span className="inline-flex items-start">
                     <span className="">{tab.name}</span>
                     {tab.count !== undefined && (
                       <sup className="text-xs text-gray-500 ml-1">
-                        <span className='mr-0.5'>[</span>
-                        <span className='text-white/80 font-mono text-xs'>{tab.count}</span>
-                        <span className='ml-0.5'>]</span>
+                        <span className="mr-0.5">[</span>
+                        <span className="text-white/80 font-mono text-xs">{tab.count}</span>
+                        <span className="ml-0.5">]</span>
                       </sup>
                     )}
                   </span>
@@ -676,8 +680,12 @@ export default function UserDetails() {
                     <div className="flex items-start space-x-3">
                       <User className="w-4 h-4 text-gray-400 mt-1" />
                       <div className="flex-1">
-                        <div className="text-xs uppercase font-mono text-gray-500 mb-1">Username</div>
-                        <div className="text-white font-sans text-sm">{user.name.toLowerCase().replace(/\s+/g, '')}</div>
+                        <div className="text-xs uppercase font-mono text-gray-500 mb-1">
+                          Username
+                        </div>
+                        <div className="text-white font-sans text-sm">
+                          {user.name.toLowerCase().replace(/\s+/g, '')}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
@@ -691,7 +699,9 @@ export default function UserDetails() {
                       <div className="flex items-start space-x-3">
                         <HashIcon className="w-4 h-4 text-gray-400 mt-1" />
                         <div className="flex-1">
-                          <div className="text-xs uppercase font-mono text-gray-500 mb-1">Username</div>
+                          <div className="text-xs uppercase font-mono text-gray-500 mb-1">
+                            Username
+                          </div>
                           <div className="text-white font-mono text-sm">{user.username}</div>
                         </div>
                       </div>
@@ -700,7 +710,9 @@ export default function UserDetails() {
                       <div className="flex items-start space-x-3">
                         <Phone className="w-4 h-4 text-gray-400 mt-1" />
                         <div className="flex-1">
-                          <div className="text-xs uppercase font-mono text-gray-500 mb-1">Phone</div>
+                          <div className="text-xs uppercase font-mono text-gray-500 mb-1">
+                            Phone
+                          </div>
                           <div className="text-white font-mono text-sm">+251 91 234 5678</div>
                         </div>
                       </div>
@@ -708,14 +720,16 @@ export default function UserDetails() {
                     <div className="flex items-start space-x-3">
                       <Calendar className="w-4 h-4 text-gray-400 mt-1" />
                       <div className="flex-1">
-                        <div className="text-xs uppercase font-mono text-gray-500 mb-1">Member Since</div>
+                        <div className="text-xs uppercase font-mono text-gray-500 mb-1">
+                          Member Since
+                        </div>
                         <div className="text-white font-mono text-sm">
                           {new Date(user.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
                             hour: '2-digit',
-                            minute: '2-digit'
+                            minute: '2-digit',
                           })}
                         </div>
                       </div>
@@ -733,10 +747,14 @@ export default function UserDetails() {
                       <div className="flex items-center space-x-3">
                         <Mail className="w-4 h-4 text-gray-400" />
                         <div>
-                          <div className="text-xs uppercase font-mono text-gray-500">Email Verification</div>
+                          <div className="text-xs uppercase font-mono text-gray-500">
+                            Email Verification
+                          </div>
                         </div>
                       </div>
-                      <div className={`px-2 rounded-none py-1 text-xs font-mono ${user.emailVerified ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                      <div
+                        className={`px-2 rounded-none py-1 text-xs font-mono ${user.emailVerified ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
+                      >
                         {user.emailVerified ? 'Verified' : 'Unverified'}
                       </div>
                     </div>
@@ -745,11 +763,14 @@ export default function UserDetails() {
                       <div className="flex items-center space-x-3">
                         <Database className="w-4 h-4 text-gray-400" />
                         <div>
-                          <div className="text-xs uppercase font-mono text-gray-500">Two-Factor Authentication</div>
-
+                          <div className="text-xs uppercase font-mono text-gray-500">
+                            Two-Factor Authentication
+                          </div>
                         </div>
                       </div>
-                      <div className={`px-2 rounded-none py-1 text-xs font-mono ${user.twoFactorEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                      <div
+                        className={`px-2 rounded-none py-1 text-xs font-mono ${user.twoFactorEnabled ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
+                      >
                         {user.twoFactorEnabled ? 'Enabled' : 'Disabled'}
                       </div>
                     </div>
@@ -789,9 +810,11 @@ export default function UserDetails() {
                               <h3 className="text-white font-light inline-flex items-start">
                                 {membership.organization.name}
                                 <sup className="text-xs text-gray-500 ml-2 mt-0.5">
-                                  <span className='mr-1'>[</span>
-                                  <span className='text-white/80 font-mono text-xs'>{membership.organization.slug}</span>
-                                  <span className='ml-1'>]</span>
+                                  <span className="mr-1">[</span>
+                                  <span className="text-white/80 font-mono text-xs">
+                                    {membership.organization.slug}
+                                  </span>
+                                  <span className="ml-1">]</span>
                                 </sup>
                               </h3>
                               <p className="text-gray-400 text-sm font-sans mt-1">
@@ -801,14 +824,17 @@ export default function UserDetails() {
                           </div>
                           <div className="flex flex-col items-end space-y-2">
                             <div className="flex items-center space-x-2">
-                              <span className="text-gray-500 font-mono text-xs uppercase">Joined: </span>
+                              <span className="text-gray-500 font-mono text-xs uppercase">
+                                Joined:{' '}
+                              </span>
                               <span className="text-white font-mono text-xs">
                                 {new Date(membership.joinedAt).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'short',
                                   day: 'numeric',
                                 })}
-                                , {new Date(membership.joinedAt).toLocaleTimeString('en-US', {
+                                ,{' '}
+                                {new Date(membership.joinedAt).toLocaleTimeString('en-US', {
                                   hour: 'numeric',
                                   minute: '2-digit',
                                   hour12: true,
@@ -859,26 +885,34 @@ export default function UserDetails() {
                               <h3 className="text-white font-light inline-flex items-start">
                                 {membership.team.name}
                                 <sup className="text-xs text-gray-500 ml-2 mt-0.5">
-                                  <span className='mr-1'>[</span>
-                                  <span className='text-white/80 font-mono text-xs'>{membership.team.organizationSlug || membership.team.organizationName}</span>
-                                  <span className='ml-1'>]</span>
+                                  <span className="mr-1">[</span>
+                                  <span className="text-white/80 font-mono text-xs">
+                                    {membership.team.organizationSlug ||
+                                      membership.team.organizationName}
+                                  </span>
+                                  <span className="ml-1">]</span>
                                 </sup>
                               </h3>
                               <p className="text-gray-400 text-sm font-sans mt-1">
-                                in {membership.team.organizationSlug || membership.team.organizationName}
+                                in{' '}
+                                {membership.team.organizationSlug ||
+                                  membership.team.organizationName}
                               </p>
                             </div>
                           </div>
                           <div className="flex flex-col items-end space-y-2">
                             <div className="flex items-center space-x-2">
-                              <span className="text-gray-500 font-mono text-xs uppercase">Joined: </span>
+                              <span className="text-gray-500 font-mono text-xs uppercase">
+                                Joined:{' '}
+                              </span>
                               <span className="text-white font-mono text-xs">
                                 {new Date(membership.joinedAt).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'short',
                                   day: 'numeric',
                                 })}
-                                , {new Date(membership.joinedAt).toLocaleTimeString('en-US', {
+                                ,{' '}
+                                {new Date(membership.joinedAt).toLocaleTimeString('en-US', {
                                   hour: 'numeric',
                                   minute: '2-digit',
                                   hour12: true,
@@ -948,9 +982,11 @@ export default function UserDetails() {
                               <h3 className="text-white font-light inline-flex items-start">
                                 Session {session.id.substring(0, 8)}...
                                 <sup className="text-xs text-gray-500 ml-2 mt-0.5">
-                                  <span className='mr-1'>[</span>
-                                  <span className='text-white/80 font-mono text-xs'>{session.ipAddress}</span>
-                                  <span className='ml-1'>]</span>
+                                  <span className="mr-1">[</span>
+                                  <span className="text-white/80 font-mono text-xs">
+                                    {session.ipAddress}
+                                  </span>
+                                  <span className="ml-1">]</span>
                                 </sup>
                               </h3>
                               <div className="flex items-center space-x-2 mt-2">
@@ -969,14 +1005,17 @@ export default function UserDetails() {
                           </div>
                           <div className="flex flex-col items-end space-y-2">
                             <div className="flex items-center space-x-2">
-                              <span className="text-gray-500 font-mono text-xs uppercase">Expires: </span>
+                              <span className="text-gray-500 font-mono text-xs uppercase">
+                                Expires:{' '}
+                              </span>
                               <span className="text-white font-mono text-xs">
                                 {new Date(session.expiresAt).toLocaleDateString('en-US', {
                                   year: 'numeric',
                                   month: 'short',
                                   day: 'numeric',
                                 })}
-                                , {new Date(session.expiresAt).toLocaleTimeString('en-US', {
+                                ,{' '}
+                                {new Date(session.expiresAt).toLocaleTimeString('en-US', {
                                   hour: 'numeric',
                                   minute: '2-digit',
                                   hour12: true,
@@ -1170,14 +1209,10 @@ export default function UserDetails() {
           <div className="overflow-x-hidden bg-black/90 border border-white/10 p-6 w-full pt-4 max-w-2xl rounded-none">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-sm text-white flex items-center justify-center font-light uppercase">
-                <span className='text-white/50 mr-2'>
-                  [
-                </span>
+                <span className="text-white/50 mr-2">[</span>
                 <Monitor className="inline mr-2 w-3 h-3 text-white" />
-                <span className='font-mono text-white/70 uppercase'>Seed Sessions</span>
-                <span className='text-white/50 ml-2'>
-                  ]
-                </span>
+                <span className="font-mono text-white/70 uppercase">Seed Sessions</span>
+                <span className="text-white/50 ml-2">]</span>
               </h3>
               <Button
                 variant="ghost"
@@ -1209,7 +1244,8 @@ export default function UserDetails() {
                   <Button
                     onClick={() => {
                       const count = parseInt(
-                        (document.getElementById('session-count') as HTMLInputElement)?.value || '3',
+                        (document.getElementById('session-count') as HTMLInputElement)?.value ||
+                          '3',
                         10
                       );
                       handleSeedSessions(count);

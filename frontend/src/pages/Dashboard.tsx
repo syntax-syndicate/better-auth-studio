@@ -1,33 +1,29 @@
-import {
-  ArrowRight,
-  BarChart3,
-  Building2,
-  ChevronDown,
-  Copy,
-  Database,
-  Settings,
-  Users,
-  Search,
-  X,
-  Zap,
-  AlertTriangle,
-  CheckCircle,
-  Clock,
-  Calendar as CalendarIcon,
-} from '../components/PixelIcons';
-import { Shield, DollarSign, ArrowUpRight } from 'lucide-react';
+import { format } from 'date-fns';
+import { ArrowUpRight, DollarSign, Shield } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useCounts } from '@/contexts/CountsContext';
+import {
+  AlertTriangle,
+  ArrowRight,
+  BarChart3,
+  Building2,
+  Calendar as CalendarIcon,
+  CheckCircle,
+  ChevronDown,
+  Clock,
+  Copy,
+  Database,
+  Search,
+  Settings,
+  Users,
+  X,
+  Zap,
+} from '../components/PixelIcons';
 import OrganizationsPage from './Organizations';
 import UsersPage from './Users';
 
@@ -66,9 +62,14 @@ export default function Dashboard() {
     isOutdated: boolean;
   } | null>(null);
   const [hoveredUsersAreaIndex, setHoveredUsersAreaIndex] = useState<number | null>(null);
-  const [hoveredUsersAreaPosition, setHoveredUsersAreaPosition] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredUsersAreaPosition, setHoveredUsersAreaPosition] = useState<{
+    x: number;
+    y: number;
+  } | null>(null);
   const [hoveredAreaIndex, setHoveredAreaIndex] = useState<number | null>(null);
-  const [hoveredAreaPosition, setHoveredAreaPosition] = useState<{ x: number; y: number } | null>(null);
+  const [hoveredAreaPosition, setHoveredAreaPosition] = useState<{ x: number; y: number } | null>(
+    null
+  );
 
   // Custom date range states
   const [activeUsersDateFrom, setActiveUsersDateFrom] = useState<Date | undefined>(undefined);
@@ -94,7 +95,7 @@ export default function Dashboard() {
   const [teamsCount, setTeamsCount] = useState(0);
   const [organizationsLoading, setOrganizationsLoading] = useState(false);
   const [teamsLoading, setTeamsLoading] = useState(false);
-  
+
   // Daily percentages for stats bar
   const [usersDailyPercentage, setUsersDailyPercentage] = useState(0);
   const [organizationsDailyPercentage, setOrganizationsDailyPercentage] = useState(0);
@@ -263,7 +264,12 @@ export default function Dashboard() {
   // Fetch total users chart analytics
   useEffect(() => {
     const fetchData = async () => {
-      const data = await fetchAnalytics('users', selectedUserPeriod, activeUsersDateFrom, activeUsersDateTo);
+      const data = await fetchAnalytics(
+        'users',
+        selectedUserPeriod,
+        activeUsersDateFrom,
+        activeUsersDateTo
+      );
       if (data) {
         setTotalUsersData(data.data || []);
         setTotalUsersLabels(data.labels || []);
@@ -276,11 +282,11 @@ export default function Dashboard() {
   // Sync newUsersPeriod with selectedSubscriptionPeriod
   useEffect(() => {
     const periodMap: Record<string, string> = {
-      'Daily': '1D',
-      'Weekly': '1W',
-      'Monthly': '1M',
-      'Yearly': '1Y',
-      'Custom': 'Custom'
+      Daily: '1D',
+      Weekly: '1W',
+      Monthly: '1M',
+      Yearly: '1Y',
+      Custom: 'Custom',
     };
     if (newUsersPeriod && periodMap[newUsersPeriod]) {
       setSelectedSubscriptionPeriod(periodMap[newUsersPeriod]);
@@ -391,7 +397,12 @@ export default function Dashboard() {
           return; // Don't fetch if dates are not set
         }
       }
-      const data = await fetchAnalytics('newUsers', selectedSubscriptionPeriod, newUsersDateFrom, newUsersDateTo);
+      const data = await fetchAnalytics(
+        'newUsers',
+        selectedSubscriptionPeriod,
+        newUsersDateFrom,
+        newUsersDateTo
+      );
       if (data) {
         setNewUsersData(data.data || []);
         setNewUsersLabels(data.labels || []);
@@ -591,7 +602,13 @@ export default function Dashboard() {
   const getChartLabels = (period: string, dataSource: 'users' | 'newUsers' = 'users') => {
     const labels = dataSource === 'users' ? totalUsersLabels : newUsersLabels;
     const lengths: Record<string, number> = {
-      '1D': 24, '1W': 7, '1M': 30, '3M': 3, '6M': 6, '1Y': 12, 'ALL': 7
+      '1D': 24,
+      '1W': 7,
+      '1M': 30,
+      '3M': 3,
+      '6M': 6,
+      '1Y': 12,
+      ALL: 7,
     };
     const expectedLength = lengths[period] || 7;
 
@@ -599,24 +616,26 @@ export default function Dashboard() {
     if (labels && labels.length > 0 && labels.length === expectedLength) {
       if (period === '1D') {
         // For 1D, show every 4 hours
-        return labels.filter((_, i) => i % 4 === 0).map(label => {
-          // Convert hour format to am/pm
-          const hour = parseInt(label.replace('h', ''));
-          if (hour === 0) return '12am';
-          if (hour < 12) return `${hour}am`;
-          if (hour === 12) return '12pm';
-          return `${hour - 12}pm`;
-        });
+        return labels
+          .filter((_, i) => i % 4 === 0)
+          .map((label) => {
+            // Convert hour format to am/pm
+            const hour = parseInt(label.replace('h', ''));
+            if (hour === 0) return '12am';
+            if (hour < 12) return `${hour}am`;
+            if (hour === 12) return '12pm';
+            return `${hour - 12}pm`;
+          });
       }
       if (period === '1W') {
         // For 1W, use day names directly (Mon, Tue, Wed, etc.)
-        return labels.map(label => {
+        return labels.map((label) => {
           return label.length > 3 ? label.substring(0, 3) : label;
         });
       }
       if (period === '1M') {
         // For 1M, show day numbers only for x-axis (labels are like "Nov 5")
-        return labels.map(label => {
+        return labels.map((label) => {
           const parts = label.split(' ');
           if (parts.length >= 2) {
             return parts[1]; // Just the day number
@@ -626,13 +645,13 @@ export default function Dashboard() {
       }
       if (period === '1Y' || period === '3M' || period === '6M') {
         // For months, use short month names (Jan, Feb, Mar, etc.)
-        return labels.map(label => {
+        return labels.map((label) => {
           // Labels should already be month names like "Nov", "Dec", etc.
           return label.length > 3 ? label.substring(0, 3) : label;
         });
       }
       // For other periods, use labels directly but shorten them
-      return labels.map(label => {
+      return labels.map((label) => {
         if (label.length > 3) return label.substring(0, 3);
         return label;
       });
@@ -683,7 +702,13 @@ export default function Dashboard() {
   const getDetailedLabels = (period: string, dataSource: 'users' | 'newUsers' = 'users') => {
     const labels = dataSource === 'users' ? totalUsersLabels : newUsersLabels;
     const lengths: Record<string, number> = {
-      '1D': 24, '1W': 7, '1M': 30, '3M': 3, '6M': 6, '1Y': 12, 'ALL': 7
+      '1D': 24,
+      '1W': 7,
+      '1M': 30,
+      '3M': 3,
+      '6M': 6,
+      '1Y': 12,
+      ALL: 7,
     };
     const expectedLength = lengths[period] || 7;
 
@@ -691,7 +716,7 @@ export default function Dashboard() {
     if (labels && labels.length > 0 && labels.length === expectedLength) {
       if (period === '1D') {
         // Convert hour format to am/pm for tooltips
-        return labels.map(label => {
+        return labels.map((label) => {
           const hour = parseInt(label.replace('h', ''));
           if (hour === 0) return '12am';
           if (hour < 12) return `${hour}am`;
@@ -701,10 +726,36 @@ export default function Dashboard() {
       }
       if (period === '1Y' || period === '3M' || period === '6M') {
         // For months, convert short names to full names
-        return labels.map(label => {
-          const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-          const shortNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-          const index = shortNames.findIndex(s => s === label);
+        return labels.map((label) => {
+          const monthNames = [
+            'January',
+            'February',
+            'March',
+            'April',
+            'May',
+            'June',
+            'July',
+            'August',
+            'September',
+            'October',
+            'November',
+            'December',
+          ];
+          const shortNames = [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dec',
+          ];
+          const index = shortNames.findIndex((s) => s === label);
           if (index !== -1) return monthNames[index];
           return label;
         });
@@ -763,7 +814,13 @@ export default function Dashboard() {
   const getChartData = (period: string, dataSource: 'users' | 'newUsers' = 'users') => {
     const data = dataSource === 'users' ? totalUsersData : newUsersData;
     const lengths: Record<string, number> = {
-      '1D': 24, '1W': 7, '1M': 30, '3M': 3, '6M': 6, '1Y': 12, 'ALL': 7
+      '1D': 24,
+      '1W': 7,
+      '1M': 30,
+      '3M': 3,
+      '6M': 6,
+      '1Y': 12,
+      ALL: 7,
     };
     const expectedLength = lengths[period] || 7;
 
@@ -779,7 +836,7 @@ export default function Dashboard() {
     const trimmedData = paddedData.slice(0, expectedLength);
 
     const maxValue = Math.max(...trimmedData, 1);
-    return trimmedData.map(val => (val / maxValue) * 100);
+    return trimmedData.map((val) => (val / maxValue) * 100);
   };
 
   const renderOverview = () => (
@@ -812,15 +869,25 @@ export default function Dashboard() {
           <div className="flex items-center gap-3 min-w-fit">
             <div className="w-10 h-10 rounded-none bg-white/5 border border-dashed border-white/10 flex items-center justify-center flex-shrink-0">
               <Users className="w-5 h-5 text-white" />
-      </div>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm uppercase tracking-wide">Users</span>
-              <span className="text-white text-lg font-medium">{loading ? '...' : formatNumber(counts.users)}</span>
-              <div className={`flex items-center gap-1 ${usersDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                <svg className={`w-3 h-3 ${usersDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
+              <span className="text-white text-lg font-medium">
+                {loading ? '...' : formatNumber(counts.users)}
+              </span>
+              <div
+                className={`flex items-center gap-1 ${usersDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+              >
+                <svg
+                  className={`w-3 h-3 ${usersDailyPercentage < 0 ? 'rotate-180' : ''}`}
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                >
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">{Math.abs(usersDailyPercentage).toFixed(1)}%</span>
+                <span className="text-sm font-medium">
+                  {Math.abs(usersDailyPercentage).toFixed(1)}%
+                </span>
               </div>
             </div>
           </div>
@@ -838,11 +905,19 @@ export default function Dashboard() {
               <span className="text-white text-lg font-medium">
                 {loading ? '...' : formatNumber(counts.organizations)}
               </span>
-              <div className={`flex items-center gap-1 ${organizationsDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                <svg className={`w-3 h-3 ${organizationsDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
+              <div
+                className={`flex items-center gap-1 ${organizationsDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+              >
+                <svg
+                  className={`w-3 h-3 ${organizationsDailyPercentage < 0 ? 'rotate-180' : ''}`}
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                >
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">{Math.abs(organizationsDailyPercentage).toFixed(1)}%</span>
+                <span className="text-sm font-medium">
+                  {Math.abs(organizationsDailyPercentage).toFixed(1)}%
+                </span>
               </div>
             </div>
           </div>
@@ -855,12 +930,22 @@ export default function Dashboard() {
             </div>
             <div className="flex items-center gap-2">
               <span className="text-gray-400 text-sm uppercase tracking-wide">Sessions</span>
-              <span className="text-white text-lg font-medium">{loading ? '...' : formatNumber(counts.sessions)}</span>
-              <div className={`flex items-center gap-1 ${sessionsDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                <svg className={`w-3 h-3 ${sessionsDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
+              <span className="text-white text-lg font-medium">
+                {loading ? '...' : formatNumber(counts.sessions)}
+              </span>
+              <div
+                className={`flex items-center gap-1 ${sessionsDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+              >
+                <svg
+                  className={`w-3 h-3 ${sessionsDailyPercentage < 0 ? 'rotate-180' : ''}`}
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                >
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">{Math.abs(sessionsDailyPercentage).toFixed(1)}%</span>
+                <span className="text-sm font-medium">
+                  {Math.abs(sessionsDailyPercentage).toFixed(1)}%
+                </span>
               </div>
             </div>
           </div>
@@ -878,11 +963,19 @@ export default function Dashboard() {
               <span className="text-white text-lg font-medium">
                 ${totalSubscription !== null ? formatNumber(totalSubscription) : '1.2k'}
               </span>
-              <div className={`flex items-center gap-1 ${revenueDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                <svg className={`w-3 h-3 ${revenueDailyPercentage < 0 ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="currentColor">
+              <div
+                className={`flex items-center gap-1 ${revenueDailyPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+              >
+                <svg
+                  className={`w-3 h-3 ${revenueDailyPercentage < 0 ? 'rotate-180' : ''}`}
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                >
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className="text-sm font-medium">{Math.abs(revenueDailyPercentage).toFixed(1)}%</span>
+                <span className="text-sm font-medium">
+                  {Math.abs(revenueDailyPercentage).toFixed(1)}%
+                </span>
               </div>
             </div>
           </div>
@@ -930,40 +1023,57 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm text-white uppercase font-light">TOTAL USER</h3>
               <div className="flex items-center space-x-1 overflow-x-auto">
-                {['1D', '1W', '6M', '1Y',].map((period) => (
+                {['1D', '1W', '6M', '1Y'].map((period) => (
                   <button
                     key={period}
                     onClick={() => setSelectedUserPeriod(period)}
-                    className={`px-2 py-1 text-xs font-light transition-colors whitespace-nowrap ${selectedUserPeriod === period
-                      ? 'bg-white/20 text-white border border-white/30'
-                      : 'text-gray-500 hover:text-white'
-                      }`}
+                    className={`px-2 py-1 text-xs font-light transition-colors whitespace-nowrap ${
+                      selectedUserPeriod === period
+                        ? 'bg-white/20 text-white border border-white/30'
+                        : 'text-gray-500 hover:text-white'
+                    }`}
                   >
                     {period}
                   </button>
                 ))}
               </div>
             </div>
-            <div className='flex justify-between items-end mb-6'>
+            <div className="flex justify-between items-end mb-6">
               <p className="text-4xl text-white font-light">
                 {loading ? '...' : formatNumber(counts.users)}
               </p>
               <div className="flex items-center gap-1 px-2 py-1">
-                <svg className={`w-3 h-3 ${totalUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`} viewBox="0 0 12 12" fill="currentColor">
+                <svg
+                  className={`w-3 h-3 ${totalUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`}
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                >
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className={`text-xs font-medium ${totalUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <span
+                  className={`text-xs font-medium ${totalUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                >
                   {Math.abs(totalUsersPercentage).toFixed(1)}%
                 </span>
               </div>
             </div>
             <div className="space-y-2 relative">
               <div className="h-32 relative">
-                <svg className="w-full h-full absolute inset-0" viewBox="0 0 100 100" preserveAspectRatio="none">
+                <svg
+                  className="w-full h-full absolute inset-0"
+                  viewBox="0 0 100 100"
+                  preserveAspectRatio="none"
+                >
                   <defs>
                     <linearGradient id="usersBarGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: 'rgba(255, 255, 255, 0.3)', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'rgba(255, 255, 255, 0.05)', stopOpacity: 1 }} />
+                      <stop
+                        offset="0%"
+                        style={{ stopColor: 'rgba(255, 255, 255, 0.3)', stopOpacity: 1 }}
+                      />
+                      <stop
+                        offset="100%"
+                        style={{ stopColor: 'rgba(255, 255, 255, 0.05)', stopOpacity: 1 }}
+                      />
                     </linearGradient>
                   </defs>
                 </svg>
@@ -986,8 +1096,14 @@ export default function Dashboard() {
                           // Constrain tooltip within viewport
                           const tooltipWidth = 150; // Approximate tooltip width
                           const tooltipHeight = 60; // Approximate tooltip height
-                          const constrainedX = Math.max(tooltipWidth / 2, Math.min(window.innerWidth - tooltipWidth / 2, x));
-                          const constrainedY = Math.max(tooltipHeight + 10, Math.min(window.innerHeight - 10, y));
+                          const constrainedX = Math.max(
+                            tooltipWidth / 2,
+                            Math.min(window.innerWidth - tooltipWidth / 2, x)
+                          );
+                          const constrainedY = Math.max(
+                            tooltipHeight + 10,
+                            Math.min(window.innerHeight - 10, y)
+                          );
                           setHoveredUsersAreaIndex(i);
                           setHoveredUsersAreaPosition({ x: constrainedX, y: constrainedY });
                         }}
@@ -999,7 +1115,8 @@ export default function Dashboard() {
                         <div
                           className="w-full h-full"
                           style={{
-                            background: 'linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05))',
+                            background:
+                              'linear-gradient(to bottom, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.05))',
                             opacity: isHovered ? 1 : 0.8,
                           }}
                         />
@@ -1020,16 +1137,23 @@ export default function Dashboard() {
                     }}
                   >
                     <div className="bg-black border border-white/20 rounded-sm px-3 py-2 shadow-lg whitespace-nowrap">
-                      <div className="text-xs text-gray-400 mb-1 font-mono uppercase">{getDetailedLabels(selectedUserPeriod, 'users')[hoveredUsersAreaIndex]}</div>
+                      <div className="text-xs text-gray-400 mb-1 font-mono uppercase">
+                        {getDetailedLabels(selectedUserPeriod, 'users')[hoveredUsersAreaIndex]}
+                      </div>
                       <div className="text-sm text-white font-sans font-medium">
-                        {totalUsersData[hoveredUsersAreaIndex] !== undefined ? totalUsersData[hoveredUsersAreaIndex].toLocaleString() : '0'} <span className="font-mono text-xs text-gray-400">users</span>
+                        {totalUsersData[hoveredUsersAreaIndex] !== undefined
+                          ? totalUsersData[hoveredUsersAreaIndex].toLocaleString()
+                          : '0'}{' '}
+                        <span className="font-mono text-xs text-gray-400">users</span>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
               {/* X-axis labels */}
-              <div className={`flex justify-between ${selectedUserPeriod === '1M' ? 'text-[10px]' : 'text-xs'} text-gray-500 font-mono`}>
+              <div
+                className={`flex justify-between ${selectedUserPeriod === '1M' ? 'text-[10px]' : 'text-xs'} text-gray-500 font-mono`}
+              >
                 {getChartLabels(selectedUserPeriod, 'users').map((label, i) => (
                   <span key={i} className="flex-1 text-center truncate">
                     {label}
@@ -1060,25 +1184,36 @@ export default function Dashboard() {
                   <button
                     key={period}
                     onClick={() => setSelectedSubscriptionPeriod(period)}
-                    className={`px-2 py-1 text-xs font-light transition-colors whitespace-nowrap ${selectedSubscriptionPeriod === period
-                      ? 'bg-white/20 text-white border border-white/30'
-                      : 'text-gray-500 hover:text-white'
-                      }`}
+                    className={`px-2 py-1 text-xs font-light transition-colors whitespace-nowrap ${
+                      selectedSubscriptionPeriod === period
+                        ? 'bg-white/20 text-white border border-white/30'
+                        : 'text-gray-500 hover:text-white'
+                    }`}
                   >
                     {period}
                   </button>
                 ))}
               </div>
             </div>
-            <div className='flex justify-between items-end mb-6'>
+            <div className="flex justify-between items-end mb-6">
               <p className="text-4xl text-white font-light">
-                ${totalSubscription.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                $
+                {totalSubscription.toLocaleString('en-US', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </p>
               <div className="flex items-center gap-1 px-2 py-1">
-                <svg className={`w-3 h-3 ${newUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`} viewBox="0 0 12 12" fill="currentColor">
+                <svg
+                  className={`w-3 h-3 ${newUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`}
+                  viewBox="0 0 12 12"
+                  fill="currentColor"
+                >
                   <path d="M6 0 L12 12 L0 12 Z" />
                 </svg>
-                <span className={`text-xs font-medium ${newUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                <span
+                  className={`text-xs font-medium ${newUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                >
                   {Math.abs(newUsersPercentage).toFixed(1)}%
                 </span>
               </div>
@@ -1089,8 +1224,14 @@ export default function Dashboard() {
                 <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                   <defs>
                     <linearGradient id="areaGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                      <stop offset="0%" style={{ stopColor: 'rgba(255, 255, 255, 0.3)', stopOpacity: 1 }} />
-                      <stop offset="100%" style={{ stopColor: 'rgba(255, 255, 255, 0.05)', stopOpacity: 1 }} />
+                      <stop
+                        offset="0%"
+                        style={{ stopColor: 'rgba(255, 255, 255, 0.3)', stopOpacity: 1 }}
+                      />
+                      <stop
+                        offset="100%"
+                        style={{ stopColor: 'rgba(255, 255, 255, 0.05)', stopOpacity: 1 }}
+                      />
                     </linearGradient>
                   </defs>
                   {/* Area fill */}
@@ -1134,8 +1275,10 @@ export default function Dashboard() {
                           opacity={isHovered ? 1 : 0}
                           className="transition-all duration-200 ease-out"
                           style={{
-                            filter: isHovered ? 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.6))' : 'none',
-                            pointerEvents: 'none'
+                            filter: isHovered
+                              ? 'drop-shadow(0 0 3px rgba(255, 255, 255, 0.6))'
+                              : 'none',
+                            pointerEvents: 'none',
                           }}
                         />
                         {/* Invisible hover area */}
@@ -1154,8 +1297,14 @@ export default function Dashboard() {
                               // Constrain tooltip within viewport
                               const tooltipWidth = 150; // Approximate tooltip width
                               const tooltipHeight = 60; // Approximate tooltip height
-                              const constrainedX = Math.max(tooltipWidth / 2, Math.min(window.innerWidth - tooltipWidth / 2, pointX));
-                              const constrainedY = Math.max(tooltipHeight + 10, Math.min(window.innerHeight - 10, pointY));
+                              const constrainedX = Math.max(
+                                tooltipWidth / 2,
+                                Math.min(window.innerWidth - tooltipWidth / 2, pointX)
+                              );
+                              const constrainedY = Math.max(
+                                tooltipHeight + 10,
+                                Math.min(window.innerHeight - 10, pointY)
+                              );
                               setHoveredAreaIndex(i);
                               setHoveredAreaPosition({ x: constrainedX, y: constrainedY });
                             }
@@ -1182,16 +1331,27 @@ export default function Dashboard() {
                     }}
                   >
                     <div className="bg-black border border-white/20 rounded-sm px-3 py-2 shadow-lg whitespace-nowrap">
-                      <div className="text-xs text-gray-400 mb-1 font-mono uppercase">{getDetailedLabels(selectedSubscriptionPeriod, 'newUsers')[hoveredAreaIndex]}</div>
+                      <div className="text-xs text-gray-400 mb-1 font-mono uppercase">
+                        {
+                          getDetailedLabels(selectedSubscriptionPeriod, 'newUsers')[
+                            hoveredAreaIndex
+                          ]
+                        }
+                      </div>
                       <div className="text-sm text-white font-sans font-medium">
-                        {newUsersData[hoveredAreaIndex] !== undefined ? newUsersData[hoveredAreaIndex].toLocaleString() : '0'} <span className="font-mono text-xs text-gray-400">users</span>
+                        {newUsersData[hoveredAreaIndex] !== undefined
+                          ? newUsersData[hoveredAreaIndex].toLocaleString()
+                          : '0'}{' '}
+                        <span className="font-mono text-xs text-gray-400">users</span>
                       </div>
                     </div>
                   </div>
                 )}
               </div>
               {/* X-axis labels */}
-              <div className={`flex justify-between ${selectedSubscriptionPeriod === '1M' ? 'text-[10px]' : 'text-xs'} text-gray-500 font-mono`}>
+              <div
+                className={`flex justify-between ${selectedSubscriptionPeriod === '1M' ? 'text-[10px]' : 'text-xs'} text-gray-500 font-mono`}
+              >
                 {getChartLabels(selectedSubscriptionPeriod, 'newUsers').map((label, i) => (
                   <span key={i} className="flex-1 text-center truncate">
                     {label}
@@ -1243,21 +1403,23 @@ export default function Dashboard() {
                           {period}
                         </button>
                       ))}
-              </div>
+                    </div>
                   )}
-            </div>
+                </div>
 
                 {activeUsersPeriod === 'Custom' && (
                   <div className="h-0 flex items-center gap-2">
-                    <Popover >
+                    <Popover>
                       <PopoverTrigger asChild>
-            <Button 
+                        <Button
                           variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-            >
+                        >
                           <CalendarIcon className="mr-1 h-3 w-3" />
-                          {activeUsersDateFrom ? format(activeUsersDateFrom, 'MMM dd yyyy') : 'From'}
-            </Button>
+                          {activeUsersDateFrom
+                            ? format(activeUsersDateFrom, 'MMM dd yyyy')
+                            : 'From'}
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1286,25 +1448,39 @@ export default function Dashboard() {
                           selected={activeUsersDateTo}
                           onSelect={setActiveUsersDateTo}
                           initialFocus
-                          disabled={(date) => activeUsersDateFrom ? date < activeUsersDateFrom : false}
+                          disabled={(date) =>
+                            activeUsersDateFrom ? date < activeUsersDateFrom : false
+                          }
                           className="rounded-none"
                         />
                       </PopoverContent>
                     </Popover>
-              </div>
+                  </div>
                 )}
-            </div>
-              <hr className='mb-2 -mx-10 border-white/10' />
-              <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">Active Users</h4>
-              <p className="text-xs text-gray-400 mb-3">Users with active session in the time frame</p>
-              <div className='flex pt-4 justify-between items-end'>
-                <p className="text-3xl text-white font-light mb-2">{activeUsersDaily.toLocaleString()}</p>
+              </div>
+              <hr className="mb-2 -mx-10 border-white/10" />
+              <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">
+                Active Users
+              </h4>
+              <p className="text-xs text-gray-400 mb-3">
+                Users with active session in the time frame
+              </p>
+              <div className="flex pt-4 justify-between items-end">
+                <p className="text-3xl text-white font-light mb-2">
+                  {activeUsersDaily.toLocaleString()}
+                </p>
                 <div className="mt-2 mb-1 flex items-center gap-2">
                   <div className="flex items-center -mr-5 gap-1 px-2 py-1 border-white/5 rounded-none">
-                    <svg className={`w-3 h-3 ${activeUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`} viewBox="0 0 12 12" fill="currentColor">
+                    <svg
+                      className={`w-3 h-3 ${activeUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`}
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                    >
                       <path d="M6 0 L12 12 L0 12 Z" />
                     </svg>
-                    <span className={`text-xs font-medium ${activeUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span
+                      className={`text-xs font-medium ${activeUsersPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                    >
                       {Math.abs(activeUsersPercentage).toFixed(1)}%
                     </span>
                   </div>
@@ -1356,13 +1532,13 @@ export default function Dashboard() {
                   <div className="h-0 flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-            <Button
-              variant="outline"
+                        <Button
+                          variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-            >
+                        >
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {newUsersDateFrom ? format(newUsersDateFrom, 'MMM dd yyyy') : 'From'}
-            </Button>
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1391,27 +1567,34 @@ export default function Dashboard() {
                           selected={newUsersDateTo}
                           onSelect={setNewUsersDateTo}
                           initialFocus
-                          disabled={(date) => newUsersDateFrom ? date < newUsersDateFrom : false}
+                          disabled={(date) => (newUsersDateFrom ? date < newUsersDateFrom : false)}
                           className="rounded-none"
                         />
                       </PopoverContent>
                     </Popover>
-              </div>
+                  </div>
                 )}
-            </div>
-              <hr className='mb-2 -mx-10 border-white/10' />
-              <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">New Users</h4>
-              <p className="text-xs text-gray-400 mb-3">
-                Newly registered Users in the time frame
-              </p>
-              <div className='flex pt-4 justify-between items-end'>
+              </div>
+              <hr className="mb-2 -mx-10 border-white/10" />
+              <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">
+                New Users
+              </h4>
+              <p className="text-xs text-gray-400 mb-3">Newly registered Users in the time frame</p>
+              <div className="flex pt-4 justify-between items-end">
                 <p className="text-3xl text-white font-light mb-2">{_newUsersCount}</p>
                 <div className="mt-2 mb-1 flex items-center gap-2">
                   <div className="flex items-center -mr-5 gap-1 px-2 py-1 rounded-none">
-                    <svg className={`w-3 h-3 ${newUsersCountPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`} viewBox="0 0 12 12" fill="currentColor" style={newUsersCountPercentage < 0 ? { transform: 'rotate(180deg)' } : {}}>
+                    <svg
+                      className={`w-3 h-3 ${newUsersCountPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`}
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                      style={newUsersCountPercentage < 0 ? { transform: 'rotate(180deg)' } : {}}
+                    >
                       <path d="M6 0 L12 12 L0 12 Z" />
                     </svg>
-                    <span className={`text-xs font-medium ${newUsersCountPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span
+                      className={`text-xs font-medium ${newUsersCountPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                    >
                       {Math.abs(newUsersCountPercentage).toFixed(1)}%
                     </span>
                   </div>
@@ -1467,13 +1650,15 @@ export default function Dashboard() {
                   <div className="h-0 flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-            <Button
-              variant="outline"
+                        <Button
+                          variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-            >
+                        >
                           <CalendarIcon className="mr-1 h-3 w-3" />
-                          {organizationsDateFrom ? format(organizationsDateFrom, 'MMM dd yyyy') : 'From'}
-            </Button>
+                          {organizationsDateFrom
+                            ? format(organizationsDateFrom, 'MMM dd yyyy')
+                            : 'From'}
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1502,27 +1687,37 @@ export default function Dashboard() {
                           selected={organizationsDateTo}
                           onSelect={setOrganizationsDateTo}
                           initialFocus
-                          disabled={(date) => organizationsDateFrom ? date < organizationsDateFrom : false}
+                          disabled={(date) =>
+                            organizationsDateFrom ? date < organizationsDateFrom : false
+                          }
                           className="rounded-none"
                         />
                       </PopoverContent>
                     </Popover>
-              </div>
+                  </div>
                 )}
-            </div>
-              <hr className='mb-2 -mx-10 border-white/10' />
-              <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">Organizations</h4>
+              </div>
+              <hr className="mb-2 -mx-10 border-white/10" />
+              <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">
+                Organizations
+              </h4>
               <p className="text-xs text-gray-400 mb-3">Total organizations in the time frame</p>
-              <div className='flex pt-4 justify-between items-end'>
+              <div className="flex pt-4 justify-between items-end">
                 <p className="text-3xl text-white font-light mb-2">
                   {organizationsLoading ? '...' : organizationsCount.toLocaleString()}
                 </p>
                 <div className="mt-2 mb-1 flex items-center gap-2">
                   <div className="flex items-center -mr-5 gap-1 px-2 py-1 rounded-none">
-                    <svg className={`w-3 h-3 ${organizationsPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`} viewBox="0 0 12 12" fill="currentColor">
+                    <svg
+                      className={`w-3 h-3 ${organizationsPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`}
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                    >
                       <path d="M6 0 L12 12 L0 12 Z" />
                     </svg>
-                    <span className={`text-xs font-medium ${organizationsPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span
+                      className={`text-xs font-medium ${organizationsPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                    >
                       {Math.abs(organizationsPercentage).toFixed(1)}%
                     </span>
                   </div>
@@ -1575,13 +1770,13 @@ export default function Dashboard() {
                   <div className="h-0 flex items-center gap-2">
                     <Popover>
                       <PopoverTrigger asChild>
-            <Button
-              variant="outline"
+                        <Button
+                          variant="outline"
                           className="h-6 px-2 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
-            >
+                        >
                           <CalendarIcon className="mr-1 h-3 w-3" />
                           {teamsDateFrom ? format(teamsDateFrom, 'MMM dd yyyy') : 'From'}
-            </Button>
+                        </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0 bg-black border-white/10">
                         <Calendar
@@ -1610,7 +1805,7 @@ export default function Dashboard() {
                           selected={teamsDateTo}
                           onSelect={setTeamsDateTo}
                           initialFocus
-                          disabled={(date) => teamsDateFrom ? date < teamsDateFrom : false}
+                          disabled={(date) => (teamsDateFrom ? date < teamsDateFrom : false)}
                           className="rounded-none"
                         />
                       </PopoverContent>
@@ -1618,19 +1813,25 @@ export default function Dashboard() {
                   </div>
                 )}
               </div>
-              <hr className='mb-2 -mx-10 border-white/10' />
+              <hr className="mb-2 -mx-10 border-white/10" />
               <h4 className="text-md text-white/80 uppercase font-mono font-light mb-1">Teams</h4>
               <p className="text-xs text-gray-400 mb-3">Total teams in the time frame</p>
-              <div className='flex pt-4 justify-between items-end'>
+              <div className="flex pt-4 justify-between items-end">
                 <p className="text-3xl text-white font-light mb-2">
                   {teamsLoading ? '...' : teamsCount.toLocaleString()}
                 </p>
                 <div className="mt-2 mb-1 flex items-center gap-2">
                   <div className="flex items-center -mr-5 gap-1 px-2 py-1 rounded-none">
-                    <svg className={`w-3 h-3 ${teamsPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`} viewBox="0 0 12 12" fill="currentColor">
+                    <svg
+                      className={`w-3 h-3 ${teamsPercentage >= 0 ? 'text-green-500' : 'text-red-500 rotate-180'}`}
+                      viewBox="0 0 12 12"
+                      fill="currentColor"
+                    >
                       <path d="M6 0 L12 12 L0 12 Z" />
                     </svg>
-                    <span className={`text-xs font-medium ${teamsPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                    <span
+                      className={`text-xs font-medium ${teamsPercentage >= 0 ? 'text-green-500' : 'text-red-500'}`}
+                    >
                       {Math.abs(teamsPercentage).toFixed(1)}%
                     </span>
                   </div>
@@ -1656,10 +1857,12 @@ export default function Dashboard() {
             <div className="flex items-center justify-between mb-4 flex-shrink-0">
               <div className="flex items-center gap-2">
                 <Shield className="w-4 h-4 text-white/60" />
-                <h4 className="text-xs text-gray-400 uppercase font-mono font-light">Security Insights</h4>
+                <h4 className="text-xs text-gray-400 uppercase font-mono font-light">
+                  Security Insights
+                </h4>
               </div>
             </div>
-            <hr className='-mx-10 -mt-1 border-white/10' />
+            <hr className="-mx-10 -mt-1 border-white/10" />
             <div className="space-y-3 overflow-y-auto custom-scrollbar max-h-[400px]">
               {securityPatches.map((patch, index) => (
                 <div
@@ -1673,7 +1876,9 @@ export default function Dashboard() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-sm text-white/90 font-light truncate group-hover:text-white transition-colors">{patch.title}</span>
+                        <span className="text-sm text-white/90 font-light truncate group-hover:text-white transition-colors">
+                          {patch.title}
+                        </span>
                       </div>
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span
@@ -1702,19 +1907,22 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="h-screen bg-black text-white overflow-hidden flex flex-col" style={{ overflowX: 'hidden' }}>
+    <div
+      className="h-screen bg-black text-white overflow-hidden flex flex-col"
+      style={{ overflowX: 'hidden' }}
+    >
       {/* Tab Content */}
       <div className="flex-1 overflow-hidden">
-      {activeTab === 'overview' ? (
-        renderOverview()
-      ) : activeTab === 'users' ? (
-        <UsersPage />
-      ) : activeTab === 'organizations' ? (
-        <OrganizationsPage />
-      ) : (
-        //  activeTab === 'sessions' ? <SessionsPage /> :
-        renderOverview()
-      )}
+        {activeTab === 'overview' ? (
+          renderOverview()
+        ) : activeTab === 'users' ? (
+          <UsersPage />
+        ) : activeTab === 'organizations' ? (
+          <OrganizationsPage />
+        ) : (
+          //  activeTab === 'sessions' ? <SessionsPage /> :
+          renderOverview()
+        )}
       </div>
 
       {/* Quick Actions Modal */}
@@ -2021,7 +2229,8 @@ export default function Dashboard() {
                       <div>
                         <h5 className="text-sm text-white font-medium mb-1">Action Required</h5>
                         <p className="text-xs text-gray-400">
-                          This patch is pending review and requires manual approval before deployment.
+                          This patch is pending review and requires manual approval before
+                          deployment.
                         </p>
                       </div>
                     </>

@@ -444,9 +444,9 @@ export default function DatabaseVisualizer() {
             </div>
             <h2 className="text-3xl font-mono uppercase font-light text-white mb-3">Coming Soon</h2>
             <p className="text-lg text-gray-300 font-light mb-6 leading-relaxed">
-              We will be having this feature soon. This
-              feature will allow you to explore your Better Auth database structure with beautiful,
-              interactive graphs showing all tables, relationships, and data flow.
+              We will be having this feature soon. This feature will allow you to explore your
+              Better Auth database structure with beautiful, interactive graphs showing all tables,
+              relationships, and data flow.
             </p>
             <div className="flex items-center justify-center space-x-6 text-sm text-gray-400">
               <div className="flex items-center space-x-2">

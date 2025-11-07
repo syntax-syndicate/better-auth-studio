@@ -1,3 +1,7 @@
+import { Edit } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   Building2,
   Calendar,
@@ -8,10 +12,6 @@ import {
   Users,
   X,
 } from '../components/PixelIcons';
-import { Edit } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
 import { Badge } from '../components/ui/badge';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -242,11 +242,14 @@ export default function TeamDetails() {
       <div className="space-y-6 p-6">
         <div className="flex items-center space-x-4">
           <span className="mb-4 ml-0 flex justify-start items-start text-left border-none text-white">
-            <span className='font-light'>
+            <span className="font-light">
               <span
                 onClick={() => navigate(`/organizations/${orgId}`)}
-                className='uppercase cursor-pointer text-white/80 font-mono text-sm'>teams / </span>
-              <span className='text-white font-mono text-sm'>{teamId}</span>
+                className="uppercase cursor-pointer text-white/80 font-mono text-sm"
+              >
+                teams /{' '}
+              </span>
+              <span className="text-white font-mono text-sm">{teamId}</span>
             </span>
           </span>
         </div>
@@ -265,11 +268,14 @@ export default function TeamDetails() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           <span className="mb-4 ml-0 flex justify-start items-start text-left border-none text-white">
-            <span className='font-light'>
+            <span className="font-light">
               <span
                 onClick={() => navigate(`/organizations/${team.organizationId}`)}
-                className='uppercase cursor-pointer text-white/80 font-mono text-sm'>teams / </span>
-              <span className='text-white font-mono text-sm'>{teamId}</span>
+                className="uppercase cursor-pointer text-white/80 font-mono text-sm"
+              >
+                teams /{' '}
+              </span>
+              <span className="text-white font-mono text-sm">{teamId}</span>
             </span>
           </span>
         </div>
@@ -300,9 +306,9 @@ export default function TeamDetails() {
           <h1 className="text-2xl text-white font-light inline-flex items-center">
             {team.name}
             <sup className="text-xs text-gray-500 ml-2">
-              <span className='mr-1'>[</span>
-              <span className='text-white/80 font-mono text-xs'>{teamId}</span>
-              <span className='ml-1'>]</span>
+              <span className="mr-1">[</span>
+              <span className="text-white/80 font-mono text-xs">{teamId}</span>
+              <span className="ml-1">]</span>
             </sup>
           </h1>
           <div className="flex items-center space-x-2 mt-1">
@@ -345,9 +351,9 @@ export default function TeamDetails() {
             <span className="inline-flex items-start">
               Members
               <sup className="text-xs text-gray-500 ml-1">
-                <span className='mr-0.5'>[</span>
-                <span className='text-white/80 font-mono text-xs'>{members.length}</span>
-                <span className='ml-0.5'>]</span>
+                <span className="mr-0.5">[</span>
+                <span className="text-white/80 font-mono text-xs">{members.length}</span>
+                <span className="ml-0.5">]</span>
               </sup>
             </span>
           </button>
@@ -434,14 +440,17 @@ export default function TeamDetails() {
           {/* Members Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg relative text-white font-light inline-flex items-start">Team Members
+              <h3 className="text-lg relative text-white font-light inline-flex items-start">
+                Team Members
                 <sup className="text-xs text-gray-500 ml-1 mt-0">
-                  <span className='mr-1'>[</span>
-                  <span className='text-white/80 font-mono text-xs'>{members.length}</span>
-                  <span className='ml-1'>]</span>
+                  <span className="mr-1">[</span>
+                  <span className="text-white/80 font-mono text-xs">{members.length}</span>
+                  <span className="ml-1">]</span>
                 </sup>
               </h3>
-              <p className="text-gray-400 font-light font-mono text-xs uppercase mt-1">Manage members of this team</p>
+              <p className="text-gray-400 font-light font-mono text-xs uppercase mt-1">
+                Manage members of this team
+              </p>
             </div>
           </div>
 

@@ -183,7 +183,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
       // Prevent background scroll when command palette is open
       document.body.style.overflow = 'hidden';
       document.addEventListener('keydown', handleEscape);
-      
+
       return () => {
         document.body.style.overflow = 'unset';
         document.removeEventListener('keydown', handleEscape);
@@ -194,11 +194,11 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
   if (!isOpen) return null;
 
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 flex items-start justify-center pt-[20vh] z-50 overflow-hidden"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-black/90 overflow-hidden border border-white/10 rounded-none w-full max-w-2xl mx-4"
         onClick={(e) => e.stopPropagation()}
       >
@@ -234,7 +234,7 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                     {categoryCommands.map((command) => {
                       const Icon = command.icon;
                       const isDisabled = command.disabled;
-                      
+
                       return (
                         <Command.Item
                           key={command.id}
@@ -242,13 +242,13 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
                           disabled={isDisabled}
                           onSelect={() => {
                             if (!isDisabled) {
-                            command.action();
-                            onClose();
+                              command.action();
+                              onClose();
                             }
                           }}
                           className={`flex items-center space-x-3 px-0 py-2 rounded-none transition-colors relative ${
-                            isDisabled 
-                              ? 'opacity-40 cursor-not-allowed blur-[0.5px]' 
+                            isDisabled
+                              ? 'opacity-40 cursor-not-allowed blur-[0.5px]'
                               : 'hover:bg-white/5 cursor-pointer'
                           }`}
                         >

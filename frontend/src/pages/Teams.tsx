@@ -227,9 +227,9 @@ export default function Teams() {
           <h1 className="text-2xl relative text-white font-light inline-flex items-start">
             Teams
             <sup className="text-xs text-gray-500 ml-1 mt-0">
-              <span className='mr-1'>[</span>
-              <span className='text-white font-mono text-sm'>{filteredTeams.length}</span>
-              <span className='ml-1'>]</span>
+              <span className="mr-1">[</span>
+              <span className="text-white font-mono text-sm">{filteredTeams.length}</span>
+              <span className="ml-1">]</span>
             </sup>
           </h1>
           <p className="text-gray-400 mt-1 uppercase font-mono text-sm font-light">

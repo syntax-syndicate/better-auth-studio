@@ -1,6 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+// @ts-expect-error
+import { hex } from '@better-auth/utils/hex';
+import { scryptAsync } from '@noble/hashes/scrypt.js';
+import { hexToBytes } from '@noble/hashes/utils.js';
 import { type Request, type Response, Router } from 'express';
 import { createJiti } from 'jiti';
 import {
@@ -14,10 +18,7 @@ import type { AuthConfig } from './config.js';
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
-import { scryptAsync } from "@noble/hashes/scrypt.js";
-import { hexToBytes } from "@noble/hashes/utils.js";
-// @ts-ignore
-import { hex } from "@better-auth/utils/hex";
+
 const config = {
   N: 16384,
   r: 16,
@@ -25,7 +26,7 @@ const config = {
   dkLen: 64,
 };
 async function generateKey(password: string, salt: string) {
-  return await scryptAsync(password.normalize("NFKC"), salt, {
+  return await scryptAsync(password.normalize('NFKC'), salt, {
     N: config.N,
     p: config.p,
     r: config.r,
@@ -42,7 +43,7 @@ function getStudioVersion(): string {
       const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
       return packageJson.version || '1.0.0';
     }
-  } catch (_error) { }
+  } catch (_error) {}
   return '1.0.0';
 }
 
@@ -300,12 +301,13 @@ export function createRoutes(
           const packageJsonPath = join(projectRoot, 'package.json');
           if (existsSync(packageJsonPath)) {
             const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
-            let versionString = packageJson.dependencies?.['better-auth'] ||
+            const versionString =
+              packageJson.dependencies?.['better-auth'] ||
               packageJson.devDependencies?.['better-auth'] ||
               '1.0.0';
             currentVersion = versionString.replace(/[\^~>=<]/g, '');
           }
-        } catch { }
+        } catch {}
       }
 
       let latestVersion = currentVersion;
@@ -385,8 +387,7 @@ export function createRoutes(
       if (adapterResult && (adapterResult as any).options?.adapterConfig) {
         adapterConfig = (adapterResult as any).options.adapterConfig;
       }
-    } catch (_error) {
-    }
+    } catch (_error) {}
 
     try {
       const detectedDb = await detectDatabaseWithDialect();
@@ -396,7 +397,7 @@ export function createRoutes(
         databaseAdapter = detectedDb.adapter || detectedDb.name;
         databaseVersion = detectedDb.version;
       }
-    } catch (_error) { }
+    } catch (_error) {}
 
     if (databaseType === 'unknown') {
       const configPath = await findAuthConfigPath();
@@ -459,12 +460,12 @@ export function createRoutes(
 
       socialProviders: authConfig.socialProviders
         ? authConfig.socialProviders.map((provider: any) => ({
-          type: provider.id,
-          clientId: provider.clientId,
-          clientSecret: provider.clientSecret,
-          redirectUri: provider.redirectUri,
-          ...provider,
-        }))
+            type: provider.id,
+            clientId: provider.clientId,
+            clientSecret: provider.clientSecret,
+            redirectUri: provider.redirectUri,
+            ...provider,
+          }))
         : authConfig.providers || [],
 
       user: {
@@ -571,12 +572,17 @@ export function createRoutes(
   router.get('/api/analytics', async (req: Request, res: Response) => {
     try {
       const { period = 'ALL', type = 'users', from, to } = req.query;
-      const analytics = await getAuthData(authConfig, 'analytics', {
-        period: period as string,
-        type: type as string,
-        from: from as string | undefined,
-        to: to as string | undefined,
-      }, configPath);
+      const analytics = await getAuthData(
+        authConfig,
+        'analytics',
+        {
+          period: period as string,
+          type: type as string,
+          from: from as string | undefined,
+          to: to as string | undefined,
+        },
+        configPath
+      );
       res.json(analytics);
     } catch (_error) {
       res.status(500).json({ error: 'Failed to fetch analytics' });
@@ -625,14 +631,14 @@ export function createRoutes(
             const users = await adapter.findMany({ model: 'user', limit: 100000 });
             userCount = users?.length || 0;
           }
-        } catch (_error) { }
+        } catch (_error) {}
 
         try {
           if (typeof adapter.findMany === 'function') {
             const sessions = await adapter.findMany({ model: 'session', limit: 100000 });
             sessionCount = sessions?.length || 0;
           }
-        } catch (_error) { }
+        } catch (_error) {}
 
         if (organizationPluginEnabled) {
           try {
@@ -732,7 +738,7 @@ export function createRoutes(
       res.status(500).json({ error: 'Failed to update user' });
     }
   });
-  router.put("/api/users/:userId/password", async (req: Request, res: Response) => {
+  router.put('/api/users/:userId/password', async (req: Request, res: Response) => {
     try {
       const { userId } = req.params;
       const { password } = req.body;
@@ -750,13 +756,16 @@ export function createRoutes(
       try {
         const salt = hex.encode(crypto.getRandomValues(new Uint8Array(16)));
         const key = await generateKey(password, salt);
-        hashedPassword = `${salt}:${hex.encode(key)}`
+        hashedPassword = `${salt}:${hex.encode(key)}`;
       } catch {
         res.status(500).json({ error: 'Failed to hash password' });
       }
       const account = await adapter.update({
-        model: "account",
-        where: [{ field: 'userId', value: userId }, { field: "providerId", value: "credential" }],
+        model: 'account',
+        where: [
+          { field: 'userId', value: userId },
+          { field: 'providerId', value: 'credential' },
+        ],
         update: { password: hashedPassword },
       });
 
@@ -801,18 +810,18 @@ export function createRoutes(
           id: membership.id,
           organization: organization
             ? {
-              id: organization.id,
-              name: organization.name || 'Unknown Organization',
-              slug: organization.slug || 'unknown',
-              image: organization.image,
-              createdAt: organization.createdAt,
-            }
+                id: organization.id,
+                name: organization.name || 'Unknown Organization',
+                slug: organization.slug || 'unknown',
+                image: organization.image,
+                createdAt: organization.createdAt,
+              }
             : {
-              id: membership.organizationId,
-              name: 'Unknown Organization',
-              slug: 'unknown',
-              createdAt: membership.createdAt,
-            },
+                id: membership.organizationId,
+                name: 'Unknown Organization',
+                slug: 'unknown',
+                createdAt: membership.createdAt,
+              },
           role: membership.role || 'member',
           joinedAt: membership.createdAt,
         };
@@ -850,23 +859,21 @@ export function createRoutes(
           id: membership.id,
           team: team
             ? {
-              id: team.id,
-              name: team.name || 'Unknown Team',
-              organizationId: team.organizationId,
-              organizationName: organization
-                ? organization.name || 'Unknown Organization'
-                : 'Unknown Organization',
-              organizationSlug: organization
-                ? organization.slug || 'unknown'
-                : 'unknown',
-            }
+                id: team.id,
+                name: team.name || 'Unknown Team',
+                organizationId: team.organizationId,
+                organizationName: organization
+                  ? organization.name || 'Unknown Organization'
+                  : 'Unknown Organization',
+                organizationSlug: organization ? organization.slug || 'unknown' : 'unknown',
+              }
             : {
-              id: membership.teamId,
-              name: 'Unknown Team',
-              organizationId: 'unknown',
-              organizationName: 'Unknown Organization',
-              organizationSlug: 'unknown',
-            },
+                id: membership.teamId,
+                name: 'Unknown Team',
+                organizationId: 'unknown',
+                organizationName: 'Unknown Organization',
+                organizationSlug: 'unknown',
+              },
           role: membership.role || 'member',
           joinedAt: membership.createdAt,
         };
@@ -1004,7 +1011,7 @@ export function createRoutes(
           limit: 1,
         });
         organization = orgs && orgs.length > 0 ? orgs[0] : null;
-      } catch (_error) { }
+      } catch (_error) {}
 
       const transformedTeam = {
         id: team.id,
@@ -1016,9 +1023,9 @@ export function createRoutes(
         memberCount: team.memberCount || 0,
         organization: organization
           ? {
-            id: organization.id,
-            name: organization.name,
-          }
+              id: organization.id,
+              name: organization.name,
+            }
           : null,
       };
 
@@ -1115,7 +1122,7 @@ export function createRoutes(
           res.json({ users: transformedUsers });
           return;
         }
-      } catch (_adapterError) { }
+      } catch (_adapterError) {}
 
       const result = await getAuthData(authConfig, 'users', { page, limit, search }, configPath);
 
@@ -1246,7 +1253,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) { }
+        } catch (_fallbackError) {}
 
         res.json({
           plugins: [],
@@ -1301,7 +1308,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) { }
+        } catch (_fallbackError) {}
 
         res.json({
           database: null,
@@ -1314,7 +1321,7 @@ export function createRoutes(
     }
   });
 
-  router.get("/api/database/test", async (_req: Request, res: Response) => {
+  router.get('/api/database/test', async (_req: Request, res: Response) => {
     try {
       const adapter = await getAuthAdapterWithConfig();
       if (!adapter || !adapter.findMany) {
@@ -2299,7 +2306,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) { }
+        } catch (_fallbackError) {}
 
         res.json({
           enabled: false,
@@ -2340,7 +2347,7 @@ export function createRoutes(
           }));
           res.json({ success: true, invitations: transformedInvitations });
           return;
-        } catch (_error) { }
+        } catch (_error) {}
       }
 
       res.json({ success: true, invitations: [] });
@@ -2379,12 +2386,12 @@ export function createRoutes(
                     joinedAt: member.joinedAt || member.createdAt,
                     user: user
                       ? {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        image: user.image,
-                        emailVerified: user.emailVerified,
-                      }
+                          id: user.id,
+                          name: user.name,
+                          email: user.email,
+                          image: user.image,
+                          emailVerified: user.emailVerified,
+                        }
                       : null,
                   };
                 }
@@ -2399,7 +2406,7 @@ export function createRoutes(
 
           res.json({ success: true, members: validMembers });
           return;
-        } catch (_error) { }
+        } catch (_error) {}
       }
 
       res.json({ success: true, members: [] });
@@ -2525,7 +2532,7 @@ export function createRoutes(
         'Operations',
         'Finance',
         'HR',
-        'Legal'
+        'Legal',
       ];
 
       const results = [];
@@ -2742,7 +2749,7 @@ export function createRoutes(
 
           res.json({ success: true, teams: transformedTeams });
           return;
-        } catch (_error) { }
+        } catch (_error) {}
       }
 
       res.json({ success: true, teams: [] });
@@ -2823,12 +2830,12 @@ export function createRoutes(
                     joinedAt: member.joinedAt || member.createdAt,
                     user: user
                       ? {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        image: user.image,
-                        emailVerified: user.emailVerified,
-                      }
+                          id: user.id,
+                          name: user.name,
+                          email: user.email,
+                          image: user.image,
+                          emailVerified: user.emailVerified,
+                        }
                       : null,
                   };
                 }
@@ -2843,7 +2850,7 @@ export function createRoutes(
 
           res.json({ success: true, members: validMembers });
           return;
-        } catch (_error) { }
+        } catch (_error) {}
       }
 
       res.json({ success: true, members: [] });
@@ -3017,7 +3024,7 @@ export function createRoutes(
               fallback: true,
             });
           }
-        } catch (_fallbackError) { }
+        } catch (_fallbackError) {}
 
         res.json({
           enabled: false,
@@ -3473,7 +3480,7 @@ export function createRoutes(
 
   // OAuth Test Endpoints
   router.get('/api/tools/oauth/providers', async (_req: Request, res: Response) => {
-    const result = await getAuthAdapterWithConfig()
+    const result = await getAuthAdapterWithConfig();
     try {
       const providers = authConfig.socialProviders || [];
       res.json({
@@ -3500,9 +3507,7 @@ export function createRoutes(
 
       // Check if provider exists
       const providers = authConfig.socialProviders || [];
-      const selectedProvider = providers.find(
-        (p: any) => (p.id || p.type) === provider
-      );
+      const selectedProvider = providers.find((p: any) => (p.id || p.type) === provider);
 
       if (!selectedProvider) {
         return res.status(404).json({ success: false, error: 'Provider not found' });
@@ -3531,7 +3536,7 @@ export function createRoutes(
       res.status(500).json({
         success: false,
         error: 'Failed to initiate OAuth test',
-        details: error instanceof Error ? error.message : String(error)
+        details: error instanceof Error ? error.message : String(error),
       });
     }
   });
@@ -3545,12 +3550,20 @@ export function createRoutes(
       const { testSessionId, provider } = req.query;
 
       if (!testSessionId || !provider) {
-        return res.status(400).send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Missing test session or provider</body></html>');
+        return res
+          .status(400)
+          .send(
+            '<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Missing test session or provider</body></html>'
+          );
       }
 
       const session = oauthTestSessions.get(testSessionId as string);
       if (!session || session.provider !== provider) {
-        return res.status(404).send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">OAuth test session not found</body></html>');
+        return res
+          .status(404)
+          .send(
+            '<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">OAuth test session not found</body></html>'
+          );
       }
 
       const authBaseUrl = authConfig.baseURL || 'http://localhost:3000';
@@ -3712,7 +3725,11 @@ export function createRoutes(
       `);
     } catch (error) {
       console.error('OAuth start error:', error);
-      res.status(500).send('<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Failed to start OAuth test</body></html>');
+      res
+        .status(500)
+        .send(
+          '<html><body style="background:#000;color:#fff;font-family:monospace;padding:20px;">Failed to start OAuth test</body></html>'
+        );
     }
   });
 
@@ -3806,7 +3823,9 @@ export function createRoutes(
       `);
     } catch (error) {
       console.error('OAuth callback error:', error);
-      res.send('<html><body style="background:#000;color:#fff;text-align:center;"><h1>OAuth Test Error</h1><p>Callback processing failed</p></body></html>');
+      res.send(
+        '<html><body style="background:#000;color:#fff;text-align:center;"><h1>OAuth Test Error</h1><p>Callback processing failed</p></body></html>'
+      );
     }
   });
 
@@ -3857,7 +3876,9 @@ export function createRoutes(
         const accountCandidate = accounts
           .map((account: any) => ({
             account,
-            created: parseDate(account.createdAt || account.created_at || account.updatedAt || account.updated_at),
+            created: parseDate(
+              account.createdAt || account.created_at || account.updatedAt || account.updated_at
+            ),
           }))
           .filter((entry) => entry.created >= threshold)
           .sort((a, b) => b.created - a.created)[0];
@@ -3876,7 +3897,12 @@ export function createRoutes(
         const sessionCandidate = sessions
           .map((sessionItem: any) => ({
             session: sessionItem,
-            created: parseDate(sessionItem.createdAt || sessionItem.created_at || sessionItem.updatedAt || sessionItem.updated_at),
+            created: parseDate(
+              sessionItem.createdAt ||
+                sessionItem.created_at ||
+                sessionItem.updatedAt ||
+                sessionItem.updated_at
+            ),
           }))
           .filter((entry) => entry.created >= threshold)
           .sort((a, b) => b.created - a.created)[0];
@@ -3917,15 +3943,15 @@ export function createRoutes(
           userInfo,
           account: recentAccount
             ? {
-              id: recentAccount.id,
-              userId: recentAccount.userId,
-            }
+                id: recentAccount.id,
+                userId: recentAccount.userId,
+              }
             : null,
           session: recentSession
             ? {
-              id: recentSession.id,
-              userId: recentSession.userId,
-            }
+                id: recentSession.id,
+                userId: recentSession.userId,
+              }
             : null,
           timestamp: new Date().toISOString(),
         };
