@@ -191,7 +191,7 @@ const TERMINAL_SCRIPT: TerminalLine[] = [
   { text: "✔ oauth succeeded — kinfishtech@gmail.com", tone: "success" },
   { text: "$ testing database connection...", tone: "command" },
   { text: "⌁ checking database connection with adapter.findMany()", tone: "info" },
-  { text: "✔ connection established → first user email: kinfishtech@gmail.com", tone: "success" },
+  { text: "✔ connection established, found users", tone: "success" },
   { text: "$ testing health check..", tone: "command" },
   { text: "⌁ running system health check api...", tone: "info" },
   { text: "✔ health check passed! all systems operational", tone: "success" },
@@ -340,7 +340,7 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
         </div>
       </div>
 
-      <div className="hidden md:block absolute top-6 right-6 lg:right-12 w-[420px] lg:w-[520px]">
+      <div className="hidden md:block absolute top-6 right-6 lg:right-10 w-[420px] lg:w-[520px]">
         <div className="relative overflow-hidden border border-white/20 border-dashed rounded-none bg-transparent backdrop-blur-2xl animate-[terminal-pop_0.6s_ease-out]">
           <div className="absolute inset-0 bg-linear-to-br from-transparent/20 via-transparent/5 to-transparent opacity-70 blur-3xl" />
           <div className="relative px-6 pt-4 pb-0 font-mono text-[12px] text-white">
@@ -374,14 +374,14 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
               </div> */}
             </div>
             <div className="mx-auto mt-4 py-1  border-t border-dashed border-white/10 backdrop-blur-sm">
-              <div className="flex items-center justify-between text-[10px] text-white/60 uppercase tracking-[0.22em]">
+              <div className="flex items-center justify-between text-[9px] text-white/60 uppercase tracking-[0.22em]">
                 <div className="flex items-center space-x-3">
                   <span>Status: {visibleTerminalLines.length === 0 ? "Idle" : "Live"}</span>
                   <span>Lines: {visibleTerminalLines.length}</span>
                 </div>
-                <div className="flex items-center space-x-1">
+                <div className="flex items-center space-x-2">
                   <div className="w-1.5 h-1.5 mr-1 bg-emerald-400 rounded-full animate-pulse" />
-                  <span>better auth studio</span>
+                  <span className="text-white/70 font-mono text-[9px] uppercase tracking-[0.25em]">better auth studio</span>
                 </div>
               </div>
             </div>
