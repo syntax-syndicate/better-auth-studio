@@ -13,46 +13,46 @@ export default function Changelog() {
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">LATEST RELEASE</h2>
           <PixelCard variant="highlight">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-light tracking-tight text-white">v1.0.26</h3>
-              <span className="text-sm font-light tracking-tight text-white/50">2025-01-09</span>
+              <h3 className="text-lg font-light tracking-tight text-white">v1.0.30</h3>
+              <span className="text-sm font-light tracking-tight text-white/50">2025-11-08</span>
             </div>
             <p className="text-sm font-light tracking-tight text-white/70 mb-4">
-              Major release introducing Shadcn UI components, comprehensive admin functionality with user banning/unbanning, advanced filtering system with date range picker, and pure black & white theme overhaul.
+              Massive studio refresh featuring a rebuilt analytics dashboard, refined black & white interface, and an all-new Tools command center with guided OAuth diagnostics, migration helpers, and database connectivity checks.
             </p>
             <div className="space-y-3">
               <h4 className="font-light tracking-tight text-white">✨ New Features</h4>
               <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">Shadcn UI Components</strong> with Calendar, Popover, and DateRangePicker for modern UI interactions
+                  <strong className="pr-2">Dashboard 2.0</strong> with configurable period chips, custom date windows, and live organization / team metrics synced to backend analytics
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">Admin Functionality</strong> with comprehensive user banning/unbanning system including ban reasons and expiration dates
+                  <strong className="pr-2">Tools Workspace</strong> housing Test OAuth, Run Migration, and Test Database actions with auto-scrolling terminals and session-aware logging
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">Advanced Filtering System</strong> with dynamic filters, date range picker, and real-time filter application
+                  <strong className="pr-2">OAuth Diagnostics</strong> including Better Auth state verification, provider selection modal, social popup orchestration, and concise success feedback with user identity display
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">Pure Black & White Theme</strong> with sharp, modern aesthetic and consistent styling across all pages
+                  <strong className="pr-2">Migration Blueprints</strong> for Clerk plus placeholders for Supabase, Auth0, and NextAuth with copy-ready scripts and custom playground
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">Enhanced Database Visualization</strong> with plugin-aware coloring and improved schema display
+                  <strong className="pr-2">Database Smoke Tests</strong> leveraging adapter introspection to preview sample records and confirm connectivity
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">User Management Enhancements</strong> with ban status indicators, warning banners, and action menus
+                  <strong className="pr-2">Geist Typography</strong> applied to OAuth bootstraps and modals for a cohesive type system across browser surfaces
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">React Day Picker v9</strong> integration with dual-month calendar view and keyboard navigation
+                  <strong className="pr-2">UI Clean-up</strong> removing legacy comments, aligning seed dialogs, and mirroring filter experiences between Users and Organizations
                 </li>
                 <li className="flex items-start">
                   <span className="text-white/50 mr-3">•</span>
-                  <strong className="pr-2">API Endpoints</strong> for admin functionality including ban-user, unban-user, and admin status checking
+                  <strong className="pr-2">Changelog Updates</strong> capturing the latest design refinements and tooling capabilities
                 </li>
               </ul>
             </div>
@@ -61,6 +61,72 @@ export default function Changelog() {
 
         <section>
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">RECENT UPDATES</h2>
+
+          <PixelCard className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-light tracking-tight text-white">Dashboard Overhaul & Tool Suite</h3>
+              <span className="text-sm font-light tracking-tight text-white/50">2025-11-08</span>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white">📊 Dashboard Enhancements</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Period controls wired to analytics endpoints for organizations, teams, and subscriptions with custom range support
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Refined stat cards with live percentages, hover tooltips, and constraint-aware chart tooltips
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Consistent Geist typography and black/white styling applied across modals, filters, and cards
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white">🧰 Tools Command Center</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Test OAuth flow with provider selection modal, Better Auth state validation, popup orchestration, and account polling
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Run Migration dialog featuring Clerk blueprint, syntax-highlighted custom editor, and Coming Soon placeholders
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Test Database connectivity via `/api/database/test` with inline sample row preview and concise terminal logs
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Coming Soon badges applied to unfinished utilities while keeping OAuth and database tools interactive
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white">🧼 Polish & Cleanup</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Seed dialogs aligned between Users and Organizations with bracketed headers and dashed dividers
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    Removed stale console comments and deprecated navigation blocks across frontend and routes
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-white/50 mr-3">•</span>
+                    OAuth bootstrap pages updated to Geist Sans/Mono with improved typography and status wording
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </PixelCard>
 
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -529,6 +595,16 @@ export default function Changelog() {
         <section>
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">VERSION HISTORY</h2>
           <div className="space-y-4">
+            <PixelCard>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-light tracking-tight text-white">v1.0.30</h3>
+                <span className="text-sm font-light tracking-tight text-white/50">2025-11-08</span>
+              </div>
+              <p className="text-sm font-light tracking-tight text-white/70">
+                Released the refreshed analytics dashboard, Tools workspace with OAuth testing/migration/database utilities, Geist typography polish, and widespread UI clean-up.
+              </p>
+            </PixelCard>
+
             <PixelCard>
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-lg font-light tracking-tight text-white">v1.0.26</h3>
