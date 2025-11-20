@@ -38,7 +38,6 @@ export async function startStudio(options: StudioOptions) {
 
   let wss: WebSocketServer | null = null;
 
-  // Only start WebSocket server in watch mode
   if (watchMode) {
     wss = new WebSocketServer({ server });
 
