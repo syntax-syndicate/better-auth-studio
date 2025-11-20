@@ -91,8 +91,9 @@ async function startStudioWithWatch(options: StudioWatchOptions) {
       try {
         if (currentStudio && typeof currentStudio.close === 'function') {
           await currentStudio.close();
-        
-          const newAuthConfig = await findAuthConfig(configPath);
+        }
+
+        const newAuthConfig = await findAuthConfig(configPath);
         if (!newAuthConfig) {
           return;
         }
@@ -187,7 +188,6 @@ program
 
       let databaseInfo = 'Not configured';
 
-      // Try to auto-detect database first
       try {
         const detectedDb = await detectDatabaseWithDialect();
         if (detectedDb) {
