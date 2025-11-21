@@ -6,7 +6,7 @@ export default function Changelog() {
     <PixelLayout
       currentPage="changelog"
       title="CHANGLOG"
-      description="Track the Better Auth Studio development with detailed release notes and updates."
+      description="Track the Better Auth Studio development with detailed release updates."
     >
       <div className="space-y-8">
         <section>

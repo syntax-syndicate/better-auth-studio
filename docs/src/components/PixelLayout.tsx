@@ -32,7 +32,7 @@ export default function PixelLayout({ children, currentPage, title, description 
             <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-4 text-white">
               {title}
             </h1>
-            <p className="text-sm md:text-base font-light tracking-tight text-white/50 max-w-2xl mx-auto">
+            <p className="text-sm uppercase md:text-base font-light tracking-tight text-white/50 max-w-2xl mx-auto">
               {description}
             </p>
           </div>
