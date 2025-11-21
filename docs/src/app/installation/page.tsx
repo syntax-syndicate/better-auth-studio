@@ -18,13 +18,12 @@ export default function Installation() {
               <div>
                 <h3 className="text-lg font-light tracking-tight mb-2 text-white">Beta Version Notice</h3>
                 <p className="text-sm font-light tracking-tight text-white/70">
-                  Better Auth Studio is currently in <strong>beta</strong> and in early development. You may encounter bugs or incomplete features. Please report any issues you find on our GitHub repository to help us improve the project. Your feedback is greatly appreciated!
+                  Better Auth Studio is currently in <strong className="font-bold">beta</strong> and in early development. You may encounter bugs or incomplete features. Please report any  <a href="https://github.com/Kinfe123/better-auth-studio/issues" target="_blank" rel="noopener" className="underline underline-offset-2 font-bold">issues</a> you find on our GitHub repository to help us improve the project. Your feedback is greatly appreciated!
                 </p>
               </div>
             </div>
           </PixelCard>
         </section>
-
         <section>
           <PixelCard variant="highlight">
             <div className="flex items-start">
