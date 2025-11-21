@@ -1,4 +1,5 @@
-import { LucideLoader } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { LucideLoader, LucideTrash } from 'lucide-react';
 import type React from 'react';
 
 interface IconProps {
@@ -568,19 +569,7 @@ export const AlertTriangle: React.FC<IconProps> = ({ className = '', size = 24 }
 );
 
 export const Trash2: React.FC<IconProps> = ({ className = '', size = 24 }) => (
-  <svg
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    className={className}
-    width={size}
-    height={size}
-  >
-    <path
-      d="M10 2h4v2h6v2h-2v14H6V6H4V4h6V2zM8 6v14h8V6H8zm2 2h2v10h-2V8zm4 0h2v10h-2V8z"
-      fill="currentColor"
-    />
-  </svg>
+  <LucideTrash className={cn(className, 'w-4 h-4')} size={size} />
 );
 
 export const Send: React.FC<IconProps> = ({ className = '', size = 24 }) => (

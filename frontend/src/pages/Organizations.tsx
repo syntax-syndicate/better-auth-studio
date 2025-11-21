@@ -1031,14 +1031,30 @@ export default function Organizations() {
 
       {/* Edit Organization Modal */}
       {showEditModal && selectedOrganization && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowEditModal(false);
+              setSelectedOrganization(null);
+              setEditFormData({ name: '', slug: '' });
+            }
+          }}
+        >
+          <div
+            className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg text-white font-light">Edit Organization</h3>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => setShowEditModal(false)}
+                onClick={() => {
+                  setShowEditModal(false);
+                  setSelectedOrganization(null);
+                  setEditFormData({ name: '', slug: '' });
+                }}
                 className="text-gray-400 hover:text-white rounded-none"
               >
                 <X className="w-4 h-4" />

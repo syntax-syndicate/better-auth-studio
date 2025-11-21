@@ -97,7 +97,9 @@ export default function OrganizationDetails() {
   const [showCreateTeamModal, setShowCreateTeamModal] = useState(false);
   const [showEditTeamModal, setShowEditTeamModal] = useState(false);
   const [showDeleteTeamModal, setShowDeleteTeamModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [editFormData, setEditFormData] = useState({ name: '', slug: '' });
 
   const [inviteEmail, setInviteEmail] = useState('');
   const [selectedInviterId, setSelectedInviterId] = useState('');
@@ -434,6 +436,72 @@ export default function OrganizationDetails() {
     }
   };
 
+  const generateSlug = (name: string): string => {
+    return name
+      .toLowerCase()
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/[^a-z0-9-]/g, '') // Remove special characters except hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
+      .replace(/^-|-$/g, ''); // Remove leading/trailing hyphens
+  };
+
+  const openEditModal = () => {
+    if (organization) {
+      setEditFormData({ name: organization.name, slug: organization.slug });
+      setShowEditModal(true);
+    }
+  };
+
+  const handleEditNameChange = (name: string) => {
+    const slug = generateSlug(name);
+    setEditFormData({ name, slug });
+  };
+
+  const handleEditSlugChange = (slug: string) => {
+    setEditFormData((prev) => ({ ...prev, slug: generateSlug(slug) }));
+  };
+
+  const handleUpdateOrganization = async () => {
+    if (!organization) {
+      toast.error('No organization selected');
+      return;
+    }
+
+    if (!editFormData.name) {
+      toast.error('Please fill in the organization name');
+      return;
+    }
+
+    const toastId = toast.loading('Updating organization...');
+
+    try {
+      const response = await fetch(`/api/organizations/${organization.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editFormData.name,
+          slug: editFormData.slug,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        await fetchOrganization();
+        setShowEditModal(false);
+        setEditFormData({ name: '', slug: '' });
+        toast.success('Organization updated successfully!', { id: toastId });
+      } else {
+        toast.error(`Error updating organization: ${result.error || 'Unknown error'}`, {
+          id: toastId,
+        });
+      }
+    } catch (error) {
+      console.error('Error updating organization:', error);
+      toast.error('Error updating organization', { id: toastId });
+    }
+  };
+
   const openInviteModal = () => {
     fetchAvailableUsers();
     setShowInviteModal(true);
@@ -731,7 +799,10 @@ export default function OrganizationDetails() {
             <Mail className="w-4 h-4 mr-2" />
             Invite User
           </Button>
-          <Button className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none">
+          <Button
+            onClick={openEditModal}
+            className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+          >
             <Edit className="w-4 h-4 mr-2" />
             Edit Organization
           </Button>
@@ -1802,6 +1873,95 @@ export default function OrganizationDetails() {
                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
               >
                 Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Organization Modal */}
+      {showEditModal && organization && (
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowEditModal(false);
+              setEditFormData({ name: '', slug: '' });
+            }
+          }}
+        >
+          <div
+            className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg text-white font-light">Edit Organization</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditFormData({ name: '', slug: '' });
+                }}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-16 h-16 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
+                  <Building2 className="w-8 h-8 text-white" />
+                </div>
+                <div>
+                  <div className="text-white font-light">{organization.name}</div>
+                  <div className="text-sm text-gray-400">{organization.slug}</div>
+                </div>
+              </div>
+              <div>
+                <Label htmlFor="edit-name" className="text-sm text-gray-400 font-light">
+                  Name
+                </Label>
+                <Input
+                  id="edit-name"
+                  value={editFormData.name}
+                  onChange={(e) => handleEditNameChange(e.target.value)}
+                  placeholder="e.g. Acme Corp"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-slug" className="text-sm text-gray-400 font-light">
+                  Slug
+                </Label>
+                <Input
+                  id="edit-slug"
+                  value={editFormData.slug}
+                  onChange={(e) => handleEditSlugChange(e.target.value)}
+                  placeholder="e.g. acme-corp"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Auto-generated from name. You can edit it manually.
+                </p>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setShowEditModal(false);
+                  setEditFormData({ name: '', slug: '' });
+                }}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleUpdateOrganization}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+              >
+                Update
               </Button>
             </div>
           </div>
