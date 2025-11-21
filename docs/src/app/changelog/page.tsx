@@ -63,10 +63,6 @@ export default function Changelog() {
                     <span className="text-white/50 mr-3">•</span>
                     Refined stat cards with live percentages, hover tooltips, and constraint-aware chart tooltips
                   </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Consistent Geist typography and black/white styling applied across modals, filters, and cards
-                  </li>
                 </ul>
               </div>
 
@@ -85,33 +81,11 @@ export default function Changelog() {
                     <span className="text-white/50 mr-3">•</span>
                     Test Database connectivity via `/api/database/test` with inline sample row preview and concise terminal logs
                   </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Coming Soon badges applied to unfinished utilities while keeping OAuth and database tools interactive
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-light tracking-tight mb-2 text-white">🧼 Polish & Cleanup</h4>
-                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Seed dialogs aligned between Users and Organizations with bracketed headers and dashed dividers
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Removed stale console comments and deprecated navigation blocks across frontend and routes
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    OAuth bootstrap pages updated to Geist Sans/Mono with improved typography and status wording
-                  </li>
                 </ul>
               </div>
             </div>
           </PixelCard>
-
+          
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Shadcn UI Integration & Admin Functionality</h3>
@@ -129,17 +103,8 @@ export default function Changelog() {
                     <span className="text-white/50 mr-3">•</span>
                     DateRangePicker component for advanced date filtering with auto-close functionality
                   </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Popover component with proper positioning and accessibility features
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Pure black and white theme with CSS variables and consistent styling
-                  </li>
                 </ul>
               </div>
-
               <div>
                 <h4 className="font-light tracking-tight mb-2 text-white">🛡️ Admin Functionality</h4>
                 <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
