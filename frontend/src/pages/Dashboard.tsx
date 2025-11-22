@@ -1932,16 +1932,12 @@ export default function Dashboard() {
 
             {/* Right Column - Security Insights */}
             <div className="bg-white/5 border border-white/10 p-6 pt-4 overflow-hidden relative rounded-none flex flex-col">
-              {/* Top-left corner */}
               <div className="absolute top-0 left-0 w-[12px] h-[0.5px] bg-white/30" />
               <div className="absolute top-0 left-0 w-[0.5px] h-[12px] bg-white/30" />
-              {/* Top-right corner */}
               <div className="absolute top-0 right-0 w-[12px] h-[0.5px] bg-white/30" />
               <div className="absolute top-0 right-0 w-[0.5px] h-[12px] bg-white/30" />
-              {/* Bottom-left corner */}
               <div className="absolute bottom-0 left-0 w-[12px] h-[0.5px] bg-white/30" />
               <div className="absolute bottom-0 left-0 w-[0.5px] h-[12px] bg-white/30" />
-              {/* Bottom-right corner */}
               <div className="absolute bottom-0 right-0 w-[12px] h-[0.5px] bg-white/30" />
               <div className="absolute bottom-0 right-0 w-[0.5px] h-[12px] bg-white/30" />
               <div className="flex items-center justify-between mb-4 flex-shrink-0">
