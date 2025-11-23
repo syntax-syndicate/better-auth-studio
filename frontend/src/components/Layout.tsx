@@ -8,7 +8,7 @@ import {
   Wrench,
 } from 'lucide-react';
 import { type ReactNode, useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCounts } from '../contexts/CountsContext';
 import CommandPalette from './CommandPalette';
 import { Button } from './ui/button';
@@ -20,6 +20,7 @@ interface LayoutProps {
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const { counts, loading } = useCounts();
+  const navigate = useNavigate();
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
   const [studioVersion, setStudioVersion] = useState('v1.0.0');
 
@@ -84,7 +85,7 @@ export default function Layout({ children }: LayoutProps) {
               <div className="w-7 h-7 border border-dashed border-white/20 rounded-lg flex items-center justify-center">
                 <span className="text-black font-bold text-md">⚡</span>
               </div>
-              <div className="mb-0">
+              <div className="mb-0 cursor-pointer" onClick={() => navigate('/')}>
                 <h1 className="text-md inline-flex mb-0 items-start font-light font-mono uppercase text-white">
                   Better-Auth Studio
                   <sup className="text-sm text-gray-500 ml-1 mt-0">
@@ -95,11 +96,9 @@ export default function Layout({ children }: LayoutProps) {
                     <span className="ml-1">]</span>
                   </sup>
                 </h1>
-                {/* <p className="text-xs text-gray-300">{studioVersion}</p> */}
               </div>
             </div>
           </div>
-
           <div className="flex items-center space-x-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -114,21 +113,25 @@ export default function Layout({ children }: LayoutProps) {
                 ⌘ K
               </kbd>
             </div>
-            <a href="https://better-auth.com/docs" target="_blank" rel="noopener">
-              <Button
-                variant="ghost"
-                className="text-gray-300 bg-transparent hover:bg-transparent hover:bg-gray-900 border-dashed"
-              >
-                Docs
-              </Button>
+            <a
+              href="https://better-auth.com/docs"
+              target="_blank"
+              rel="noopener"
+              className="group flex items-center"
+            >
+              <span className="text-white/80 text-xs mr-2 transition-colors duration-150 group-hover:text-white group-hover:bg-gray-500/20 rounded px-0.5">[</span>
+              <span className="text-white/80 font-mono text-sm uppercase">Docs</span>
+              <span className="text-xs ml-2 transition-colors duration-150 group-hover:text-white group-hover:bg-gray-500/20 rounded px-0.5">]</span>
             </a>
-            <a href="https://better-auth.com/support" target="_blank" rel="noopener">
-              <Button
-                variant="ghost"
-                className="text-gray-300 bg-transparent hover:bg-transparent hover:bg-gray-900 border-dashed"
-              >
-                Support
-              </Button>
+            <a
+              href="https://better-auth.com/support"
+              target="_blank"
+              rel="noopener"
+              className="group flex items-center"
+            >
+              <span className="text-xs mr-2 transition-colors duration-150 group-hover:text-white group-hover:bg-gray-500/20 rounded px-0.5">[</span>
+              <span className="text-white/80 font-mono text-sm uppercase">Support</span>
+              <span className="text-xs ml-2 transition-colors duration-150 group-hover:text-white group-hover:bg-gray-500/20 rounded px-0.5">]</span>
             </a>
           </div>
         </div>

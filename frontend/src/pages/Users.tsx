@@ -796,9 +796,8 @@ export default function Users() {
         )}
       </div>
 
-      {/* Users Table */}
       <div className="bg-black/30 border border-dashed border-white/20 rounded-none">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-dashed border-white/10">
@@ -926,7 +925,7 @@ export default function Users() {
 
                         {actionMenuOpen === user.id && (
                           <div
-                            className="absolute right-0 top-full mt-1 w-48 bg-black border border-white/20 rounded-none shadow-lg z-50"
+                            className="absolute z-[999] right-0 top-full mt-1 w-48 bg-black border border-white/20 rounded-none shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <button
