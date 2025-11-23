@@ -21,11 +21,11 @@ A web-based studio interface for managing Better Auth applications. Better Auth 
  
   <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJODyqbs8p2EKCNef8H9XqPm4cIwjaQVRUAFg7" alt="Better Auth Studio Preview 8" width="100%" />
   
-  
+  <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJ2syhnQSdgJ9w13MfvHiGYPs07AkpWQSXm6Nj" alt="Better Auth Studio Preview 12" width="100%" />
   <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJcW7cwWXSlBtbRHTF15ujAQLPx3VpcKgMOz08" alt="Better Auth Studio Preview 3" width="100%" />  
   <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJnAGpd3rzcKd2Hu4wkD0jJbApf78rC1VgZORT" alt="Better Auth Studio Preview 10" width="100%" />
 
-  <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJ2syhnQSdgJ9w13MfvHiGYPs07AkpWQSXm6Nj" alt="Better Auth Studio Preview 12" width="100%" />
+  
   <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJK6lXYfaxUOknshdjxpSgwV6mq7DtH3aMZXWK" alt="Better Auth Studio Preview 13" width="100%" />
   <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJhZFdrWmjbSvOe01IQl7r68LUfVKuFcNqAydt" alt="Better Auth Studio Preview 14" width="100%" />
   
