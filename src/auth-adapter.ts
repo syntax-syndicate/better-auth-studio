@@ -1,11 +1,15 @@
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { createJiti } from 'jiti';
+import { InternalAdapter } from "better-auth"
 
-export interface AuthAdapter {
-  createUser: (data: any) => Promise<any>;
+type OptionalFields<T> = { [K in keyof T]?: T[K] };
+
+type UserInternalAdapter = OptionalFields<InternalAdapter>
+
+// combining the internal adapter with the custom one for the studio
+export interface AuthAdapter extends UserInternalAdapter {
   createSession: (data: any) => Promise<any>;
-  deletUser?: (id: string) => Promise<any>;
   createAccount: (data: any) => Promise<any>;
   createVerification: (data: any) => Promise<any>;
   createOrganization: (data: any) => Promise<any>;
@@ -96,7 +100,7 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
                 updatedAt: new Date(),
               },
             });
-          } catch (_accountError) {}
+          } catch (_accountError) { }
         }
 
         return user;
@@ -252,8 +256,10 @@ export async function createMockUser(adapter: AuthAdapter, index: number) {
     createdAt: new Date(),
     updatedAt: new Date(),
   };
-
-  return await adapter.createUser(userData);
+  if (!adapter?.createUser) {
+    return null;
+  }
+  return await adapter?.createUser(userData);
 }
 
 // Random IP address generators for different countries
@@ -422,7 +428,10 @@ export async function createMockSession(adapter: AuthAdapter, userId: string, in
     updatedAt: new Date(),
   };
 
-  return await adapter.createSession(sessionData);
+  if (!adapter?.createSession) {
+    return null;
+  }
+  return await adapter?.createSession(sessionData);
 }
 
 export async function createMockAccount(adapter: AuthAdapter, userId: string, index: number) {
@@ -442,7 +451,10 @@ export async function createMockAccount(adapter: AuthAdapter, userId: string, in
     updatedAt: new Date(),
   };
 
-  return await adapter.createAccount(accountData);
+  if (!adapter?.createAccount) {
+    return null;
+  }
+  return await adapter?.createAccount(accountData);
 }
 
 export async function createMockVerification(adapter: AuthAdapter, _userId: string, index: number) {

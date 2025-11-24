@@ -1,7 +1,10 @@
-export interface AuthAdapter {
-    createUser: (data: any) => Promise<any>;
+import { InternalAdapter } from "better-auth";
+type OptionalFields<T> = {
+    [K in keyof T]?: T[K];
+};
+type UserInternalAdapter = OptionalFields<InternalAdapter>;
+export interface AuthAdapter extends UserInternalAdapter {
     createSession: (data: any) => Promise<any>;
-    deletUser?: (id: string) => Promise<any>;
     createAccount: (data: any) => Promise<any>;
     createVerification: (data: any) => Promise<any>;
     createOrganization: (data: any) => Promise<any>;
@@ -18,8 +21,17 @@ export interface AuthAdapter {
     }): Promise<T[]>;
 }
 export declare function getAuthAdapter(configPath?: string): Promise<AuthAdapter | null>;
-export declare function createMockUser(adapter: AuthAdapter, index: number): Promise<any>;
+export declare function createMockUser(adapter: AuthAdapter, index: number): Promise<(Record<string, any> & {
+    id: string;
+    createdAt: Date;
+    updatedAt: Date;
+    email: string;
+    emailVerified: boolean;
+    name: string;
+    image?: string | null | undefined;
+}) | null>;
 export declare function createMockSession(adapter: AuthAdapter, userId: string, index: number): Promise<any>;
 export declare function createMockAccount(adapter: AuthAdapter, userId: string, index: number): Promise<any>;
 export declare function createMockVerification(adapter: AuthAdapter, _userId: string, index: number): Promise<any>;
+export {};
 //# sourceMappingURL=auth-adapter.d.ts.map

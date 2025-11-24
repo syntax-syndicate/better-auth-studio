@@ -2802,6 +2802,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
             }
             const userData = req.body;
+            if (!adapter.createUser) {
+                return res.status(500).json({ error: 'createUser method not available on adapter' });
+            }
             const user = await adapter.createUser(userData);
             res.json({ success: true, user });
         }
@@ -2834,6 +2837,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                         throw new Error('createUser method not available on adapter');
                     }
                     const user = await createMockUser(adapter, i + 1);
+                    if (!user) {
+                        throw new Error('Failed to create user');
+                    }
                     results.push({
                         success: true,
                         user: {
@@ -2882,6 +2888,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 try {
                     if (typeof adapter.createSession !== 'function') {
                         throw new Error('createSession method not available on adapter');
+                    }
+                    if (!user) {
+                        throw new Error('Failed to create user');
                     }
                     const session = await createMockSession(adapter, user.id, i + 1);
                     results.push({
@@ -2985,6 +2994,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 try {
                     if (typeof adapter.createAccount !== 'function') {
                         throw new Error('createAccount method not available on adapter');
+                    }
+                    if (!user) {
+                        throw new Error('Failed to create user');
                     }
                     const account = await createMockAccount(adapter, user.id, i + 1);
                     results.push({

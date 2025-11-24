@@ -216,7 +216,10 @@ export async function createMockUser(adapter, index) {
         createdAt: new Date(),
         updatedAt: new Date(),
     };
-    return await adapter.createUser(userData);
+    if (!adapter?.createUser) {
+        return null;
+    }
+    return await adapter?.createUser(userData);
 }
 // Random IP address generators for different countries
 const _countryIPRanges = [
@@ -378,7 +381,10 @@ export async function createMockSession(adapter, userId, index) {
         createdAt: new Date(),
         updatedAt: new Date(),
     };
-    return await adapter.createSession(sessionData);
+    if (!adapter?.createSession) {
+        return null;
+    }
+    return await adapter?.createSession(sessionData);
 }
 export async function createMockAccount(adapter, userId, index) {
     const accountData = {
@@ -396,7 +402,10 @@ export async function createMockAccount(adapter, userId, index) {
         createdAt: new Date(),
         updatedAt: new Date(),
     };
-    return await adapter.createAccount(accountData);
+    if (!adapter?.createAccount) {
+        return null;
+    }
+    return await adapter?.createAccount(accountData);
 }
 export async function createMockVerification(adapter, _userId, index) {
     const verificationData = {

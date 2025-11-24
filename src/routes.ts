@@ -3041,6 +3041,9 @@ export function createRoutes(
       }
 
       const userData = req.body;
+      if(!adapter.createUser) {
+        return res.status(500).json({ error: 'createUser method not available on adapter' });
+      }
       const user = await adapter.createUser(userData);
       res.json({ success: true, user });
     } catch (_error) {
@@ -3074,8 +3077,10 @@ export function createRoutes(
           if (typeof adapter.createUser !== 'function') {
             throw new Error('createUser method not available on adapter');
           }
-
           const user = await createMockUser(adapter, i + 1);
+          if(!user) {
+            throw new Error('Failed to create user');
+          }
           results.push({
             success: true,
             user: {
@@ -3094,7 +3099,6 @@ export function createRoutes(
           });
         }
       }
-
       res.json({
         success: true,
         message: `Seeded ${results.filter((r) => r.success).length} users`,
@@ -3127,7 +3131,9 @@ export function createRoutes(
           if (typeof adapter.createSession !== 'function') {
             throw new Error('createSession method not available on adapter');
           }
-
+          if(!user) {
+            throw new Error('Failed to create user');
+          }
           const session = await createMockSession(adapter, user.id, i + 1);
           results.push({
             success: true,
@@ -3236,7 +3242,9 @@ export function createRoutes(
           if (typeof adapter.createAccount !== 'function') {
             throw new Error('createAccount method not available on adapter');
           }
-
+          if(!user) {
+            throw new Error('Failed to create user');
+          }
           const account = await createMockAccount(adapter, user.id, i + 1);
           results.push({
             success: true,
