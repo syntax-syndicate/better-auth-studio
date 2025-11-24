@@ -634,7 +634,6 @@ export default function Tools() {
   }, []);
 
   const handleTestOAuth = async () => {
-    // Check if providers are available
     if (oauthProviders.length === 0) {
       toast.error('No OAuth providers configured');
       addLog('error', '❌ No OAuth providers found in configuration', 'failed');
@@ -645,17 +644,13 @@ export default function Tools() {
       );
       return;
     }
-
-    // Always show modal to select provider
     setShowOAuthModal(true);
   };
 
   const startOAuthTest = async (providerId: string) => {
-    // Close modal immediately
     setShowOAuthModal(false);
     setSelectedProvider('');
 
-    // Show terminal and start logging
     setRunningTool('test-oauth');
     setShowLogs(true);
     setToolLogs([]);
@@ -699,7 +694,6 @@ export default function Tools() {
         const left = (window.screen.width - width) / 2;
         const top = (window.screen.height - height) / 2;
 
-        // Open popup window that will bootstrap the OAuth flow via Better Auth
         const oauthWindow = window.open(
           result.startUrl,
           'oauth-test',
@@ -782,7 +776,6 @@ export default function Tools() {
             clearTimeout(timeoutId);
             window.removeEventListener('message', messageHandler);
 
-            // Check if we already got a result
             const storedResult = sessionStorage.getItem(
               `oauth_test_result_${testSession.testSessionId}`
             );
@@ -793,7 +786,6 @@ export default function Tools() {
           }
         }, 500);
 
-        // Timeout after 5 minutes
         const timeoutId = setTimeout(
           () => {
             if (!oauthWindow.closed) {
@@ -1176,8 +1168,6 @@ export default function Tools() {
           ))}
         </div>
       </div>
-
-      {/* OAuth Provider Selection Modal */}
       {showOAuthModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-black/90 border border-dashed border-white/20 p-8 w-full max-w-2xl rounded-none">
@@ -1264,8 +1254,6 @@ export default function Tools() {
           </div>
         </div>
       )}
-
-      {/* Migration Provider Modal */}
       {showMigrationModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
           <div className="bg-black/95 border border-dashed border-white/20 p-8 w-full max-w-5xl rounded-none">

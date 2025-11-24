@@ -3385,7 +3385,6 @@ export function createRoutes(
     }
   });
 
-  // OAuth Test Endpoints
   router.get('/api/tools/oauth/providers', async (_req: Request, res: Response) => {
     const _result = await getAuthAdapterWithConfig();
     try {
