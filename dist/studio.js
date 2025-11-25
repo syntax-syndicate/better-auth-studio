@@ -6,6 +6,7 @@ import express from 'express';
 import open from 'open';
 import { WebSocketServer } from 'ws';
 import { createRoutes } from './routes.js';
+import chalk from 'chalk';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 export async function startStudio(options) {
@@ -46,6 +47,20 @@ export async function startStudio(options) {
     });
     server.listen(port, host, () => {
         const url = `http://${host}:${port}`;
+        process.stdout.write('\n');
+        process.stdout.write(chalk.green('✔ Better Auth Studio is running!\n'));
+        process.stdout.write(chalk.green('\n'));
+        process.stdout.write(chalk.white(`🌐 Open your browser and navigate to: `));
+        process.stdout.write(chalk.green(`${url}\n`));
+        process.stdout.write(chalk.white(`📊 Dashboard available at: `));
+        process.stdout.write(chalk.green(`${url}\n`));
+        process.stdout.write(chalk.white(`🔧 API endpoints available at: `));
+        process.stdout.write(chalk.green(`${url}/api\n`));
+        if (watchMode) {
+            process.stdout.write(chalk.yellow('👀 Watch mode enabled - config changes will reload automatically\n'));
+        }
+        process.stdout.write(chalk.gray('Press Ctrl+C to stop the studio\n'));
+        process.stdout.write('\n');
         if (watchMode) {
         }
         if (openBrowser) {
