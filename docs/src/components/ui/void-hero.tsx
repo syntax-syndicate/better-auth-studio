@@ -306,7 +306,7 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
         </div>
         <div className="absolute bottom-4 left-4 md:bottom-10 md:left-10 z-20 max-w-md">
 
-          <h1 className="text-2xl flex uppercase font-mono md:text-3xl font-light tracking-tight mb-3 text-white">
+          <h1 className="text-2xl w-[1000px] flex uppercase font-mono md:text-3xl font-light tracking-tight mb-3 text-white">
             {title.split("Studio")[0]}{" "}
             <LineShadowText className="font-normal ml-2" shadowColor="white">
               Studio
@@ -318,7 +318,13 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
                 <span className="text-white/50 group-hover:text-white transition-colors">]</span>
               </div>
             )}
+            <div className="inline-flex group gap-x-1 text-[13px] ml-2 font-mono">
+              <span className="text-white/50 group-hover:text-white transition-colors">[</span>
+              <span className="text-white/70 text-[14px]">PUBLIC BETA</span>
+              <span className="text-white/50 group-hover:text-white transition-colors">]</span>
+            </div>
           </h1>
+
           <p className="font-mono uppercase text-[12.5px] text-white/50 mb-6">
             {description}
           </p>
@@ -382,7 +388,7 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
           </div>
         </div>
 
-        <div className="hidden md:block absolute bottom-6 right-6 lg:right-10 w-[420px] lg:w-[520px]">
+        <div className="hidden lg:block absolute bottom-6 right-6 lg:right-10 w-[420px] lg:w-[520px]">
           <div className="relative overflow-hidden border border-white/20 border-dashed rounded-none bg-transparent backdrop-blur-2xl animate-[terminal-pop_0.6s_ease-out]">
             <div className="absolute inset-0 bg-linear-to-br from-transparent/20 via-transparent/5 to-transparent opacity-70 blur-3xl" />
             <div className="relative px-6 pt-4 pb-0 font-mono text-[12px] text-white">
@@ -407,8 +413,7 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
                 {terminalLogs.map((line, idx) => (
                   <div
                     key={`${line.text}-${idx}`}
-                    className={`flex items-start gap-2 whitespace-pre-wrap leading-relaxed ${
-                      line.tone === "command"
+                    className={`flex items-start gap-2 whitespace-pre-wrap leading-relaxed ${line.tone === "command"
                         ? "text-white/90"
                         : line.tone === "success"
                           ? "text-emerald-400"
