@@ -1245,6 +1245,78 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             });
         }
     });
+    router.post('/api/tools/health-check', async (_req, res) => {
+        try {
+            const baseUrl = authConfig.baseURL?.replace(/\/$/, '') ||
+                process.env.BETTER_AUTH_URL?.replace(/\/$/, '') ||
+                'http://localhost:3000';
+            const basePathRaw = authConfig.basePath || '/api/auth';
+            const basePath = basePathRaw === '/' ? '' : basePathRaw.startsWith('/') ? basePathRaw : `/${basePathRaw}`;
+            const endpointChecks = [
+                { label: 'Sign In', method: 'OPTIONS', path: '/sign-in/email' },
+                { label: 'Sign Up', method: 'OPTIONS', path: '/sign-up/email' },
+            ];
+            const checks = await Promise.all(endpointChecks.map(async (check) => {
+                const targetUrl = `${baseUrl}${basePath}${check.path}`;
+                try {
+                    const response = await fetch(targetUrl, {
+                        method: check.method,
+                    });
+                    const ok = response.status < 500 && response.status !== 404;
+                    if (!ok) {
+                        return {
+                            label: check.label,
+                            endpoint: check.path,
+                            ok: false,
+                            status: response.status,
+                            error: response.statusText,
+                        };
+                    }
+                    return {
+                        label: check.label,
+                        endpoint: check.path,
+                        ok,
+                        status: response.status,
+                    };
+                }
+                catch (error) {
+                    return {
+                        label: check.label,
+                        endpoint: check.path,
+                        ok: false,
+                        status: null,
+                        error: error instanceof Error ? error.message : 'Unknown error',
+                    };
+                }
+            }));
+            const allPassed = checks.every((check) => check.ok);
+            const failedChecks = checks.filter((check) => !check.ok);
+            if (allPassed) {
+                res.json({
+                    success: true,
+                    message: 'All Better Auth endpoints are healthy',
+                });
+            }
+            else {
+                res.json({
+                    success: false,
+                    message: 'Some Better Auth endpoints failed health checks',
+                    failedEndpoints: failedChecks.map((check) => ({
+                        endpoint: check.endpoint,
+                        status: check.status,
+                        error: check.error,
+                    })),
+                });
+            }
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Health check failed',
+                message: error instanceof Error ? error.message : 'Unknown error',
+            });
+        }
+    });
     // Database Detection endpoint - Auto-detect database from installed packages
     router.get('/api/database/detect', async (_req, res) => {
         try {

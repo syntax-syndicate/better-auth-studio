@@ -1032,27 +1032,52 @@ export default function Tools() {
     setShowLogs(true);
     setToolLogs([]);
 
-    addLog('info', 'Running system health check...', 'running');
+    addLog('info', 'Running Better Auth health check...', 'running');
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      addLog('progress', 'Checking API endpoints...', 'running');
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      addLog('progress', 'Checking database health...', 'running');
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      addLog('progress', 'Checking plugins status...', 'running');
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      addLog('success', '✅ System health check passed!', 'completed');
-      toast.success('System health check passed');
+      addLog('progress', 'Testing Better Auth endpoints...', 'running');
+      const response = await fetch('/api/tools/health-check', {
+        method: 'POST',
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Health check failed');
+      }
+
+      if (data.success) {
+        addLog('success', '✅ Better Auth health check passed', 'completed');
+        toast.success('Health check passed');
+      } else {
+        addLog('error', '❌ Better Auth health check failed', 'failed');
+        
+        if (data.failedEndpoints && data.failedEndpoints.length > 0) {
+          data.failedEndpoints.forEach((failed: { endpoint: string; status?: number | null; error?: string }) => {
+            const statusInfo = failed.status ? ` (Status: ${failed.status})` : '';
+            const errorInfo = failed.error ? ` - ${failed.error}` : '';
+            addLog(
+              'error',
+              `   • Endpoint ${failed.endpoint}${statusInfo}${errorInfo}`,
+              'failed'
+            );
+          });
+        }
+        
+        toast.error('Health check failed');
+      }
     } catch (error) {
-      addLog('error', `❌ Health check failed: ${error}`, 'failed');
+      addLog(
+        'error',
+        `❌ Health check failed: ${error instanceof Error ? error.message : error}`,
+        'failed'
+      );
       toast.error('Health check failed');
     } finally {
       setRunningTool(null);
     }
   };
 
-  const enabledToolIds = new Set(['test-oauth', 'test-db', 'hash-password']);
+  const enabledToolIds = new Set(['test-oauth', 'test-db', 'hash-password', 'health-check']);
 
   const tools: Tool[] = [
     {
