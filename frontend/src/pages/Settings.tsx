@@ -361,7 +361,6 @@ export default function Settings() {
       <hr className="w-full border-white/15 h-px" />
       <hr className="w-full border-white/15 h-px" />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-5">
-        {/* Application Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
             <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
@@ -591,7 +590,6 @@ export default function Settings() {
                 </Badge>
               </div>
             )}
-            {/* No Database Detected */}
             {!databaseInfo?.success && !config?.database && (
               <div className="flex items-center justify-between p-3 px-5">
                 <div className="flex items-center space-x-3">
