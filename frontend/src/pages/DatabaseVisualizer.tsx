@@ -280,11 +280,11 @@ export default function DatabaseVisualizer() {
       </div>
       <div className="flex-1 grid grid-cols-4 gap-6 mt-6">
         <div className="col-span-1 space-y-4">
-          <Card className="rounded-none bg-black h-fit shadow-sm">
-            <CardHeader>
+          <Card className="rounded-none bg-black h-fit shadow-sm border border-white/15">
+            <CardHeader className='border-b border-white/15 pb-2 mb-2'>
               <CardTitle className="font-light text-xl text-white flex items-center space-x-2">
-                <Settings className="w-5 h-5" />
-                <span>Detected Tables</span>
+                <Settings className="w-4 h-4" />
+                <span className='uppercase font-mono text-xs tracking-tight'>Detected Tables</span>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
@@ -294,7 +294,7 @@ export default function DatabaseVisualizer() {
                     <div key={table.name} className="border border-white/10 p-3 rounded-none">
                       <div className="flex items-center justify-between text-sm text-white">
                         <span>{table.displayName}</span>
-                        <span className="text-xs uppercase text-gray-400">
+                        <span className="text-xs uppercase font-mono text-gray-400">
                           {table.origin === 'core' ? 'Core' : 'Extended'}
                         </span>
                       </div>
@@ -311,9 +311,11 @@ export default function DatabaseVisualizer() {
           </Card>
 
           {schema && (
-            <Card className="rounded-none bg-black shadow-sm">
-              <CardHeader>
-                <CardTitle className="text-white text-sm">Schema Summary</CardTitle>
+            <Card className="rounded-none bg-black shadow-sm border border-white/15">
+              <CardHeader className='border-b border-white/15 pb-2 mb-2'>
+                <CardTitle className="font-light text-xl text-white flex items-center space-x-2">
+                  <span className='uppercase font-mono text-xs tracking-tight'>Schema Summary</span>
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 <div className="flex justify-between text-white/80">
@@ -374,7 +376,7 @@ export default function DatabaseVisualizer() {
         </div>
 
         <div className="col-span-3">
-          <div className="h-full bg-black border border-gray-700 rounded-lg overflow-hidden shadow-xl">
+          <div className="h-full bg-black border border-white/20 rounded-lg overflow-hidden shadow-xl">
             <ReactFlow
               nodes={nodes}
               edges={edges}
@@ -402,9 +404,9 @@ export default function DatabaseVisualizer() {
               nodesConnectable={false}
               elementsSelectable={true}
             >
-              <Controls className="bg-gray-900 border-gray-700 [&>button]:bg-gray-800 [&>button]:border-gray-600 [&>button]:text-white [&>button:hover]:bg-gray-700" />
+              <Controls className="bg-gray-900 border-white/20 [&>button]:bg-gray-800 [&>button]:border-gray-600 [&>button]:text-white [&>button:hover]:bg-gray-700" />
               <MiniMap
-                className="bg-gray-900 border-gray-700"
+                className="bg-gray-900 border-white/20"
                 nodeColor={(node) => {
                   if (node.data?.isForeign) return '#374151';
                   return '#1f2937';

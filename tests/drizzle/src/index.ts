@@ -19,7 +19,6 @@ app.get('/', async (req, res) => {
   const users = await (await auth.$context).adapter.findMany({
     model: "user",
   })
-  console.log({users})
   res.json({
     message: 'Better Auth Test Project',
     description: 'This is a test project for Better Auth Studio',
