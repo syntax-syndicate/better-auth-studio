@@ -266,18 +266,19 @@ export default function DatabaseVisualizer() {
     <>
       <div className="space-y-8">
         <div className="flex items-center justify-between p-5 pt-7">
-        <div>
-          <h1 className="text-3xl font-normal text-white tracking-tight">Schema Visualizer</h1>
-          <p className="text-gray-300 mt-2 uppercase font-mono font-light text-xs">
-            Visualize your Better Auth database schema with interactive tables and relationships.
-          </p>
+          <div>
+            <h1 className="text-3xl font-normal text-white tracking-tight">Schema Visualizer</h1>
+            <p className="text-gray-300 mt-2 uppercase font-mono font-light text-xs">
+              Visualize your Better Auth database schema with interactive tables and relationships.
+            </p>
+          </div>
+        </div>
+        <div className='flex flex-col items-center space-y-8 mb-4'>
+          <hr className="w-full border-white/15 h-px" />
+          <hr className="w-full border-white/15 h-px" />
         </div>
       </div>
-          <hr className="w-full border-white/15 h-px" />
-          <hr className="w-full border-white/15 h-px" />
-        </div>
-
-      <div className="flex-1 grid grid-cols-4 gap-6">
+      <div className="flex-1 grid grid-cols-4 gap-6 mt-6">
         <div className="col-span-1 space-y-4">
           <Card className="rounded-none bg-black h-fit shadow-sm">
             <CardHeader>
@@ -418,5 +419,5 @@ export default function DatabaseVisualizer() {
     </>
   );
 
-  return <div className="p-6 h-screen flex flex-col bg-black">{mainContent}</div>;
+  return <div className="h-screen flex flex-col bg-black">{mainContent}</div>;
 }
