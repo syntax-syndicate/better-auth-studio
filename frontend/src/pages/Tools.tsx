@@ -1,10 +1,11 @@
-import { Code, Eye, EyeOff, Globe, Key, TestTube } from 'lucide-react';
+import { Code, Download, Eye, EyeOff, Globe, Key, TestTube } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { getProviderIcon } from '../lib/icons';
 import {
   ArrowRight,
+  Check,
   CheckCircle,
   ChevronRight,
   Copy,
@@ -361,6 +362,12 @@ export default function Tools() {
   const [hashOutput, setHashOutput] = useState<string | null>(null);
   const [hashingPassword, setHashingPassword] = useState(false);
   const [showPlainPassword, setShowPlainPassword] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [availableTables, setAvailableTables] = useState<Array<{ name: string; displayName: string }>>([]);
+  const [selectedTables, setSelectedTables] = useState<Set<string>>(new Set());
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
+  const [exportLimit, setExportLimit] = useState<string>('1000');
+  const [isExporting, setIsExporting] = useState(false);
 
   const addLog = (
     type: 'info' | 'success' | 'error' | 'progress',
@@ -1008,6 +1015,130 @@ export default function Tools() {
       setRunningTool(null);
     }
   };
+  const handleExportData = () => {
+    setShowExportModal(true);
+  };
+
+  const fetchAvailableTables = async () => {
+    try {
+      const response = await fetch('/api/database/schema');
+      const result = await response.json();
+      if (result.success && result.schema && result.schema.tables) {
+        const tables = result.schema.tables.map((table: any) => ({
+          name: table.name,
+          displayName: table.displayName || table.name,
+        }));
+        setAvailableTables(tables);
+      }
+    } catch (_error) {
+      toast.error('Failed to fetch available tables');
+    }
+  };
+
+  useEffect(() => {
+    if (showExportModal) {
+      fetchAvailableTables();
+      setSelectedTables(new Set());
+    }
+  }, [showExportModal]);
+
+  const toggleTableSelection = (tableName: string) => {
+    setSelectedTables((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(tableName)) {
+        newSet.delete(tableName);
+      } else {
+        newSet.add(tableName);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllTables = () => {
+    setSelectedTables(new Set(availableTables.map((t) => t.name)));
+  };
+
+  const deselectAllTables = () => {
+    setSelectedTables(new Set());
+  };
+
+  const handleExecuteExport = async () => {
+    if (selectedTables.size === 0) {
+      toast.error('Please select at least one table to export');
+      return;
+    }
+
+    const limit = parseInt(exportLimit, 10);
+    if (isNaN(limit) || limit <= 0) {
+      toast.error('Please enter a valid limit (greater than 0)');
+      return;
+    }
+
+    if (limit > 10000) {
+      toast.error('Limit cannot exceed 10,000 rows per table');
+      return;
+    }
+
+    setIsExporting(true);
+    setRunningTool('export-data');
+    setShowLogs(true);
+    setToolLogs([]);
+
+    try {
+      addLog('info', `📦 Starting export of ${selectedTables.size} table(s)...`, 'running');
+      addLog('progress', `Format: ${exportFormat.toUpperCase()} | Limit: ${limit} rows per table`, 'running');
+
+      const response = await fetch('/api/tools/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tables: Array.from(selectedTables),
+          format: exportFormat,
+          limit: limit,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        addLog('success', '✅ Export completed successfully!', 'completed');
+        
+        // Log row counts
+        if (result.rowCounts) {
+          Object.entries(result.rowCounts).forEach(([table, count]) => {
+            addLog('info', `  • ${table}: ${count} rows`, 'completed');
+          });
+        }
+        
+        addLog('info', `📥 Downloading ${result.filename}...`, 'completed');
+
+        // Create download link
+        const blob = new Blob([result.data], {
+          type: result.contentType || (exportFormat === 'json' ? 'application/json' : 'text/csv'),
+        });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = result.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        toast.success('Export downloaded successfully');
+        setShowExportModal(false);
+      } else {
+        throw new Error(result.error || 'Export failed');
+      }
+    } catch (error) {
+      addLog('error', `❌ Export failed: ${error instanceof Error ? error.message : error}`, 'failed');
+      toast.error('Export failed');
+    } finally {
+      setIsExporting(false);
+      setRunningTool(null);
+    }
+  };
+
   const handleHealthCheck = async () => {
     setRunningTool('health-check');
     setShowLogs(true);
@@ -1058,7 +1189,7 @@ export default function Tools() {
     }
   };
 
-  const enabledToolIds = new Set(['test-oauth', 'test-db', 'hash-password', 'health-check']);
+  const enabledToolIds = new Set(['test-oauth', 'test-db', 'hash-password', 'health-check', 'export-data']);
 
   const tools: Tool[] = [
     {
@@ -1116,6 +1247,14 @@ export default function Tools() {
       icon: TestTube,
       action: handleHealthCheck,
       category: 'testing',
+    },
+    {
+      id: 'export-data',
+      name: 'Export Data',
+      description: 'Export database tables to JSON or CSV',
+      icon: Download,
+      action: handleExportData,
+      category: 'database',
     },
   ];
 
@@ -1625,6 +1764,157 @@ export default function Tools() {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {showExportModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+          <div className="bg-black border border-dashed border-white/20 rounded-none p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <Download className="w-5 h-5 text-white" />
+                <h3 className="text-xl text-white font-light uppercase tracking-wider">Export Data</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowExportModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              <div>
+                <Label className="text-xs uppercase font-mono text-gray-400 mb-3 block">Export Format</Label>
+                <div className="flex space-x-4">
+                  <button
+                    onClick={() => setExportFormat('json')}
+                    className={`px-4 py-2 border rounded-none transition-colors ${
+                      exportFormat === 'json'
+                        ? 'border-white/50 bg-white/10 text-white'
+                        : 'border-dashed border-white/20 text-gray-400 hover:border-white/30'
+                    }`}
+                  >
+                    JSON
+                  </button>
+                  <button
+                    onClick={() => setExportFormat('csv')}
+                    className={`px-4 py-2 border rounded-none transition-colors ${
+                      exportFormat === 'csv'
+                        ? 'border-white/50 bg-white/10 text-white'
+                        : 'border-dashed border-white/20 text-gray-400 hover:border-white/30'
+                    }`}
+                  >
+                    CSV
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="export-limit" className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                  Row Limit Per Table
+                </Label>
+                <Input
+                  id="export-limit"
+                  type="number"
+                  value={exportLimit}
+                  onChange={(e) => setExportLimit(e.target.value)}
+                  min="1"
+                  max="10000"
+                  placeholder="1000"
+                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                />
+                <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                  Maximum 10,000 rows per table (default: 1000)
+                </p>
+              </div>
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-xs uppercase font-mono text-gray-400">
+                    Select Tables ({selectedTables.size} selected)
+                  </Label>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={selectAllTables}
+                      className="text-xs text-gray-400 hover:text-white rounded-none"
+                    >
+                      Select All
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={deselectAllTables}
+                      className="text-xs text-gray-400 hover:text-white rounded-none"
+                    >
+                      Deselect All
+                    </Button>
+                  </div>
+                </div>
+                <div className="border border-dashed border-white/20 rounded-none max-h-64 overflow-y-auto">
+                  {availableTables.length === 0 ? (
+                    <div className="p-4 text-center text-gray-400 text-sm">Loading tables...</div>
+                  ) : (
+                    <div className="space-y-0">
+                      {availableTables.map((table) => {
+                        const isSelected = selectedTables.has(table.name);
+                        return (
+                          <button
+                            key={table.name}
+                            onClick={() => toggleTableSelection(table.name)}
+                            className={`w-full text-left p-3 border-b border-dashed border-white/10 last:border-b-0 transition-colors ${
+                              isSelected
+                                ? 'bg-white/10 border-white/30'
+                                : 'hover:bg-white/5'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="text-white text-sm font-mono">{table.displayName}</span>
+                                <span className="text-xs text-gray-400 ml-2 font-mono">({table.name})</span>
+                              </div>
+                              {isSelected && (
+                                <Check className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-8 border-t border-dashed border-white/10 pt-6">
+              <Button
+                variant="outline"
+                onClick={() => setShowExportModal(false)}
+                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleExecuteExport}
+                disabled={isExporting || selectedTables.size === 0}
+                className="rounded-none"
+              >
+                {isExporting ? (
+                  <>
+                    <Loader className="w-4 h-4 mr-2 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Export
+                  </>
+                )}
+              </Button>
             </div>
           </div>
         </div>

@@ -3840,6 +3840,91 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({ hasResult: false, error: 'Failed to check status' });
         }
     });
+    router.post('/api/tools/export', async (req, res) => {
+        try {
+            const { tables, format, limit } = req.body;
+            if (!tables || !Array.isArray(tables) || tables.length === 0) {
+                return res.status(400).json({ success: false, error: 'No tables specified' });
+            }
+            const exportLimit = Math.min(Math.max(parseInt(limit || '1000', 10), 1), 10000);
+            const exportFormat = format === 'csv' ? 'csv' : 'json';
+            const adapter = await getAuthAdapterWithConfig();
+            if (!adapter || !adapter.findMany) {
+                return res.status(500).json({ success: false, error: 'Auth adapter not available' });
+            }
+            const exportData = {};
+            // Fetch data from each table
+            for (const tableName of tables) {
+                try {
+                    const data = await adapter.findMany({
+                        model: tableName,
+                        limit: exportLimit,
+                    });
+                    exportData[tableName] = data || [];
+                }
+                catch (error) {
+                    // If table doesn't exist or can't be accessed, skip it
+                    exportData[tableName] = [];
+                }
+            }
+            let output;
+            let filename;
+            let contentType;
+            if (exportFormat === 'csv') {
+                // Convert to CSV
+                const csvRows = [];
+                for (const [tableName, rows] of Object.entries(exportData)) {
+                    if (rows.length === 0)
+                        continue;
+                    // Add table header
+                    csvRows.push(`\n=== ${tableName.toUpperCase()} ===\n`);
+                    // Get all unique keys from all rows
+                    const allKeys = new Set();
+                    rows.forEach((row) => {
+                        Object.keys(row).forEach((key) => allKeys.add(key));
+                    });
+                    const headers = Array.from(allKeys);
+                    // Write CSV header
+                    csvRows.push(headers.map((h) => `"${h}"`).join(','));
+                    // Write CSV rows
+                    rows.forEach((row) => {
+                        const values = headers.map((header) => {
+                            const value = row[header];
+                            if (value === null || value === undefined)
+                                return '';
+                            if (typeof value === 'object')
+                                return `"${JSON.stringify(value).replace(/"/g, '""')}"`;
+                            return `"${String(value).replace(/"/g, '""')}"`;
+                        });
+                        csvRows.push(values.join(','));
+                    });
+                }
+                output = csvRows.join('\n');
+                filename = `better-auth-export-${new Date().toISOString().split('T')[0]}.csv`;
+                contentType = 'text/csv';
+            }
+            else {
+                // JSON format
+                output = JSON.stringify(exportData, null, 2);
+                filename = `better-auth-export-${new Date().toISOString().split('T')[0]}.json`;
+                contentType = 'application/json';
+            }
+            res.json({
+                success: true,
+                data: output,
+                filename,
+                contentType,
+                tables: tables,
+                rowCounts: Object.fromEntries(Object.entries(exportData).map(([table, rows]) => [table, rows.length])),
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to export data',
+            });
+        }
+    });
     return router;
 }
 //# sourceMappingURL=routes.js.map
