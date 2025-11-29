@@ -413,14 +413,14 @@ export const auth = betterAuth({
             <div className="flex-1 flex overflow-hidden">
                 {/* Left Sidebar - Templates */}
                 <div className="w-80 border-r border-dashed border-white/15 flex flex-col overflow-hidden">
-                    <div className="p-4 border-b border-dashed border-white/10 flex-shrink-0">
+                    <div className="p-4 border-b border-dashed border-white/15 flex-shrink-0">
                         <h2 className="text-lg font-light text-white uppercase tracking-wider mb-4">Templates</h2>
                         <div className="flex flex-wrap gap-2">
                             {(['all', 'authentication', 'organization', 'notification'] as const).map((category) => (
                                 <button
                                     key={category}
                                     onClick={() => setActiveCategory(category)}
-                                    className={`px-2 py-1 text-xs font-mono uppercase border border-dashed rounded-none transition-colors ${activeCategory === category
+                                    className={`px-2 py-1 text-[10px] font-mono uppercase border border-dashed rounded-none transition-colors ${activeCategory === category
                                             ? 'border-white/30 bg-white/5 text-white'
                                             : 'border-white/10 bg-black/40 text-gray-300 hover:border-white/20'
                                         }`}

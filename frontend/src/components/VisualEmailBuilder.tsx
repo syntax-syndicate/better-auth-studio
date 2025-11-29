@@ -377,9 +377,8 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
         <div className="flex-1 flex overflow-hidden h-full">
             {/* Left: Canvas */}
             <div className="flex-1 flex flex-col overflow-hidden bg-white border-r border-dashed border-white/20" style={{ minWidth: '500px', height: '100%' }}>
-                <div className="p-4 border-b border-dashed border-white/10 bg-black/40">
+                <div className="p-4 border-y border-dashed border-white/10 bg-black/90">
                     <div className="flex items-center justify-between">
-                        
                         <Label className="text-xs uppercase font-mono text-gray-400">Email Canvas</Label>
                         <div className="flex items-center gap-2">
                             <Button
@@ -459,53 +458,49 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                                     >
                                         {/* Block Controls */}
                                         {isSelected && (
-                                            <div className="absolute -left-12 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                            <div className="absolute -left-12 top-0 flex flex-col gap-1 z-10">
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         moveBlock(block.id, 'up');
                                                     }}
                                                     disabled={index === 0}
-                                                    className="h-6 w-6 p-0 bg-black/80 border border-dashed border-white/20 hover:bg-white/20 rounded-none"
+                                                    className="h-7 w-7 p-0 bg-black/90 border border-dashed border-white/30 hover:bg-white/30 hover:border-white/60 rounded-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                                    title="Move up"
                                                 >
-                                                    <ChevronUp className="w-3 h-3" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                                    <ChevronUp className="w-4 h-4 text-white" />
+                                                </button>
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         moveBlock(block.id, 'down');
                                                     }}
                                                     disabled={index === blocks.length - 1}
-                                                    className="h-6 w-6 p-0 bg-black/80 border border-dashed border-white/20 hover:bg-white/20 rounded-none"
+                                                    className="h-7 w-7 p-0 bg-black/90 border border-dashed border-white/30 hover:bg-white/30 hover:border-white/60 rounded-none transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+                                                    title="Move down"
                                                 >
-                                                    <ChevronDown className="w-3 h-3" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                                    <ChevronDown className="w-4 h-4 text-white" />
+                                                </button>
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         duplicateBlock(block.id);
                                                     }}
-                                                    className="h-6 w-6 p-0 bg-black/80 border border-dashed border-white/20 hover:bg-white/20 rounded-none"
+                                                    className="h-7 w-7 p-0 bg-black/90 border border-dashed border-white/30 hover:bg-white/30 hover:border-white/60 rounded-none transition-all flex items-center justify-center"
+                                                    title="Duplicate"
                                                 >
-                                                    <Copy className="w-3 h-3" />
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
+                                                    <Copy className="w-4 h-4 text-white" />
+                                                </button>
+                                                <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
                                                         deleteBlock(block.id);
                                                     }}
-                                                    className="h-6 w-6 p-0 bg-black/80 border border-dashed border-white/20 hover:bg-white/20 rounded-none"
+                                                    className="h-7 w-7 p-0 bg-black/90 border border-dashed border-white/30 hover:bg-red-500/40 hover:border-red-500/70 rounded-none transition-all flex items-center justify-center"
+                                                    title="Delete"
                                                 >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </Button>
+                                                    <Trash2 className="w-4 h-4 text-white" />
+                                                </button>
                                             </div>
                                         )}
 
