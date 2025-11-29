@@ -6,7 +6,11 @@ import {
     Type,
     Image as ImageIcon,
     Minus,
-    MousePointerClick
+    MousePointerClick,
+    Bold,
+    Italic,
+    Underline,
+    Strikethrough
 } from 'lucide-react';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from './ui/button';
@@ -22,6 +26,7 @@ export interface EmailBlock {
     styles: {
         fontSize?: string;
         fontWeight?: string;
+        fontStyle?: string;
         fontFamily?: string;
         color?: string;
         backgroundColor?: string;
@@ -68,10 +73,12 @@ const parseHtmlToBlocks = (html: string): EmailBlock[] => {
                 styles: {
                     fontSize: styles.fontSize || (tagName === 'h1' ? '32px' : tagName === 'h2' ? '24px' : '20px'),
                     fontWeight: styles.fontWeight || 'bold',
+                    fontStyle: styles.fontStyle || 'normal',
                     color: styles.color || '#000000',
                     textAlign: (styles.textAlign as any) || 'left',
                     padding: styles.padding || '0',
                     margin: styles.margin || '0 0 16px 0',
+                    textDecoration: styles.textDecoration || 'none',
                 },
             });
         } else if (tagName === 'p') {
@@ -81,10 +88,13 @@ const parseHtmlToBlocks = (html: string): EmailBlock[] => {
                 content: element.textContent || '',
                 styles: {
                     fontSize: styles.fontSize || '16px',
+                    fontWeight: styles.fontWeight || 'normal',
+                    fontStyle: styles.fontStyle || 'normal',
                     color: styles.color || '#333333',
                     textAlign: (styles.textAlign as any) || 'left',
                     padding: styles.padding || '0',
                     margin: styles.margin || '0 0 16px 0',
+                    textDecoration: styles.textDecoration || 'none',
                 },
             });
         } else if (tagName === 'a' || (tagName === 'div' && element.querySelector('a'))) {
@@ -95,12 +105,15 @@ const parseHtmlToBlocks = (html: string): EmailBlock[] => {
                 content: link.textContent || '',
                 styles: {
                     fontSize: styles.fontSize || '16px',
+                    fontWeight: styles.fontWeight || 'normal',
+                    fontStyle: styles.fontStyle || 'normal',
                     color: styles.color || '#ffffff',
                     backgroundColor: styles.backgroundColor || '#000000',
                     textAlign: (styles.textAlign as any) || 'center',
                     padding: styles.padding || '12px 30px',
                     margin: styles.margin || '16px 0',
                     borderRadius: styles.borderRadius || '4px',
+                    textDecoration: styles.textDecoration || 'none',
                 },
                 attributes: {
                     href: link.getAttribute('href') || '',
@@ -167,8 +180,17 @@ const blocksToHtml = (blocks: EmailBlock[]): string => {
                 return `<p style="${styleString}">${block.content}</p>`;
             case 'button':
                 const href = block.attributes?.href || '{{url}}';
+                // For buttons, we need to explicitly set text-decoration to preserve user's choice
+                const buttonStyles = { ...block.styles };
+                if (!buttonStyles.textDecoration) {
+                    buttonStyles.textDecoration = 'none'; // Default for buttons to remove link underline
+                }
+                const buttonStyleString = Object.entries(buttonStyles)
+                    .filter(([_, value]) => value)
+                    .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
+                    .join('; ');
                 return `<div style="text-align: ${block.styles.textAlign || 'center'}; margin: ${block.styles.margin || '16px 0'}">
-          <a href="${href}" style="display: inline-block; ${styleString}; text-decoration: none;">${block.content}</a>
+          <a href="${href}" style="display: inline-block; ${buttonStyleString};">${block.content}</a>
         </div>`;
             case 'image':
                 return `<img src="${block.attributes?.src || ''}" alt="${block.attributes?.alt || ''}" style="${styleString}" />`;
@@ -361,9 +383,8 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
             setSelectedBlockId(blockId);
         }
     };
-
     return (
-        <div className="flex-1 flex overflow-hidden h-full">
+        <div className="flex-1 flex overflow-hidden h-[70vh] min-h-full">
             <div className="flex-1 flex flex-col overflow-hidden bg-white border-r border-dashed border-white/20" style={{ minWidth: '500px', height: '100%' }}>
                 <div className="p-4 border-y border-dashed border-white/10 bg-black/90">
                     <div className="flex items-center justify-between">
@@ -508,6 +529,7 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                                                 style={{
                                                     fontSize: block.styles.fontSize || '24px',
                                                     fontWeight: block.styles.fontWeight || 'bold',
+                                                    fontStyle: block.styles.fontStyle || 'normal',
                                                     fontFamily: block.styles.fontFamily || 'inherit',
                                                     color: block.styles.color || '#000000',
                                                     textAlign: block.styles.textAlign || 'left',
@@ -541,6 +563,8 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                                                 onInput={(e) => handleInput(block.id, e.currentTarget.textContent || '')}
                                                 style={{
                                                     fontSize: block.styles.fontSize || '16px',
+                                                    fontWeight: block.styles.fontWeight || 'normal',
+                                                    fontStyle: block.styles.fontStyle || 'normal',
                                                     fontFamily: block.styles.fontFamily || 'inherit',
                                                     color: block.styles.color || '#333333',
                                                     textAlign: block.styles.textAlign || 'left',
@@ -593,6 +617,8 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                                                     style={{
                                                         display: 'inline-block',
                                                         fontSize: block.styles.fontSize || '16px',
+                                                        fontWeight: block.styles.fontWeight || 'normal',
+                                                        fontStyle: block.styles.fontStyle || 'normal',
                                                         fontFamily: block.styles.fontFamily || 'inherit',
                                                         color: block.styles.color || '#ffffff',
                                                         backgroundColor: block.styles.backgroundColor || '#000000',
@@ -663,6 +689,69 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                                     className="bg-black border border-dashed border-white/20 text-white rounded-none font-mono text-xs"
                                 />
                                 <p className="text-xs text-gray-500 mt-1">Double-click on canvas to edit inline</p>
+                            </div>
+                        )}
+                        {(selectedBlock.type === 'heading' || selectedBlock.type === 'paragraph' || selectedBlock.type === 'button') && (
+                            <div>
+                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">Text Formatting</Label>
+                                <div className="flex gap-2">
+                                    <Button
+                                        variant={selectedBlock.styles.fontWeight === 'bold' ? 'default' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => updateBlock(selectedBlock.id, {
+                                            styles: {
+                                                ...selectedBlock.styles,
+                                                fontWeight: selectedBlock.styles.fontWeight === 'bold' ? 'normal' : 'bold'
+                                            }
+                                        })}
+                                        className="h-8 w-8 p-0 rounded-none border border-dashed border-white/20 hover:bg-white/10"
+                                        title="Bold"
+                                    >
+                                        <Bold className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        variant={selectedBlock.styles.fontStyle === 'italic' ? 'default' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => updateBlock(selectedBlock.id, {
+                                            styles: {
+                                                ...selectedBlock.styles,
+                                                fontStyle: selectedBlock.styles.fontStyle === 'italic' ? 'normal' : 'italic'
+                                            }
+                                        })}
+                                        className="h-8 w-8 p-0 rounded-none border border-dashed border-white/20 hover:bg-white/10"
+                                        title="Italic"
+                                    >
+                                        <Italic className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        variant={selectedBlock.styles.textDecoration === 'underline' ? 'default' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => updateBlock(selectedBlock.id, {
+                                            styles: {
+                                                ...selectedBlock.styles,
+                                                textDecoration: selectedBlock.styles.textDecoration === 'underline' ? 'none' : 'underline'
+                                            }
+                                        })}
+                                        className="h-8 w-8 p-0 rounded-none border border-dashed border-white/20 hover:bg-white/10"
+                                        title="Underline"
+                                    >
+                                        <Underline className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        variant={selectedBlock.styles.textDecoration === 'line-through' ? 'default' : 'ghost'}
+                                        size="sm"
+                                        onClick={() => updateBlock(selectedBlock.id, {
+                                            styles: {
+                                                ...selectedBlock.styles,
+                                                textDecoration: selectedBlock.styles.textDecoration === 'line-through' ? 'none' : 'line-through'
+                                            }
+                                        })}
+                                        className="h-8 w-8 p-0 rounded-none border border-dashed border-white/20 hover:bg-white/10"
+                                        title="Strikethrough"
+                                    >
+                                        <Strikethrough className="w-4 h-4" />
+                                    </Button>
+                                </div>
                             </div>
                         )}
 
@@ -789,26 +878,7 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                             </div>
                         )}
 
-                        {(selectedBlock.type === 'heading' || selectedBlock.type === 'paragraph' || selectedBlock.type === 'button') && (
-                            <div>
-                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">Font Weight</Label>
-                                <div className="grid grid-cols-3 gap-2">
-                                    {(['normal', 'bold', '600'] as const).map(weight => (
-                                        <Button
-                                            key={weight}
-                                            variant={selectedBlock.styles.fontWeight === weight ? 'default' : 'ghost'}
-                                            size="sm"
-                                            onClick={() => updateBlock(selectedBlock.id, {
-                                                styles: { ...selectedBlock.styles, fontWeight: weight }
-                                            })}
-                                            className="text-xs rounded-none border border-dashed border-white/20"
-                                        >
-                                            {weight === 'normal' ? 'Normal' : weight === 'bold' ? 'Bold' : 'Semi'}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+
 
                         {(selectedBlock.type === 'heading' || selectedBlock.type === 'paragraph') && (
                             <div>
@@ -838,26 +908,6 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                             </div>
                         )}
 
-                        {(selectedBlock.type === 'heading' || selectedBlock.type === 'paragraph' || selectedBlock.type === 'button') && (
-                            <div>
-                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">Text Decoration</Label>
-                                <div className="flex gap-2">
-                                    {(['none', 'underline', 'line-through'] as const).map(decoration => (
-                                        <Button
-                                            key={decoration}
-                                            variant={selectedBlock.styles.textDecoration === decoration ? 'default' : 'ghost'}
-                                            size="sm"
-                                            onClick={() => updateBlock(selectedBlock.id, {
-                                                styles: { ...selectedBlock.styles, textDecoration: decoration }
-                                            })}
-                                            className="flex-1 text-xs rounded-none border border-dashed border-white/20"
-                                        >
-                                            {decoration === 'none' ? 'None' : decoration === 'underline' ? 'Underline' : 'Strike'}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
 
                         {selectedBlock.type !== 'divider' && (
                             <div>
