@@ -389,7 +389,7 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
             <div className="flex-1 flex flex-col overflow-hidden bg-white border-r border-dashed border-white/20 min-h-0" style={{ minWidth: '500px' }}>
                 <div className="p-4 border-y border-dashed border-white/10 bg-black/90">
                     <div className="flex items-center justify-between">
-                        <Label className="text-xs uppercase font-mono text-gray-400">Email Canvas</Label>
+                        <Label className="text-xs uppercase font-mono text-gray-400">Email Editor</Label>
                         <div className="flex items-center gap-2">
                             <Button
                                 variant="ghost"
@@ -673,7 +673,7 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
             </div>
 
             {selectedBlock && (
-                <div className="w-96 border-l border-dashed border-white/20 bg-black/40 flex flex-col flex-shrink-0 overflow-hidden" style={{ minWidth: '384px', maxWidth: '384px', height: '100%' }}>
+                <div className="w-96 h-[calc(100vh-400px)] border-l border-dashed border-white/20 bg-black/40 flex flex-col flex-shrink-0 overflow-scroll" style={{ minWidth: '384px', maxWidth: '384px' }}>
                     <div className="p-4 border-b border-dashed border-white/10 bg-black/40 z-10 flex-shrink-0">
                         <Label className="text-xs uppercase font-mono text-gray-400">
                             {selectedBlock.type.charAt(0).toUpperCase() + selectedBlock.type.slice(1)} Properties

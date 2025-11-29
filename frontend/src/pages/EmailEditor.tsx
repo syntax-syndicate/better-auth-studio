@@ -395,7 +395,7 @@ export const auth = betterAuth({
     };
 
     return (
-        <div className="h-[130vh] flex flex-col bg-black">
+        <div className="h-full flex flex-col bg-black">
             <div className="flex items-center justify-between p-5 pt-7">
                 <div className='pb-8'>
                     <h1 className="text-3xl font-normal text-white tracking-tight">Emails</h1>
@@ -555,7 +555,7 @@ export const auth = betterAuth({
                         <div className="flex-1 flex items-center justify-center">
                             <div className="text-center">
                                 <Mail className="w-16 h-16 text-white/20 mx-auto mb-4" />
-                                <p className="text-gray-400 font-mono text-sm">Select a template to start editing</p>
+                                <p className="text-gray-400 font-mono uppercase text-sm">Select a template to start editing</p>
                             </div>
                         </div>
                     )}
@@ -600,7 +600,6 @@ export const auth = betterAuth({
                             <div className="relative z-20 h-8 w-[calc(100%)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#e0f2fe,#e0f2fe_1px,transparent_1px,transparent_6px)] opacity-[8%]" />
                             <hr className="w-full border-white/15 h-px" />
                         </div>
-
 
                         <div className="flex-1 overflow-auto p-6 bg-black">
                             <CodeBlock
