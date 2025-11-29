@@ -1818,15 +1818,7 @@ export function createRoutes(
         }
       }
 
-      // 7. Plugins
-      const plugins = authConfig.plugins || [];
-      if (plugins.length === 0) {
-        addResult('Plugins', 'Plugins', 'warning', 'No plugins configured', undefined, 'info');
-      } else {
-        addResult('Plugins', 'Plugins', 'pass', `${plugins.length} plugin(s) configured`);
-      }
-
-      // 8. Environment Variables
+      // 7. Environment Variables
       const requiredEnvVars = ['BETTER_AUTH_SECRET', 'AUTH_SECRET'];
       const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
       if (missingEnvVars.length > 0) {

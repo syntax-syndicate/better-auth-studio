@@ -2623,10 +2623,8 @@ export default function Tools() {
                   return acc;
                 }, {} as Record<string, typeof configValidationResults.results>)
               ).map(([category, results]) => {
-                // Group OAuth Providers by provider name
                 if (category === 'OAuth Providers') {
                   const providerGroups = results.reduce((acc, result) => {
-                    // Extract provider name from check (e.g., "Google - Client ID" -> "Google")
                     const match = result.check.match(/^(.+?)\s*-\s*(.+)$/);
                     if (match) {
                       const providerName = match[1];
@@ -2636,7 +2634,6 @@ export default function Tools() {
                       }
                       acc[providerName].push({ ...result, check: checkType });
                     } else {
-                      // If no provider name found, put in "General" group
                       if (!acc['General']) {
                         acc['General'] = [];
                       }
