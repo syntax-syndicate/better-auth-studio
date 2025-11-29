@@ -209,7 +209,6 @@ export default function EmailEditor() {
     const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
     const [showFieldSimulator, setShowFieldSimulator] = useState(false);
 
-    // Prevent body scroll when modal is open
     useEffect(() => {
         if (showCodeModal) {
             document.body.style.overflow = 'hidden';
@@ -227,7 +226,6 @@ export default function EmailEditor() {
             setSelectedTemplate(templateId);
             setEmailHtml(template.html);
             setEmailSubject(template.subject);
-            // Initialize field values with defaults
             const defaults: Record<string, string> = {};
             template.fields.forEach(field => {
                 if (field.includes('user.name')) defaults[field] = 'John Doe';
@@ -381,7 +379,6 @@ export const auth = betterAuth({
         (template) => activeCategory === 'all' || template.category === activeCategory
     );
 
-    // Replace field placeholders with simulated values
     const getSimulatedHtml = (html: string): string => {
         if (!showFieldSimulator || Object.keys(fieldValues).length === 0) {
             return html;
@@ -562,7 +559,6 @@ export const auth = betterAuth({
                 </div>
             </div>
 
-            {/* Code Export Modal */}
             {showCodeModal && selectedTemplate && (
                 <div
                     className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 overflow-hidden"
