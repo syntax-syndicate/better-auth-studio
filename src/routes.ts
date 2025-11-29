@@ -1495,7 +1495,6 @@ export function createRoutes(
         severity: 'error' | 'warning' | 'info';
       }> = [];
 
-      // Helper to add validation result
       const addResult = (
         category: string,
         check: string,

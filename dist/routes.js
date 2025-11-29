@@ -1347,7 +1347,6 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
     router.post('/api/tools/validate-config', async (_req, res) => {
         try {
             const results = [];
-            // Helper to add validation result
             const addResult = (category, check, status, message, suggestion, severity = status === 'fail' ? 'error' : status === 'warning' ? 'warning' : 'info') => {
                 results.push({ category, check, status, message, suggestion, severity });
             };

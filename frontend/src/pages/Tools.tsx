@@ -412,7 +412,6 @@ export default function Tools() {
     version?: string;
     variant?: string;
   } | null>(null);
-
   // Prevent body scroll when Config Validator modal is open
   useEffect(() => {
     if (showConfigValidator) {

@@ -2,6 +2,7 @@ import {
   Building2,
   Database,
   LayoutDashboard,
+  Mail,
   RefreshCw,
   Search,
   Settings,
@@ -278,6 +279,7 @@ export default function Layout({ children }: LayoutProps) {
       badge: loading ? '...' : formatCount(counts.organizations),
     },
     { name: 'Database', href: '/database', icon: Database },
+    { name: 'Emails', href: '/emails', icon: Mail },
     { name: 'Tools', href: '/tools', icon: Wrench },
     { name: 'Settings', href: '/settings', icon: Settings },
   ];
