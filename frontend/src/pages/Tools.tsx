@@ -1086,40 +1086,6 @@ export default function Tools() {
       setRunningTool(null);
     }
   };
-  // const handleGenerateApiKey = async () => {
-  //   setRunningTool('generate-api-key');
-  //   setShowLogs(true);
-  //   setToolLogs([]);
-
-  //   addLog('info', 'Generating new API key...', 'running');
-
-  //   try {
-  //     const response = await fetch('/api/tools/generate-api-key', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //     });
-
-  //     const result = await response.json();
-
-  //     if (result.success && result.apiKey) {
-  //       addLog('success', '✅ API key generated successfully!', 'completed');
-  //       addLog('info', `API Key: ${result.apiKey}`, 'completed');
-  //       toast.success('API key generated successfully');
-  //     } else {
-  //       addLog(
-  //         'error',
-  //         `❌ Failed to generate API key: ${result.error || 'Unknown error'}`,
-  //         'failed'
-  //       );
-  //       toast.error('Failed to generate API key');
-  //     }
-  //   } catch (error) {
-  //     addLog('error', `❌ Network error: ${error}`, 'failed');
-  //     toast.error('Failed to generate API key');
-  //   } finally {
-  //     setRunningTool(null);
-  //   }
-  // };
   const formatDateTime = (value?: string) => {
     if (!value) return 'N/A';
     const date = new Date(value);
