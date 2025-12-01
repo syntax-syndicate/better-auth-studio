@@ -49,6 +49,10 @@ interface OAuthProvider {
   name: string;
   type: string;
   enabled: boolean;
+  clientId?: string;
+  clientSecret?: string;
+  redirectURI?: string;
+  redirectUri?: string;
 }
 
 interface MigrationProvider {
@@ -443,6 +447,15 @@ export default function Tools() {
   } | null>(null);
   const [isCheckingPassword, setIsCheckingPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showOAuthCredentialsModal, setShowOAuthCredentialsModal] = useState(false);
+  const [oauthOrigin, setOauthOrigin] = useState('');
+  const [baseUrl, setBaseUrl] = useState('localhost:3000');
+  const [oauthCredentials, setOauthCredentials] = useState<{
+    clientId: string;
+    clientSecret: string;
+  } | null>(null);
+  const [isFetchingCredentials, setIsFetchingCredentials] = useState(false);
+  const [showOAuthSecret, setShowOAuthSecret] = useState(false);
   useEffect(() => {
     if (showConfigValidator) {
       document.body.style.overflow = 'hidden';
@@ -464,6 +477,17 @@ export default function Tools() {
       document.body.style.overflow = '';
     };
   }, [showPasswordStrengthModal]);
+
+  useEffect(() => {
+    if (showOAuthCredentialsModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showOAuthCredentialsModal]);
 
   useEffect(() => {
     if (showUuidModal) {
@@ -1183,6 +1207,74 @@ export default function Tools() {
     }
   };
 
+  const handleOpenOAuthCredentials = async () => {
+    setShowOAuthCredentialsModal(true);
+    setSelectedProvider('google');
+    setOauthCredentials(null);
+    setShowOAuthSecret(false);
+    
+    try {
+      const response = await fetch('/api/config');
+      const data = await response.json();
+      if (data.baseURL) {
+        const url = data.baseURL.replace(/^https?:\/\//, '');
+        setBaseUrl(url);
+        setOauthOrigin(url);
+      } else {
+        setBaseUrl('localhost:3000');
+        setOauthOrigin('localhost:3000');
+      }
+    } catch (error) {
+      setBaseUrl('localhost:3000');
+      setOauthOrigin('localhost:3000');
+    }
+  };
+
+  const handleFetchOAuthCredentials = async () => {
+    if (!selectedProvider) {
+      toast.error('Please select a provider');
+      return;
+    }
+
+    const originToUse = oauthOrigin.trim() || baseUrl;
+    if (!originToUse) {
+      toast.error('Please enter an origin');
+      return;
+    }
+
+    const cleanOrigin = originToUse.replace(/^https?:\/\//, '');
+
+    setIsFetchingCredentials(true);
+    setOauthCredentials(null);
+
+    try {
+      const response = await fetch(
+        `https://studio-backend-0.vercel.app/oauth/${selectedProvider}?origin=${encodeURIComponent(cleanOrigin)}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch credentials: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.clientId && data.clientSecret) {
+        setOauthCredentials({
+          clientId: data.clientId,
+          clientSecret: data.clientSecret,
+        });
+        toast.success('OAuth credentials fetched successfully');
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to fetch OAuth credentials';
+      toast.error(message);
+    } finally {
+      setIsFetchingCredentials(false);
+    }
+  };
+
   const handleGenerateUuids = () => {
     const count = Math.min(Math.max(parseInt(uuidCount) || 1, 1), 100);
     const results: string[] = [];
@@ -1539,6 +1631,7 @@ export default function Tools() {
     'validate-config',
     'uuid-generator',
     'password-strength',
+    'oauth-credentials',
   ]);
 
   const tools: Tool[] = [
@@ -1629,6 +1722,14 @@ export default function Tools() {
       icon: Lock,
       action: handleOpenPasswordStrengthChecker,
       category: 'utilities',
+    },
+    {
+      id: 'oauth-credentials',
+      name: 'OAuth Credentials',
+      description: 'View and test OAuth provider credentials',
+      icon: Globe,
+      action: handleOpenOAuthCredentials,
+      category: 'oauth',
     },
   ];
 
@@ -3163,7 +3264,7 @@ export default function Tools() {
                 <h3 className="text-xl text-white font-light uppercase tracking-wider">
                   Password Strength Checker
                 </h3>
-              </div>
+    </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -3318,6 +3419,159 @@ export default function Tools() {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showOAuthCredentialsModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[60] overflow-hidden">
+          <div className="bg-black border border-dashed border-white/20 rounded-none p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <Globe className="w-5 h-5 text-white" />
+                <h3 className="text-xl text-white font-light uppercase tracking-wider">
+                  OAuth Credentials
+                </h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowOAuthCredentialsModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                  Select Provider
+                </Label>
+                <div className="flex flex-wrap gap-3">
+                  {['google', 'github'].map((providerId) => {
+                    const isSelected = selectedProvider === providerId;
+                    return (
+                      <button
+                        key={providerId}
+                        onClick={() => setSelectedProvider(providerId)}
+                        className={`px-4 py-2 border rounded-none text-sm uppercase font-mono transition-colors ${
+                          isSelected
+                            ? 'border-white/60 bg-white/10 text-white'
+                            : 'border-dashed border-white/20 text-gray-400 hover:border-white/40'
+                        }`}
+                      >
+                        {providerId.charAt(0).toUpperCase() + providerId.slice(1)}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                  Origin
+                </Label>
+                <Input
+                  value={oauthOrigin}
+                  onChange={(e) => setOauthOrigin(e.target.value)}
+                  placeholder={`http://${baseUrl}`}
+                  className="bg-black border border-dashed border-white/20 text-white font-mono text-xs rounded-none"
+                />
+                <p className="text-[11px] text-gray-500 font-mono mt-1">
+                  The default will be http://{baseUrl}
+                </p>
+              </div>
+
+              <div className="flex items-end justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setOauthCredentials(null);
+                    setOauthOrigin(baseUrl);
+                  }}
+                  className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                >
+                  Clear
+                </Button>
+                <Button
+                  onClick={handleFetchOAuthCredentials}
+                  disabled={isFetchingCredentials || !selectedProvider || (!oauthOrigin.trim() && !baseUrl)}
+                  className="rounded-none"
+                >
+                  {isFetchingCredentials ? (
+                    <>
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      Fetching...
+                    </>
+                  ) : (
+                    'Fetch Credentials'
+                  )}
+                </Button>
+              </div>
+
+              {oauthCredentials && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                        Client ID
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          value={oauthCredentials.clientId}
+                          readOnly
+                          className="bg-black border border-dashed border-white/20 text-white font-mono text-xs pr-10 rounded-none"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => copyToClipboard(oauthCredentials.clientId)}
+                          className="absolute right-0 top-0 h-full px-3 text-gray-400 hover:text-white rounded-none"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div>
+                      <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                        Client Secret
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          type={showOAuthSecret ? 'text' : 'password'}
+                          value={oauthCredentials.clientSecret}
+                          readOnly
+                          className="bg-black border border-dashed border-white/20 text-white font-mono text-xs pr-20 rounded-none"
+                        />
+                        <div className="absolute right-0 top-0 h-full flex items-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setShowOAuthSecret(!showOAuthSecret)}
+                            className="px-2 text-gray-400 hover:text-white rounded-none"
+                          >
+                            {showOAuthSecret ? (
+                              <EyeOff className="w-4 h-4" />
+                            ) : (
+                              <Eye className="w-4 h-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => copyToClipboard(oauthCredentials.clientSecret)}
+                            className="px-2 text-gray-400 hover:text-white rounded-none"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>

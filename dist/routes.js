@@ -4487,6 +4487,117 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             });
         }
     });
+    router.post('/api/tools/test-oauth-credentials', async (req, res) => {
+        try {
+            const { provider, clientId, clientSecret, redirectURI } = req.body || {};
+            if (!provider || !clientId || !clientSecret) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Provider, Client ID, and Client Secret are required',
+                });
+            }
+            if (provider.toLowerCase() === 'google') {
+                try {
+                    const tokenInfoUrl = `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=test`;
+                    const isValidClientIdFormat = /^[\d\w\-]+\.apps\.googleusercontent\.com$|^\d+$/.test(clientId);
+                    if (!isValidClientIdFormat) {
+                        return res.json({
+                            success: false,
+                            message: 'Invalid Google Client ID format',
+                            details: {
+                                provider: 'google',
+                                clientIdFormat: 'Should end with .apps.googleusercontent.com or be numeric',
+                            },
+                        });
+                    }
+                    const discoveryUrl = 'https://accounts.google.com/.well-known/openid-configuration';
+                    const discoveryResponse = await fetch(discoveryUrl);
+                    if (!discoveryResponse.ok) {
+                        return res.json({
+                            success: false,
+                            message: 'Unable to reach Google OAuth service',
+                            details: {
+                                provider: 'google',
+                                error: 'Network error',
+                            },
+                        });
+                    }
+                    if (redirectURI) {
+                        try {
+                            new URL(redirectURI);
+                        }
+                        catch {
+                            return res.json({
+                                success: false,
+                                message: 'Invalid Redirect URI format',
+                                details: {
+                                    provider: 'google',
+                                    redirectURI: redirectURI,
+                                },
+                            });
+                        }
+                    }
+                    return res.json({
+                        success: true,
+                        message: 'Google OAuth credentials format is valid',
+                        details: {
+                            provider: 'google',
+                            clientId: clientId.substring(0, 20) + '...',
+                            redirectURI: redirectURI || 'Not configured',
+                            note: 'Credentials format validated. Test with actual OAuth flow to confirm.',
+                        },
+                    });
+                }
+                catch (error) {
+                    return res.json({
+                        success: false,
+                        message: 'Failed to validate Google OAuth credentials',
+                        details: {
+                            provider: 'google',
+                            error: error instanceof Error ? error.message : 'Unknown error',
+                        },
+                    });
+                }
+            }
+            if (!clientId.trim() || !clientSecret.trim()) {
+                return res.json({
+                    success: false,
+                    message: 'Client ID and Secret cannot be empty',
+                });
+            }
+            if (redirectURI) {
+                try {
+                    new URL(redirectURI);
+                }
+                catch {
+                    return res.json({
+                        success: false,
+                        message: 'Invalid Redirect URI format',
+                        details: {
+                            provider: provider,
+                            redirectURI: redirectURI,
+                        },
+                    });
+                }
+            }
+            return res.json({
+                success: true,
+                message: `${provider} OAuth credentials format is valid`,
+                details: {
+                    provider: provider,
+                    clientId: clientId.substring(0, 20) + '...',
+                    redirectURI: redirectURI || 'Not configured',
+                    note: 'Credentials format validated. Test with actual OAuth flow to confirm.',
+                },
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to test OAuth credentials',
+            });
+        }
+    });
     return router;
 }
 //# sourceMappingURL=routes.js.map
