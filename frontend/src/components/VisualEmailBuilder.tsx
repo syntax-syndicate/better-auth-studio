@@ -151,7 +151,7 @@ const parseHtmlToBlocks = (html: string): EmailBlock[] => {
           maxWidth: imgStyles.maxWidth || divStyles.maxWidth || '70px',
           height: imgStyles.height || divStyles.height || 'auto',
           margin: divStyles.margin || styles.margin || '0 0 30px 0',
-          display: imgStyles.display || 'block',
+          textAlign: (divStyles.textAlign || styles.textAlign || 'left') as 'left' | 'center' | 'right',
         },
         attributes: {
           src: img.getAttribute('src') || '',
@@ -224,12 +224,13 @@ const blocksToHtml = (blocks: EmailBlock[]): string => {
         }
         case 'image': {
           const imageStyleString = Object.entries(block.styles)
-            .filter(([_, value]) => value)
+            .filter(([key, value]) => value && key !== 'textAlign' && key !== 'margin' && key !== 'display')
             .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
             .join('; ');
           const margin = block.styles.margin || '0 0 30px 0';
-          return `<div style="margin: ${margin}">
-            <img src="${block.attributes?.src || ''}" alt="${block.attributes?.alt || ''}" style="${imageStyleString}" />
+          const textAlign = block.styles.textAlign || 'left';
+          return `<div style="margin: ${margin}; text-align: ${textAlign}">
+            <img src="${block.attributes?.src || ''}" alt="${block.attributes?.alt || ''}" style="display: inline-block; ${imageStyleString}" />
           </div>`;
         }
         case 'divider':
@@ -710,7 +711,7 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                     )}
 
                     {block.type === 'image' && (
-                      <div style={{ margin: block.styles.margin || '0 0 30px 0', textAlign: 'left' }}>
+                      <div style={{ margin: block.styles.margin || '0 0 30px 0', textAlign: block.styles.textAlign || 'left' }}>
                         <img
                           src={block.attributes?.src || 'https://via.placeholder.com/600x300'}
                           alt={block.attributes?.alt || ''}
@@ -718,7 +719,7 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                             width: block.styles.width || '70px',
                             maxWidth: block.styles.maxWidth || '70px',
                             height: block.styles.height || 'auto',
-                            display: block.styles.display || 'block',
+                            display: 'inline-block',
                             outline: isSelected ? '2px dashed #3b82f6' : 'none',
                           }}
                         />
@@ -904,6 +905,33 @@ export default function VisualEmailBuilder({ html, onChange }: VisualEmailBuilde
                   placeholder="Image description"
                   className="bg-black border border-dashed border-white/20 text-white rounded-none font-mono text-xs"
                 />
+                <div className="mt-3">
+                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                    Alignment
+                  </Label>
+                  <div className="flex gap-2">
+                    {[
+                      { value: 'left' as const, icon: AlignLeft },
+                      { value: 'center' as const, icon: AlignCenter },
+                      { value: 'right' as const, icon: AlignRight },
+                    ].map(({ value: align, icon: Icon }) => (
+                      <Button
+                        key={align}
+                        variant={selectedBlock.styles.textAlign === align ? 'default' : 'ghost'}
+                        size="sm"
+                        onClick={() =>
+                          updateBlock(selectedBlock.id, {
+                            styles: { ...selectedBlock.styles, textAlign: align },
+                          })
+                        }
+                        className="flex-1 rounded-none border border-dashed border-white/20 flex items-center justify-center"
+                        title={align.charAt(0).toUpperCase() + align.slice(1)}
+                      >
+                        <Icon className="w-4 h-4" />
+                      </Button>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
