@@ -4894,26 +4894,21 @@ export function createRoutes(
       let contentType: string;
 
       if (exportFormat === 'csv') {
-        // Convert to CSV
         const csvRows: string[] = [];
 
         for (const [tableName, rows] of Object.entries(exportData)) {
           if (rows.length === 0) continue;
 
-          // Add table header
           csvRows.push(`\n=== ${tableName.toUpperCase()} ===\n`);
 
-          // Get all unique keys from all rows
           const allKeys = new Set<string>();
           rows.forEach((row: any) => {
             Object.keys(row).forEach((key) => allKeys.add(key));
           });
           const headers = Array.from(allKeys);
 
-          // Write CSV header
           csvRows.push(headers.map((h) => `"${h}"`).join(','));
 
-          // Write CSV rows
           rows.forEach((row: any) => {
             const values = headers.map((header) => {
               const value = row[header];
@@ -4930,7 +4925,6 @@ export function createRoutes(
         filename = `better-auth-export-${new Date().toISOString().split('T')[0]}.csv`;
         contentType = 'text/csv';
       } else {
-        // JSON format
         output = JSON.stringify(exportData, null, 2);
         filename = `better-auth-export-${new Date().toISOString().split('T')[0]}.json`;
         contentType = 'application/json';
@@ -5230,7 +5224,7 @@ export function createRoutes(
         format: secretFormat,
         length: secretLength,
         entropy,
-        envFormat: `AUTH_SECRET=${secret}`,
+        envFormat: `BETTER_AUTH_SECRET=${secret}`,
       });
     } catch (error) {
       res.status(500).json({
