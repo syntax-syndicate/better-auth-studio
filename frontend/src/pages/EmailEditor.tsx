@@ -221,6 +221,46 @@ const emailTemplates: Record<string, EmailTemplate> = {
     fields: ['user.name', 'user.email', 'app.name', 'dashboardUrl'],
     category: 'notification',
   },
+  'email-otp': {
+    id: 'email-otp',
+    name: 'Email OTP',
+    subject: 'Your Verification Code',
+    html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verification Code</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="margin-bottom: 30px;">
+    <img src="https://www.better-auth.com/logo.png" alt="Better Auth" style="max-width: 70px; height: auto; display: block;">
+  </div>
+  <div style="background: #000; color: #fff; padding: 20px; text-align: center; margin-bottom: 30px;">
+    <h1 style="margin: 0; font-size: 24px; font-weight: 300;">Verification Code</h1>
+  </div>
+  
+  <p>Hello,</p>
+  
+  <p>Your verification code is:</p>
+  
+  <div style="text-align: center; margin: 30px 0;">
+    <div style="display: inline-block; background: #f5f5f5; border: 2px dashed #000; padding: 20px 40px; font-size: 32px; font-weight: bold; letter-spacing: 8px; font-family: monospace;">
+      {{otp}}
+    </div>
+  </div>
+  
+  <p style="color: #666; font-size: 14px;">This code will expire in {{expiresIn}}.</p>
+  
+  <p style="color: #666; font-size: 14px; margin-top: 30px;">If you didn't request this code, please ignore this email.</p>
+  
+  <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
+  <p style="color: #999; font-size: 12px; text-align: center;">© {{year}} Better Auth. All rights reserved.</p>
+</body>
+</html>`,
+    fields: ['email', 'otp', 'type', 'expiresIn'],
+    category: 'authentication',
+  },
 };
 
 export default function EmailEditor() {
@@ -265,6 +305,10 @@ export default function EmailEditor() {
         else if (field.includes('inviter.email')) defaults[field] = 'jane@example.com';
         else if (field.includes('role')) defaults[field] = 'member';
         else if (field.includes('dashboardUrl')) defaults[field] = 'https://example.com/dashboard';
+        else if (field === 'email') defaults[field] = 'user@example.com';
+        else if (field === 'otp') defaults[field] = '123456';
+        else if (field === 'type') defaults[field] = 'sign-in';
+        else if (field.includes('expiresIn')) defaults[field] = '5 minutes';
       });
       setFieldValues(defaults);
     }
@@ -386,6 +430,27 @@ export const auth = betterAuth({
     },
   },
 });`,
+      'email-otp': `import { Resend } from 'resend';
+import { emailOTP } from 'better-auth/plugins';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+export const auth = betterAuth({
+  // ... other config
+  plugins: [
+    emailOTP({
+      overrideDefaultEmailVerification: true,
+      async sendVerificationOTP({ email, otp, type }) {
+        await resend.emails.send({
+          from: 'noreply@yourdomain.com',
+          to: email,
+          subject: \`${escapedSubject}\`,
+          html: \`${escapedHtml}\`,
+        });
+      },
+    }),
+  ],
+});`,
     };
 
     return codeSnippets[templateId] || '';
@@ -475,7 +540,7 @@ export const auth = betterAuth({
                 className={`w-full text-left p-3 border border-dashed rounded-none transition-colors ${
                   selectedTemplate === template.id
                     ? 'border-white/30 bg-white/5 text-white'
-                    : 'border-white/10 bg-black/40 text-gray-300 hover:border-white/20 hover:bg-white/5'
+                    : 'border-white/15 bg-black/40 text-gray-300 hover:border-white/20 hover:bg-white/5'
                 }`}
               >
                 <div className="text-sm uppercase font-mono">{template.name}</div>

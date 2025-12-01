@@ -93,7 +93,7 @@ function normalizeStudioStatus(status?: string): WatchIndicatorStatus {
   }
 }
 
-const EMAIL_TEMPLATES_COUNT = 5;
+const EMAIL_TEMPLATES_COUNT = 6;
 const TOOLS_COUNT = 12;
 
 export default function Layout({ children }: LayoutProps) {
