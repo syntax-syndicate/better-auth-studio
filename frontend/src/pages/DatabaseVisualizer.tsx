@@ -467,28 +467,29 @@ export default function DatabaseVisualizer() {
           onClick={() => setSelectedTable(null)}
         >
           <div
-            className="bg-black border border-dashed border-white/20 rounded-none p-5 w-full max-w-3xl max-h-[75vh] overflow-y-auto"
+            className="bg-black border border-dashed border-white/20 rounded-none w-full max-w-3xl max-h-[75vh] flex flex-col"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-xl font-light text-white">{selectedTable.displayName}</h3>
-                <p className="text-xs text-gray-400 mt-0.5 uppercase font-mono">
-                  {selectedTable.name} · {selectedTable.origin === 'core' ? 'Core' : 'Extended'}
-                </p>
+            <div className="flex-shrink-0 p-5 pb-4 border-b border-dashed border-white/20 bg-black sticky top-0 z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-light text-white">{selectedTable.displayName}</h3>
+                  <p className="text-xs text-gray-400 mt-0.5 uppercase font-mono">
+                    {selectedTable.name} · {selectedTable.origin === 'core' ? 'Core' : 'Extended'}
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedTable(null)}
+                  className="text-gray-400 hover:text-white rounded-none"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSelectedTable(null)}
-                className="text-gray-400 hover:text-white rounded-none"
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
 
-            <hr className="border-white/20 border-dashed mb-4" />
-
+            <div className="flex-1 overflow-y-auto p-5 pt-4">
             <div className="mb-6">
               <h4 className="text-xs uppercase font-mono text-gray-400 mb-3 tracking-wider">
                 Fields
@@ -637,6 +638,7 @@ export default function DatabaseVisualizer() {
                   </p>
                 </div>
               </div>
+            </div>
             </div>
           </div>
         </div>
