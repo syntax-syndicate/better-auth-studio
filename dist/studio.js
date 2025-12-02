@@ -9,9 +9,7 @@ import { WebSocketServer } from 'ws';
 import { createRoutes } from './routes.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-// Helper function to create clickable terminal links while preserving styling
 const createClickableLink = (url, styledText) => {
-    // ANSI escape codes for hyperlinks: \x1b]8;;URL\x1b\\TEXT\x1b]8;;\x1b\\
     return `\x1b]8;;${url}\x1b\\${styledText}\x1b]8;;\x1b\\`;
 };
 export async function startStudio(options) {
