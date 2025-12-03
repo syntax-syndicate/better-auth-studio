@@ -36,6 +36,10 @@ A sneak peek of the studio dashboard and management interface.
 
 ## 🚀 Quick Start
 
+### Hosted Version
+
+For the hosted version, please join the waitlist: **[better-auth.build](https://better-auth.build)**
+
 ### Installation
 
 📖 **[Documentation](https://better-auth-studio.vercel.app)**
