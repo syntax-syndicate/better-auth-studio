@@ -18,7 +18,7 @@ importers:
         specifier: ^0.44.5
         version: 0.44.7(kysely@0.28.8)(postgres@3.4.7)
       next:
-        specifier: ^15.0.0
+        specifier: 15.5.7
         version: 15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       postgres:
         specifier: ^3.4.3

@@ -18,7 +18,7 @@ importers:
         specifier: file:../../..
         version: file:../../..(@babel/core@7.28.5)(@types/react@18.3.27)(kysely@0.28.8)(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       next:
-        specifier: ^15.0.0
+        specifier: 15.5.7
         version: 15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1

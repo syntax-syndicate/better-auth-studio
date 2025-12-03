@@ -18,7 +18,7 @@
     "@prisma/client": "^6.15.0",
     "better-auth": "^1.3.34",
     "better-auth-studio": "file:../../..",
-    "next": "^15.0.0",
+    "next": "15.5.7",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
@@ -33,4 +33,3 @@
     "node": ">=18.0.0"
   }
 }
-
