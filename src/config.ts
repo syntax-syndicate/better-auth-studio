@@ -118,7 +118,6 @@ function getPathAliasesRecursive(
       }
     }
 
-    console.log({ tsconfigPath, tsConfig });
     if (tsConfig.extends) {
       const extendsPath = Array.isArray(tsConfig.extends) ? tsConfig.extends[0] : tsConfig.extends;
       const extendedPath = path.isAbsolute(extendsPath)
