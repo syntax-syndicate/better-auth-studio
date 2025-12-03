@@ -3740,7 +3740,7 @@ export function createRoutes(
           cwd: process.cwd(),
           configPath: authConfigPath,
           shouldThrowOnError: false,
-          noCache: true, 
+          noCache: true,
         });
 
         if (betterAuthConfig) {

@@ -145,13 +145,13 @@ export default function OrganizationDetails() {
       fetchMembers();
       fetchTeams();
     }
-    
+
     const interval = setInterval(() => {
       if (!organizationEnabled && orgId) {
         checkOrganizationEnabled();
       }
     }, 2000);
-    
+
     return () => clearInterval(interval);
   }, [orgId, organizationEnabled]);
 

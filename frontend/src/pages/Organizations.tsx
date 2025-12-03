@@ -86,13 +86,13 @@ export default function Organizations() {
 
   useEffect(() => {
     checkPluginStatus();
-    
+
     const interval = setInterval(() => {
       if (!pluginStatus?.enabled) {
         checkPluginStatus();
       }
     }, 2000);
-    
+
     return () => clearInterval(interval);
   }, [pluginStatus?.enabled]);
 
