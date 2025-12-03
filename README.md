@@ -203,6 +203,32 @@ pnpm better-auth-studio start --no-open
 pnpm better-auth-studio start --config ./custom-auth.ts
 ```
 
+### Using `--config` Option
+
+The `--config` option allows you to specify a custom path to your Better Auth configuration file. This is useful when:
+
+- Your auth config file is in a non-standard location
+- You have multiple auth config files in your project
+- You're working with monorepos or nested project structures
+- Auto-detection fails to find your config file
+
+**How it works:**
+- Better Auth Studio automatically searches for config files in common locations:
+  - `auth.ts`, `auth.js`, `auth.server.ts`, `auth.server.js`
+  - `src/auth.ts`, `lib/auth.ts`, `server/auth.ts`, etc.
+- When `--config` is provided, it uses the specified path instead
+
+**Path resolution:**
+- **Relative paths** are resolved from the current working directory:
+  ```bash
+  pnpm better-auth-studio start --config ./src/lib/auth.ts
+  pnpm better-auth-studio start --config ../shared/auth.ts
+  ```
+- **Absolute paths** are used as-is:
+  ```bash
+  pnpm better-auth-studio start --config /path/to/project/auth.ts
+  ```
+
 ### Other Commands
 ```bash
 # Check version

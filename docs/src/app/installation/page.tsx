@@ -420,6 +420,30 @@ export const auth = betterAuth({
             </div>
           </PixelCard>
 
+          <PixelCard className="mb-6">
+            <h3 className="text-lg font-light tracking-tight mb-4 text-white">Using the <code className="bg-white/10 px-1 text-white/90">--config</code> Option</h3>
+            
+            <p className="text-sm font-light tracking-tight text-white/70 mb-4">
+              Specify a custom path to your auth config file when it's in a non-standard location or auto-detection fails.
+            </p>
+
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-light tracking-tight text-white/70 mb-2">
+                  Relative or absolute paths:
+                </p>
+                <CodeBlock code="pnpm better-auth-studio start --config ./src/lib/auth.ts" />
+                <CodeBlock code="pnpm better-auth-studio start --config /path/to/auth.ts" className="mt-2" />
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 bg-white/5 border border-white/10 rounded">
+              <p className="text-xs font-light tracking-tight text-white/70">
+                <strong>Note:</strong> TypeScript path aliases (like <code className="bg-white/10 px-1 text-white/90">$lib</code>, <code className="bg-white/10 px-1 text-white/90">$app/*</code>) are automatically resolved based on your <code className="bg-white/10 px-1 text-white/90">tsconfig.json</code>.
+              </p>
+            </div>
+          </PixelCard>
+
           <PixelCard>
             <h3 className="text-lg font-light tracking-tight mb-4 text-white">Other Commands</h3>
             <div className="space-y-3">
