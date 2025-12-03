@@ -61,7 +61,7 @@ export async function getAuthData(
           'No adapter found. if you think this is an issue from our side. please file a github issue at https://github.com/Kinfe123/better-auth/issues'
         );
       }
-    }, 2000)
+    }, 2000);
     switch (type) {
       case 'stats':
         return await getRealStats(adapter);
