@@ -8,14 +8,7 @@ import { BetterAuthError, logger } from 'better-auth';
 import { loadConfig } from 'c12';
 import { addSvelteKitEnvModules } from './add-svelte-kit-env-modules.js';
 import { getTsconfigInfo } from './get-tsconfig-info.js';
-let possiblePaths = [
-    'auth.ts',
-    'auth.tsx',
-    'auth.js',
-    'auth.jsx',
-    'auth.server.js',
-    'auth.server.ts',
-];
+let possiblePaths = ['auth.ts', 'auth.js', 'auth.server.js', 'auth.server.ts'];
 possiblePaths = [
     ...possiblePaths,
     ...possiblePaths.map((it) => `lib/server/${it}`),
@@ -65,6 +58,18 @@ function getPathAliasesRecursive(tsconfigPath, visited = new Set()) {
                 result[finalAlias || ''] = path.join(resolvedBaseUrl, finalAliasedPath);
             }
         }
+        if (tsConfig.extends) {
+            const extendsPath = Array.isArray(tsConfig.extends) ? tsConfig.extends[0] : tsConfig.extends;
+            const extendedPath = path.isAbsolute(extendsPath)
+                ? extendsPath
+                : path.resolve(configDir, extendsPath);
+            const extendedAliases = getPathAliasesRecursive(extendedPath, visited);
+            for (const [alias, aliasPath] of Object.entries(extendedAliases)) {
+                if (!(alias in result)) {
+                    result[alias] = aliasPath;
+                }
+            }
+        }
         if (tsConfig.references) {
             for (const ref of tsConfig.references) {
                 const refPath = resolveReferencePath(configDir, ref.path);
@@ -83,7 +88,7 @@ function getPathAliasesRecursive(tsconfigPath, visited = new Set()) {
         return {};
     }
 }
-function getPathAliases(cwd) {
+export function getPathAliases(cwd) {
     const tsConfigPath = path.join(cwd, 'tsconfig.json');
     if (!fs.existsSync(tsConfigPath)) {
         return null;
@@ -118,7 +123,7 @@ const jitiOptions = (cwd) => {
                 ],
             },
         },
-        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        extensions: ['.ts', '.js', '.jsx'],
         alias,
     };
 };
@@ -146,7 +151,7 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, }
                 if (shouldThrowOnError) {
                     throw new Error(`Couldn't read your auth config in ${resolvedPath}. Make sure to default export your auth instance or to export as a variable named auth.`);
                 }
-                logger.error(`[#better-auth]: Couldn't read your auth config in ${resolvedPath}. Make sure to default export your auth instance or to export as a variable named auth.`);
+                logger.error(`Couldn't read your auth config in ${resolvedPath}. Make sure to default export your auth instance or to export as a variable named auth.`);
                 process.exit(1);
             }
             configFile = 'auth' in config ? config.auth?.options : config.options;
@@ -165,8 +170,8 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, }
                             if (shouldThrowOnError) {
                                 throw new Error("Couldn't read your auth config. Make sure to default export your auth instance or to export as a variable named auth.");
                             }
-                            logger.error("[#better-auth]: Couldn't read your auth config.");
-                            logger.info('[#better-auth]: Make sure to default export your auth instance or to export as a variable named auth.');
+                            logger.error("Couldn't read your auth config.");
+                            logger.info('Make sure to default export your auth instance or to export as a variable named auth.');
                             process.exit(1);
                         }
                         break;
@@ -187,7 +192,7 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, }
                     if (shouldThrowOnError) {
                         throw e;
                     }
-                    logger.error("[#better-auth]: Couldn't read your auth config.", e);
+                    logger.error("Couldn't read your auth config.", e);
                     process.exit(1);
                 }
             }

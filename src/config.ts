@@ -54,14 +54,7 @@ export interface AuthConfig {
   [key: string]: any;
 }
 
-let possiblePaths = [
-  'auth.ts',
-  'auth.tsx',
-  'auth.js',
-  'auth.jsx',
-  'auth.server.js',
-  'auth.server.ts',
-];
+let possiblePaths = ['auth.ts', 'auth.js', 'auth.server.js', 'auth.server.ts'];
 
 possiblePaths = [
   ...possiblePaths,
@@ -125,6 +118,18 @@ function getPathAliasesRecursive(
       }
     }
 
+    if (tsConfig.extends) {
+      const extendsPath = Array.isArray(tsConfig.extends) ? tsConfig.extends[0] : tsConfig.extends;
+      const extendedPath = path.isAbsolute(extendsPath)
+        ? extendsPath
+        : path.resolve(configDir, extendsPath);
+      const extendedAliases = getPathAliasesRecursive(extendedPath, visited);
+      for (const [alias, aliasPath] of Object.entries(extendedAliases)) {
+        if (!(alias in result)) {
+          result[alias] = aliasPath;
+        }
+      }
+    }
     if (tsConfig.references) {
       for (const ref of tsConfig.references) {
         const refPath = resolveReferencePath(configDir, ref.path);
@@ -144,7 +149,7 @@ function getPathAliasesRecursive(
   }
 }
 
-function getPathAliases(cwd: string): Record<string, string> | null {
+export function getPathAliases(cwd: string): Record<string, string> | null {
   const tsConfigPath = path.join(cwd, 'tsconfig.json');
   if (!fs.existsSync(tsConfigPath)) {
     return null;
@@ -179,7 +184,7 @@ const jitiOptions = (cwd: string): JO => {
         ],
       },
     },
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.ts', '.js'],
     alias,
   };
 };
@@ -231,7 +236,7 @@ export async function getConfig({
           );
         }
         logger.error(
-          `[#better-auth]: Couldn't read your auth config in ${resolvedPath}. Make sure to default export your auth instance or to export as a variable named auth.`
+          `Couldn't read your auth config in ${resolvedPath}. Make sure to default export your auth instance or to export as a variable named auth.`
         );
         process.exit(1);
       }
@@ -261,9 +266,9 @@ export async function getConfig({
                   "Couldn't read your auth config. Make sure to default export your auth instance or to export as a variable named auth."
                 );
               }
-              logger.error("[#better-auth]: Couldn't read your auth config.");
+              logger.error("Couldn't read your auth config.");
               logger.info(
-                '[#better-auth]: Make sure to default export your auth instance or to export as a variable named auth.'
+                'Make sure to default export your auth instance or to export as a variable named auth.'
               );
               process.exit(1);
             }
@@ -290,7 +295,7 @@ export async function getConfig({
           if (shouldThrowOnError) {
             throw e;
           }
-          logger.error("[#better-auth]: Couldn't read your auth config.", e);
+          logger.error("Couldn't read your auth config.", e);
           process.exit(1);
         }
       }

@@ -1,6 +1,6 @@
 import { createHmac, randomBytes } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, sep as pathSep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 // @ts-expect-error
 import { hex } from '@better-auth/utils/hex';
@@ -81,7 +81,22 @@ export async function safeImportAuthConfig(authConfigPath: string): Promise<any>
     if (authConfigPath.endsWith('.ts')) {
       const aliases: Record<string, string> = {};
       const authConfigDir = dirname(authConfigPath);
+
+      // Find project root by looking for tsconfig.json
+      let projectDir = authConfigDir;
+      let tsconfigPath = join(projectDir, 'tsconfig.json');
+      while (!existsSync(tsconfigPath) && projectDir !== dirname(projectDir)) {
+        projectDir = dirname(projectDir);
+        tsconfigPath = join(projectDir, 'tsconfig.json');
+      }
+
       const content = readFileSync(authConfigPath, 'utf-8');
+
+      // Get path aliases from tsconfig (including extends chain)
+      const { getPathAliases } = await import('./config.js');
+      const tsconfigAliases = getPathAliases(projectDir) || {};
+
+      // Handle relative imports
       const relativeImportRegex = /import\s+.*?\s+from\s+['"](\.\/[^'"]+)['"]/g;
       const dynamicImportRegex = /import\s*\(\s*['"](\.\/[^'"]+)['"]\s*\)/g;
       const foundImports = new Set<string>();
@@ -111,6 +126,34 @@ export async function safeImportAuthConfig(authConfigPath: string): Promise<any>
           if (existsSync(path)) {
             aliases[importPath] = pathToFileURL(path).href;
             break;
+          }
+        }
+      }
+
+      // Handle path aliases like $lib/db
+      const pathAliasRegex = /import\s+.*?\s+from\s+['"](\$[^'"]+)['"]/g;
+      while ((match = pathAliasRegex.exec(content)) !== null) {
+        const aliasPath = match[1];
+        // Check if we have a matching alias
+        const aliasBase = aliasPath.split('/')[0];
+        if (tsconfigAliases[aliasBase]) {
+          const remainingPath = aliasPath.replace(aliasBase, '').replace(/^\//, '');
+          const resolvedPath = join(tsconfigAliases[aliasBase], remainingPath);
+          const possiblePaths = [
+            `${resolvedPath}.ts`,
+            `${resolvedPath}.js`,
+            `${resolvedPath}.mjs`,
+            `${resolvedPath}.cjs`,
+            join(resolvedPath, 'index.ts'),
+            join(resolvedPath, 'index.js'),
+            join(resolvedPath, 'index.mjs'),
+            join(resolvedPath, 'index.cjs'),
+          ];
+          for (const path of possiblePaths) {
+            if (existsSync(path)) {
+              aliases[aliasPath] = pathToFileURL(path).href;
+              break;
+            }
           }
         }
       }

@@ -54,7 +54,6 @@ export async function getAuthAdapter(configPath?: string): Promise<AuthAdapter |
     }
 
     const auth = authModule.auth || authModule.default;
-
     if (!auth) {
       return null;
     }

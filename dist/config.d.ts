@@ -41,6 +41,7 @@ export interface AuthConfig {
     [key: string]: any;
 }
 declare let possiblePaths: string[];
+export declare function getPathAliases(cwd: string): Record<string, string> | null;
 export declare function getConfig({ cwd, configPath, shouldThrowOnError, }: {
     cwd: string;
     configPath?: string;

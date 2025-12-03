@@ -55,11 +55,13 @@ export async function getAuthData(
 ): Promise<any> {
   try {
     const adapter = await getAuthAdapter(configPath);
-    if (!adapter) {
-      console.log(
-        'No adapter found. if you think this is an issue from our side. please file a github issue at https://github.com/Kinfe123/better-auth/issues'
-      );
-    }
+    setTimeout(() => {
+      if (adapter === null) {
+        console.log(
+          'No adapter found. if you think this is an issue from our side. please file a github issue at https://github.com/Kinfe123/better-auth/issues'
+        );
+      }
+    }, 2000);
     switch (type) {
       case 'stats':
         return await getRealStats(adapter);
@@ -84,7 +86,6 @@ export async function getAuthData(
 }
 async function getRealStats(adapter: any): Promise<AuthStats> {
   try {
-    // Use findMany with high limit to get all records
     let users: any[] = [];
     let sessions: any[] = [];
 
