@@ -8,12 +8,7 @@ import { BetterAuthError, logger } from 'better-auth';
 import { loadConfig } from 'c12';
 import { addSvelteKitEnvModules } from './add-svelte-kit-env-modules.js';
 import { getTsconfigInfo } from './get-tsconfig-info.js';
-let possiblePaths = [
-    'auth.ts',
-    'auth.js',
-    'auth.server.js',
-    'auth.server.ts',
-];
+let possiblePaths = ['auth.ts', 'auth.js', 'auth.server.js', 'auth.server.ts'];
 possiblePaths = [
     ...possiblePaths,
     ...possiblePaths.map((it) => `lib/server/${it}`),
@@ -65,9 +60,7 @@ function getPathAliasesRecursive(tsconfigPath, visited = new Set()) {
         }
         console.log({ tsconfigPath, tsConfig });
         if (tsConfig.extends) {
-            const extendsPath = Array.isArray(tsConfig.extends)
-                ? tsConfig.extends[0]
-                : tsConfig.extends;
+            const extendsPath = Array.isArray(tsConfig.extends) ? tsConfig.extends[0] : tsConfig.extends;
             const extendedPath = path.isAbsolute(extendsPath)
                 ? extendsPath
                 : path.resolve(configDir, extendsPath);
@@ -222,7 +215,7 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, }
         if (shouldThrowOnError) {
             throw e;
         }
-        // logger.error("Couldn't read your auth config.", e);
+        logger.error("Couldn't read your auth config.", e);
         process.exit(1);
     }
 }
