@@ -1,4 +1,4 @@
-import { Clock1, Edit, Link2, MoreVertical, Shield, Trash2 } from 'lucide-react';
+import { ArrowUpRight, Clock1, Edit, Link2, MoreVertical, Shield, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -1063,8 +1063,18 @@ export default function UserDetails() {
                                   <span className="ml-1">]</span>
                                 </sup>
                               </h3>
-                              <p className="text-gray-400 text-sm font-sans mt-1">
-                                in {membership.organization.slug}
+                              <p className="text-gray-400 text-sm font-sans mt-1 flex items-center gap-2">
+                                <span>in {membership.organization.slug}</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/organizations/${membership.organization.id}`);
+                                  }}
+                                  className="text-white/60 hover:text-white transition-colors"
+                                  title="View organization details"
+                                >
+                                  <ArrowUpRight className="w-3.5 h-3.5" />
+                                </button>
                               </p>
                             </div>
                           </div>
@@ -1141,10 +1151,28 @@ export default function UserDetails() {
                                   }
                                 />
                               </h3>
-                              <p className="text-gray-400 text-sm font-sans mt-1">
-                                in{' '}
-                                {membership.team.organizationSlug ||
-                                  membership.team.organizationName}
+                              <p className="text-gray-400 text-sm font-sans mt-1 flex items-center gap-2">
+                                <span>
+                                  in{' '}
+                                  {membership.team.organizationSlug ||
+                                    membership.team.organizationName}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (membership.team.organizationId) {
+                                      navigate(
+                                        `/organizations/${membership.team.organizationId}/teams/${membership.team.id}`
+                                      );
+                                    } else {
+                                      navigate(`/teams/${membership.team.id}`);
+                                    }
+                                  }}
+                                  className="text-white/60 hover:text-white transition-colors"
+                                  title="View team details"
+                                >
+                                  <ArrowUpRight className="w-3.5 h-3.5" />
+                                </button>
                               </p>
                             </div>
                           </div>
