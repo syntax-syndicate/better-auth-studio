@@ -4331,6 +4331,224 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({ success: false, error: 'Failed to generate token' });
         }
     });
+    router.post('/api/tools/plugin-generator', async (req, res) => {
+        try {
+            const { pluginName, description, tables = [], hooks = [], middleware = [], rateLimit, } = req.body || {};
+            // Helper function to generate hook code
+            const generateHookCode = (hook) => {
+                const hookName = hook.name.trim() || 'hook';
+                const hookId = `${hook.timing}-${hook.action}${hook.action === 'custom' && hook.customPath ? `-${hook.customPath.replace(/[^a-zA-Z0-9]/g, '-')}` : ''}`;
+                let hookCode = '';
+                if (hook.action === 'custom' && hook.customPath) {
+                    hookCode = `      "${hookId}": async (ctx) => {
+        // ${hook.name || 'Custom hook'}
+        ${hook.customMatcher ? `if (!(${hook.customMatcher})) return;` : ''}
+        ${hook.hookLogic || '// Hook logic here'}
+      },`;
+                }
+                else {
+                    hookCode = `      "${hookId}": async (ctx) => {
+        // ${hook.name || `${hook.timing} ${hook.action} hook`}
+        ${hook.hookLogic || '// Hook logic here'}
+      },`;
+                }
+                return hookCode;
+            };
+            // Helper function to generate middleware code
+            const generateMiddlewareCode = (mw) => {
+                const mwName = mw.name.trim() || 'middleware';
+                let pathMatch = '';
+                if (mw.pathType === 'exact') {
+                    pathMatch = `req.path === "${mw.path}"`;
+                }
+                else if (mw.pathType === 'prefix') {
+                    pathMatch = `req.path.startsWith("${mw.path}")`;
+                }
+                else if (mw.pathType === 'regex') {
+                    pathMatch = `new RegExp("${mw.path}").test(req.path)`;
+                }
+                return `      async (req, res, next) => {
+        // ${mwName}
+        if (${pathMatch}) {
+          ${mw.middlewareLogic || '// Middleware logic here'}
+        }
+        next();
+      },`;
+            };
+            if (!pluginName || typeof pluginName !== 'string' || pluginName.trim().length === 0) {
+                return res.status(400).json({ success: false, error: 'Plugin name is required' });
+            }
+            // Validate plugin name (must be valid identifier)
+            const validNameRegex = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+            if (!validNameRegex.test(pluginName.trim())) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Plugin name must be a valid JavaScript identifier (letters, numbers, _, $)',
+                });
+            }
+            const sanitizedName = pluginName.trim();
+            const camelCaseName = sanitizedName.charAt(0).toLowerCase() + sanitizedName.slice(1);
+            const pascalCaseName = sanitizedName.charAt(0).toUpperCase() + sanitizedName.slice(1);
+            // Generate server plugin code
+            let serverPluginCode = `import type { BetterAuthPlugin } from "better-auth/types";
+import type { Database } from "better-auth/adapters";
+
+export interface ${pascalCaseName}Options {
+${tables.length > 0 ? '  // Database tables configuration\n' : ''}${tables
+                .map((table) => `  ${table.name}?: {\n    fields?: Record<string, any>;\n  };`)
+                .join('\n')}
+${hooks.length > 0 ? '\n  // Hooks configuration\n' : ''}${hooks
+                .map((hook) => `  ${hook.name}?: (context: any) => Promise<void> | void;`)
+                .join('\n')}
+${middleware.length > 0 ? '\n  // Middleware configuration\n' : ''}${middleware
+                .map((mw) => `  ${mw.name}?: (req: any, res: any, next: any) => Promise<void> | void;`)
+                .join('\n')}
+${rateLimit ? '\n  // Rate limiting\n  rateLimit?: {\n    windowMs?: number;\n    max?: number;\n  };' : ''}
+}
+
+export function ${camelCaseName}(options: ${pascalCaseName}Options = {}): BetterAuthPlugin {
+  return {
+    id: "${camelCaseName}",
+    name: "${sanitizedName}",
+    description: ${description ? `"${description.replace(/"/g, '\\"')}"` : 'undefined'},
+    ${tables.length > 0 ? `database: {
+      async createTables(db: Database) {
+        // Create custom tables
+${tables
+                .map((table) => `        await db.createTable("${table.name}", {
+          columns: {
+            id: {
+              type: "string",
+              primaryKey: true,
+            },
+            createdAt: {
+              type: "date",
+              default: "now()",
+            },
+            updatedAt: {
+              type: "date",
+              default: "now()",
+            },
+${table.fields?.map((field) => `            ${field.name}: {
+              type: "${field.type}",
+              ${field.required ? 'required: true,' : ''}
+              ${field.unique ? 'unique: true,' : ''}
+            },`).join('\n') || ''}
+          },
+        });`)
+                .join('\n\n')}
+      },
+    },` : ''}
+    ${hooks.length > 0 ? `hooks: {
+${hooks
+                .map((hook) => {
+                const hookId = `${hook.timing}-${hook.action}${hook.action === 'custom' && hook.customPath ? `-${hook.customPath.replace(/[^a-zA-Z0-9]/g, '-')}` : ''}`;
+                let hookCode = '';
+                if (hook.action === 'custom' && hook.customPath) {
+                    hookCode = `      "${hookId}": async (ctx) => {
+        // ${hook.name || 'Custom hook'}
+        ${hook.customMatcher ? `if (!(${hook.customMatcher})) return;` : ''}
+        ${hook.hookLogic || '// Hook logic here'}
+      },`;
+                }
+                else {
+                    hookCode = `      "${hookId}": async (ctx) => {
+        // ${hook.name || `${hook.timing} ${hook.action} hook`}
+        ${hook.hookLogic || '// Hook logic here'}
+      },`;
+                }
+                return hookCode;
+            })
+                .join('\n\n')}
+    },` : ''}
+    ${middleware.length > 0 ? `middleware: [
+${middleware
+                .map((mw) => {
+                const mwName = mw.name.trim() || 'middleware';
+                let pathMatch = '';
+                if (mw.pathType === 'exact') {
+                    pathMatch = `req.path === "${mw.path}"`;
+                }
+                else if (mw.pathType === 'prefix') {
+                    pathMatch = `req.path.startsWith("${mw.path}")`;
+                }
+                else if (mw.pathType === 'regex') {
+                    pathMatch = `new RegExp("${mw.path.replace(/"/g, '\\"')}").test(req.path)`;
+                }
+                return `      async (req, res, next) => {
+        // ${mwName}
+        if (${pathMatch}) {
+          ${mw.middlewareLogic || '// Middleware logic here'}
+        }
+        next();
+      },`;
+            })
+                .join('\n')}
+    ],` : ''}
+    ${rateLimit ? `rateLimit: {
+      windowMs: options.rateLimit?.windowMs || 15 * 60 * 1000, // 15 minutes
+      max: options.rateLimit?.max || 100,
+    },` : ''}
+  };
+}
+`;
+            // Generate client plugin code
+            const clientPluginCode = `import type { BetterAuthClientPlugin } from "better-auth/client";
+
+export interface ${pascalCaseName}ClientOptions {
+  // Client-side options
+}
+
+export function ${camelCaseName}Client(options: ${pascalCaseName}ClientOptions = {}): BetterAuthClientPlugin {
+  return {
+    id: "${camelCaseName}",
+    name: "${sanitizedName}",
+    description: ${description ? `"${description.replace(/"/g, '\\"')}"` : 'undefined'},
+    // Client-side plugin implementation
+  };
+}
+`;
+            // Generate server setup code
+            const serverSetupCode = `// server.ts or auth.ts
+import { betterAuth } from "better-auth";
+import { ${camelCaseName} } from "./plugins/${camelCaseName}";
+
+export const auth = betterAuth({
+  // ... your existing config
+  plugins: [
+    ${camelCaseName}({
+${tables.length > 0 ? `      // Configure tables\n${tables.map((table) => `      ${table.name}: {\n        fields: {},\n      },`).join('\n')}\n` : ''}${hooks.length > 0 ? `      // Configure hooks\n${hooks.map((hook) => `      ${hook.name}: async (context) => {\n        // Your hook logic here\n      },`).join('\n')}\n` : ''}${middleware.length > 0 ? `      // Configure middleware\n${middleware.map((mw) => `      ${mw.name}: async (req, res, next) => {\n        // Your middleware logic here\n        next();\n      },`).join('\n')}\n` : ''}${rateLimit ? `      // Configure rate limiting\n      rateLimit: {\n        windowMs: 15 * 60 * 1000, // 15 minutes\n        max: 100, // requests per window\n      },\n` : ''}    }),
+  ],
+});
+`;
+            // Generate client setup code
+            const clientSetupCode = `// client.ts or auth-client.ts
+import { createAuthClient } from "better-auth/react"; // or vue, svelte, etc.
+import { ${camelCaseName}Client } from "./plugins/${camelCaseName}-client";
+
+export const authClient = createAuthClient({
+  baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+  plugins: [
+    ${camelCaseName}Client({}),
+  ],
+});
+`;
+            return res.json({
+                success: true,
+                plugin: {
+                    name: sanitizedName,
+                    server: serverPluginCode,
+                    client: clientPluginCode,
+                    serverSetup: serverSetupCode,
+                    clientSetup: clientSetupCode,
+                },
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to generate plugin';
+            res.status(500).json({ success: false, error: message });
+        }
+    });
     router.post('/api/tools/export', async (req, res) => {
         try {
             const { tables, format, limit } = req.body;
