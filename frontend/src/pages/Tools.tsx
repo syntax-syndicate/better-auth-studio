@@ -1633,6 +1633,30 @@ export default function Tools() {
     setPluginEndpoints(newEndpoints);
   };
 
+  // Convert path to camelCase endpoint name (e.g., /sign-in/anonymous -> signInAnonymous)
+  const pathToCamelCase = (path: string): string => {
+    if (!path) return '';
+    // Remove leading/trailing slashes and split by '/'
+    const segments = path.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
+    if (segments.length === 0) return '';
+    
+    // Convert each segment: kebab-case to camelCase
+    const camelSegments = segments.map((segment, index) => {
+      // Split by hyphens
+      const parts = segment.split('-');
+      // First segment: all lowercase, subsequent segments: capitalize first letter
+      const camelParts = parts.map((part, partIndex) => {
+        if (index === 0 && partIndex === 0) {
+          return part.toLowerCase();
+        }
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      });
+      return camelParts.join('');
+    });
+    
+    return camelSegments.join('');
+  };
+
 
   const handleGeneratePlugin = async () => {
     if (!pluginName.trim()) {
@@ -3736,18 +3760,20 @@ export default function Tools() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() =>
+                    onClick={() => {
+                      const defaultPath = '/my-plugin/endpoint';
+                      const defaultName = pathToCamelCase(defaultPath);
                       setPluginEndpoints([
                         ...pluginEndpoints,
                         {
-                          name: '',
-                          path: '/my-plugin/endpoint',
+                          name: defaultName,
+                          path: defaultPath,
                           method: 'POST',
                           handlerLogic: '// Endpoint handler logic here\nreturn ctx.json({ success: true });',
                           expanded: true,
                         },
-                      ])
-                    }
+                      ]);
+                    }}
                     className="text-xs text-gray-400 hover:text-white rounded-none"
                   >
                     + Add Endpoint
@@ -3758,7 +3784,7 @@ export default function Tools() {
                 ) : (
                   <div className="space-y-2">
                     {pluginEndpoints.map((endpoint, index) => {
-                      const endpointLabel = `${endpoint.method} ${endpoint.path}: ${endpoint.name || `Endpoint ${index + 1}`}`;
+                      const endpointLabel = `${endpoint.method} ${endpoint.path}: ${endpoint.name || pathToCamelCase(endpoint.path) || `Endpoint ${index + 1}`}`;
                       return (
                         <div key={index} className="border border-dashed border-white/10">
                           <button
@@ -3774,21 +3800,6 @@ export default function Tools() {
                           </button>
                           {endpoint.expanded && (
                             <div className="border-t border-dashed border-white/10 p-4 space-y-4">
-                              <div>
-                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
-                                  Endpoint Name
-                                </Label>
-                                <Input
-                                  value={endpoint.name}
-                                  onChange={(e) => {
-                                    const newEndpoints = [...pluginEndpoints];
-                                    newEndpoints[index].name = e.target.value;
-                                    setPluginEndpoints(newEndpoints);
-                                  }}
-                                  placeholder="e.g., Custom Action, Data Fetch"
-                                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
-                                />
-                              </div>
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
                                   <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
@@ -3797,13 +3808,29 @@ export default function Tools() {
                                   <Input
                                     value={endpoint.path}
                                     onChange={(e) => {
+                                      const newPath = e.target.value;
+                                      const newName = pathToCamelCase(newPath);
                                       const newEndpoints = [...pluginEndpoints];
-                                      newEndpoints[index].path = e.target.value;
+                                      newEndpoints[index].path = newPath;
+                                      newEndpoints[index].name = newName;
                                       setPluginEndpoints(newEndpoints);
                                     }}
-                                    placeholder="/my-plugin/endpoint"
+                                    placeholder="/sign-in/anonymous"
                                     className="bg-black border border-dashed border-white/20 text-white rounded-none"
                                   />
+                                </div>
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Endpoint Name (Auto-generated)
+                                  </Label>
+                                  <Input
+                                    value={endpoint.name}
+                                    readOnly
+                                    className="bg-black/50 border border-dashed border-white/10 text-white/70 rounded-none cursor-not-allowed"
+                                  />
+                                  <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                                    Generated from path
+                                  </p>
                                 </div>
                                 <div>
                                   <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">

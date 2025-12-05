@@ -5031,8 +5031,10 @@ ${fields}
 
       // Generate endpoints
       const endpointsCode = endpoints.length > 0 ? endpoints.map((endpoint: any) => {
+        // Use the camelCase name from frontend (e.g., signInAnonymous)
         const endpointName = endpoint.name?.trim() || `endpoint${endpoints.indexOf(endpoint) + 1}`;
-        const sanitizedName = endpointName.toLowerCase().replace(/[^a-zA-Z0-9]/g, '');
+        // Ensure it's valid camelCase identifier (remove any invalid chars, keep camelCase)
+        const sanitizedName = endpointName.replace(/[^a-zA-Z0-9]/g, '');
         const endpointPath = endpoint.path?.trim() || `/${camelCaseName}/${sanitizedName}`;
         return `      ${sanitizedName}: createAuthEndpoint(
         "${endpointPath}",
