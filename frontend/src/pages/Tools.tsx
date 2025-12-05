@@ -4120,7 +4120,7 @@ export default function Tools() {
                           }`}
                         title={tab.path}
                       >
-                        {tab.path}
+                        {tab.label}
                       </button>
                     ))}
                   </div>

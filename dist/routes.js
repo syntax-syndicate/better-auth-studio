@@ -4524,7 +4524,7 @@ ${formattedHandlerLogic}
             const serverPluginBody = pluginParts.length > 0
                 ? `    id: "${camelCaseName}" as const,\n${pluginParts.join(',\n')}`
                 : `    id: "${camelCaseName}" as const`;
-            const serverPluginCode = cleanCode(`// plugin/index.ts
+            const serverPluginCode = cleanCode(`// plugin/${camelCaseName}/index.ts
 ${imports.join('\n')}
 
 ${description ? `/**\n * ${description.replace(/\n/g, '\n * ')}\n */` : ''}
@@ -4535,7 +4535,7 @@ ${serverPluginBody}
 };
 `);
             // Generate client plugin code
-            const clientPluginCode = cleanCode(`// plugin/client/index.ts
+            const clientPluginCode = cleanCode(`// plugin/${camelCaseName}/client/index.ts
 // Client utilities (optional)
 // Better Auth plugins work on the server side
 // Add any client-side helper functions here if needed
@@ -4547,7 +4547,7 @@ export const ${camelCaseName}Client = {
             // Generate server setup code
             const serverSetupCode = cleanCode(`// auth.ts
 import { betterAuth } from "@better-auth/core";
-import { ${camelCaseName} } from "./plugin";
+import { ${camelCaseName} } from "./plugin/${camelCaseName}";
 
 export const auth = betterAuth({
   // ... your existing config
@@ -4573,6 +4573,12 @@ export const authClient = createAuthClient({
                     client: clientPluginCode,
                     serverSetup: serverSetupCode,
                     clientSetup: clientSetupCode,
+                    filePaths: {
+                        server: `plugin/${camelCaseName}/index.ts`,
+                        client: `plugin/${camelCaseName}/client/index.ts`,
+                        serverSetup: 'auth.ts',
+                        clientSetup: 'auth-client.ts',
+                    },
                 },
             });
         }
