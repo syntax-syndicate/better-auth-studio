@@ -4425,7 +4425,6 @@ ${fields}
           }),
         }`;
             });
-            // Generate middleware
             const middlewareCode = middleware
                 .map((mw) => {
                 return `      {
@@ -4462,7 +4461,7 @@ ${fields}
                     return `      ${sanitizedName}: createAuthEndpoint(
         "${endpointPath}",
         {
-          method: "${endpoint.method || 'POST'}" as const,
+          method: "${endpoint.method || 'POST'}",
         },
         async (ctx) => {
           // ${endpoint.name || sanitizedName}
@@ -4537,8 +4536,8 @@ ${formattedHandlerLogic}
                 imports.push('import { createAuthEndpoint, createAuthMiddleware } from "@better-auth/core/api"');
             }
             const serverPluginBody = pluginParts.length > 0
-                ? `    id: "${camelCaseName}" as const,\n${pluginParts.join(',\n')}`
-                : `    id: "${camelCaseName}" as const`;
+                ? `    id: "${camelCaseName}",\n${pluginParts.join(',\n')}`
+                : `    id: "${camelCaseName}"`;
             const serverPluginCode = cleanCode(`import type { BetterAuthPlugin } from "@better-auth/core";
 ${imports.join('\n')}
 

@@ -5031,7 +5031,6 @@ ${fields}
         }`;
         });
 
-      // Generate middleware
       const middlewareCode = middleware
         .map((mw: any) => {
           return `      {
@@ -5072,7 +5071,7 @@ ${fields}
                 return `      ${sanitizedName}: createAuthEndpoint(
         "${endpointPath}",
         {
-          method: "${endpoint.method || 'POST'}" as const,
+          method: "${endpoint.method || 'POST'}",
         },
         async (ctx) => {
           // ${endpoint.name || sanitizedName}
@@ -5158,8 +5157,8 @@ ${formattedHandlerLogic}
 
       const serverPluginBody =
         pluginParts.length > 0
-          ? `    id: "${camelCaseName}" as const,\n${pluginParts.join(',\n')}`
-          : `    id: "${camelCaseName}" as const`;
+          ? `    id: "${camelCaseName}",\n${pluginParts.join(',\n')}`
+          : `    id: "${camelCaseName}"`;
 
       const serverPluginCode = cleanCode(`import type { BetterAuthPlugin } from "@better-auth/core";
 ${imports.join('\n')}
@@ -5207,7 +5206,7 @@ import type { ${camelCaseName} } from "..";
 
 export const ${camelCaseName}Client = () => {
   return {
-    id: "${camelCaseName}" as const,
+    id: "${camelCaseName}",
     $InferServerPlugin: {} as ReturnType<typeof ${camelCaseName}>,${pathMethods ? `\n    pathMethods: {\n${pathMethods}\n    },` : ''}${atomListenersCode}
   } satisfies BetterAuthClientPlugin;
 };

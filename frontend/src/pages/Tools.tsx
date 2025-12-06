@@ -3239,7 +3239,7 @@ export const authClient = createAuthClient({
                     className="bg-black border border-dashed border-white/20 text-white rounded-none"
                   />
                   <p className="text-[11px] text-gray-500 mt-1 font-mono">
-                    Must be a valid JavaScript identifier
+                    Must to be filled 
                   </p>
                 </div>
                 <div>
