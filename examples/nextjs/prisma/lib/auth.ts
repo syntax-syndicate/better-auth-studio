@@ -18,14 +18,6 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     },
   },
-  hooks: {
-    after: async (inputContext) => {
-      console.log('after', inputContext);
-    },
-    before: async (inputContext) => {
-      console.log('before', inputContext);
-    },
-  },
   emailAndPassword: {
     enabled: true,
     disableSignUp: false,
