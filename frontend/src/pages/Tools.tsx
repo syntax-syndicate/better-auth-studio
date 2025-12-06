@@ -475,6 +475,14 @@ export default function Tools() {
   } | null>(null);
   const [isCheckingEnv, setIsCheckingEnv] = useState(false);
   const [showSecretGeneratorModal, setShowSecretGeneratorModal] = useState(false);
+  const [showSecretConfirmModal, setShowSecretConfirmModal] = useState(false);
+  const [existingSecret, setExistingSecret] = useState<{
+    hasExisting: boolean;
+    secret?: string;
+    path?: string;
+  } | null>(null);
+  const [isCheckingSecret, setIsCheckingSecret] = useState(false);
+  const [isWritingSecret, setIsWritingSecret] = useState(false);
   const [secretResult, setSecretResult] = useState<{
     secret: string;
     format: string;
@@ -1376,6 +1384,81 @@ export default function Tools() {
     }
   };
 
+  const handleWriteSecretToEnv = async () => {
+    if (!secretResult) {
+      toast.error('Please generate a secret first');
+      return;
+    }
+
+    setIsCheckingSecret(true);
+    setExistingSecret(null);
+
+    try {
+      const checkResponse = await fetch('/api/tools/check-env-secret', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const checkData = await checkResponse.json();
+
+      if (checkData.success && checkData.hasExisting) {
+        setExistingSecret({
+          hasExisting: true,
+          secret: checkData.existingSecret,
+          path: checkData.path,
+        });
+        setShowSecretConfirmModal(true);
+        setIsCheckingSecret(false);
+        return;
+      }
+
+      await writeSecretToEnv('override');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to check secret';
+      toast.error(message);
+      setIsCheckingSecret(false);
+    }
+  };
+
+  const writeSecretToEnv = async (action: 'override' | 'append') => {
+    if (!secretResult) {
+      return;
+    }
+
+    setIsWritingSecret(true);
+    setShowSecretConfirmModal(false);
+
+    try {
+      const response = await fetch('/api/tools/write-env-secret', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          secret: secretResult.secret,
+          action,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(`Secret written to ${data.path}`);
+        setExistingSecret(null);
+      } else {
+        throw new Error(data.message || 'Failed to write secret');
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to write secret to .env';
+      toast.error(message);
+    } finally {
+      setIsWritingSecret(false);
+      setIsCheckingSecret(false);
+    }
+  };
+
   const handleOpenOAuthCredentials = async () => {
     setShowOAuthCredentialsModal(true);
     setSelectedProvider('google');
@@ -1666,7 +1749,6 @@ export default function Tools() {
     setPluginEndpoints(newEndpoints);
   };
 
-  // Convert path to camelCase endpoint name (e.g., /sign-in/anonymous -> signInAnonymous)
   const regenerateClientSetupCode = (framework: string) => {
     if (!pluginResult) return;
 
@@ -1679,8 +1761,6 @@ export default function Tools() {
     const frameworkImport = frameworkImportMap[framework] || 'better-auth/react';
 
     const camelCaseName = pluginResult.name.charAt(0).toLowerCase() + pluginResult.name.slice(1);
-
-    // Get baseURL based on framework
     const baseURLMap: Record<string, string> = {
       react: 'process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"',
       svelte: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
@@ -1707,15 +1787,11 @@ export const authClient = createAuthClient({
 
   const pathToCamelCase = (path: string): string => {
     if (!path) return '';
-    // Remove leading/trailing slashes and split by '/'
     const segments = path.replace(/^\/+|\/+$/g, '').split('/').filter(Boolean);
     if (segments.length === 0) return '';
 
-    // Convert each segment: kebab-case to camelCase
     const camelSegments = segments.map((segment, index) => {
-      // Split by hyphens
       const parts = segment.split('-');
-      // First segment: all lowercase, subsequent segments: capitalize first letter
       const camelParts = parts.map((part, partIndex) => {
         if (index === 0 && partIndex === 0) {
           return part.toLowerCase();
@@ -1740,7 +1816,6 @@ export const authClient = createAuthClient({
     setPluginResult(null);
 
     try {
-      // Filter out empty tables, hooks, and middleware
       const validTables = pluginTables.filter(
         (table) => table.name.trim() && table.fields.some((f) => f.name.trim())
       );
@@ -5304,6 +5379,24 @@ export const authClient = createAuthClient({
                     </p>
                   </div>
 
+                  <div className="flex justify-end space-x-2 pt-2">
+                    <Button
+                      variant="outline"
+                      onClick={handleWriteSecretToEnv}
+                      disabled={isCheckingSecret || isWritingSecret}
+                      className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                    >
+                      {isCheckingSecret || isWritingSecret ? (
+                        <>
+                          <Loader className="w-4 h-4 mr-2 animate-spin" />
+                          {isWritingSecret ? 'Writing...' : 'Checking...'}
+                        </>
+                      ) : (
+                        'Write to .env'
+                      )}
+                    </Button>
+                  </div>
+
                   <div className="border border-dashed border-white/20 bg-black text-gray-300 text-xs font-mono p-3 rounded-none">
                     <div className="flex items-start space-x-2">
                       <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0 text-gray-400" />
@@ -5398,6 +5491,81 @@ export const authClient = createAuthClient({
                   className="rounded-none"
                 >
                   {isWritingToEnv ? (
+                    <>
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      Writing...
+                    </>
+                  ) : (
+                    'Yes, Overwrite'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Secret Overwrite Confirmation Modal */}
+      {showSecretConfirmModal && existingSecret && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[70] overflow-hidden">
+          <div className="bg-black border border-dashed border-white/20 rounded-none p-6 w-full max-w-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <AlertCircle className="w-5 h-5 text-yellow-400" />
+                <h3 className="text-xl text-white font-light uppercase tracking-wider">
+                  Overwrite Existing Secret?
+                </h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowSecretConfirmModal(false);
+                  setExistingSecret(null);
+                  setIsCheckingSecret(false);
+                }}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="border border-dashed border-white/20 p-4">
+                <p className="text-sm border-b border-dashed border-white/20 pb-5 text-gray-300 font-mono mb-3">
+                  <span className="text-white uppercase">BETTER_AUTH_SECRET</span> already exists in{' '}
+                  <span className="text-gray-400 normal-case">{existingSecret.path}</span>:
+                </p>
+                <div className="space-y-2 pt-2">
+                  <div className="flex items-center justify-between text-xs font-mono">
+                    <span className="text-gray-400 uppercase">BETTER_AUTH_SECRET</span>
+                    <span className="text-gray-500">
+                      {existingSecret.secret && existingSecret.secret.length > 20
+                        ? `${existingSecret.secret.substring(0, 20)}...`
+                        : existingSecret.secret || '***'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-dashed border-white/10">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowSecretConfirmModal(false);
+                    setExistingSecret(null);
+                    setIsCheckingSecret(false);
+                  }}
+                  className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                >
+                  No, Cancel
+                </Button>
+                <Button
+                  onClick={() => writeSecretToEnv('override')}
+                  disabled={isWritingSecret}
+                  className="rounded-none"
+                >
+                  {isWritingSecret ? (
                     <>
                       <Loader className="w-4 h-4 mr-2 animate-spin" />
                       Writing...

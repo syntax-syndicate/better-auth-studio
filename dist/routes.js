@@ -4359,13 +4359,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                         ?.filter((f) => f.name.trim())
                         .map((field) => {
                         const attrs = [`type: "${field.type}"`];
-                        // Always include required (default to false)
                         attrs.push(`required: ${field.required ? 'true' : 'false'}`);
-                        // Always include unique (default to false)
                         attrs.push(`unique: ${field.unique ? 'true' : 'false'}`);
-                        // Always include input (default to false)
                         attrs.push('input: false');
-                        // Add defaultValue for boolean fields
                         if (field.type === 'boolean') {
                             attrs.push('defaultValue: false');
                         }
@@ -4373,7 +4369,6 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                         return `          ${field.name}: {\n            ${attrStr}\n          }`;
                     })
                         .join(',\n') || '';
-                    // If extending an existing table, use the extended table name
                     const tableName = table.isExtending && table.extendedTableName
                         ? table.extendedTableName.trim()
                         : table.name.trim();
@@ -4385,7 +4380,6 @@ ${fields}
                 })
                     .join(',\n')
                 : '';
-            // Generate hooks
             const beforeHooks = hooks
                 .filter((h) => h.timing === 'before')
                 .map((hook) => {
@@ -4408,7 +4402,6 @@ ${fields}
                 return `        {
           matcher: ${matcher},
           handler: createAuthMiddleware(async (ctx) => {
-            // ${hook.name || `${hook.timing} ${hook.action} hook`}
             ${hook.hookLogic || '// Hook logic here'}
           }),
         }`;
@@ -4435,7 +4428,6 @@ ${fields}
                 return `        {
           matcher: ${matcher},
           handler: createAuthMiddleware(async (ctx) => {
-            // ${hook.name || `${hook.timing} ${hook.action} hook`}
             ${hook.hookLogic || '// Hook logic here'}
           }),
         }`;
@@ -4445,13 +4437,11 @@ ${fields}
                 return `      {
         path: "${mw.path}",
         middleware: createAuthMiddleware(async (ctx) => {
-          // ${mw.name || 'Middleware'}
           ${mw.middlewareLogic || '// Middleware logic here'}
         }),
       }`;
             })
                 .join(',\n');
-            // Generate endpoints
             const endpointsCode = endpoints.length > 0
                 ? endpoints
                     .map((endpoint) => {
@@ -4479,7 +4469,6 @@ ${fields}
           method: "${endpoint.method || 'POST'}",
         },
         async (ctx) => {
-          // ${endpoint.name || sanitizedName}
 ${formattedHandlerLogic}
         },
       ),`;
@@ -4524,34 +4513,28 @@ ${formattedHandlerLogic}
             };
             const formatCode = (code) => {
                 try {
-                    // Create a temporary file
                     const tempFile = pathJoin(tmpdir(), `biome-format-${Date.now()}-${Math.random().toString(36).substring(7)}.ts`);
                     writeFile(tempFile, code, 'utf-8');
                     try {
-                        // Format using Biome CLI
                         execSync(`npx @biomejs/biome format --write ${tempFile}`, {
                             stdio: 'pipe',
                             cwd: process.cwd(),
                         });
-                        // Read formatted code
                         const formatted = readFile(tempFile, 'utf-8');
                         unlinkSync(tempFile);
                         return formatted;
                     }
                     catch (formatError) {
-                        // Clean up temp file on error
                         try {
                             unlinkSync(tempFile);
                         }
                         catch {
                             // Ignore cleanup errors
                         }
-                        // If formatting fails, return original code
                         return code;
                     }
                 }
                 catch (error) {
-                    // If anything fails, return original code
                     return code;
                 }
             };
@@ -4578,7 +4561,6 @@ ${formattedHandlerLogic}
             if (rateLimitCode) {
                 pluginParts.push(`    rateLimit: {\n${rateLimitCode}\n    }`);
             }
-            // Generate server plugin code
             const imports = ['import type { BetterAuthPlugin } from "@better-auth/core"'];
             if (hooks.length > 0 || middleware.length > 0 || endpoints.length > 0) {
                 imports.push('import { createAuthEndpoint, createAuthMiddleware } from "@better-auth/core/api"');
@@ -4630,7 +4612,6 @@ export const ${camelCaseName}Client = () => {
   } satisfies BetterAuthClientPlugin;
 };
 `));
-            // Generate server setup code
             const serverSetupCode = formatCode(cleanCode(`import { betterAuth } from "@better-auth/core";
 import { ${camelCaseName} } from "./plugin/${camelCaseName}";
 
@@ -4648,7 +4629,6 @@ export const auth = betterAuth({
                 vue: 'better-auth/vue',
             };
             const frameworkImport = frameworkImportMap[clientFramework] || 'better-auth/react';
-            // Get baseURL based on framework
             const baseURLMap = {
                 react: 'process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"',
                 svelte: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
@@ -5029,6 +5009,110 @@ export const authClient = createAuthClient({
             res.status(500).json({
                 success: false,
                 message: error instanceof Error ? error.message : 'Failed to generate secret',
+            });
+        }
+    });
+    router.post('/api/tools/check-env-secret', async (_req, res) => {
+        try {
+            const envPath = join(process.cwd(), '.env');
+            const envLocalPath = join(process.cwd(), '.env.local');
+            const targetPath = existsSync(envLocalPath) ? envLocalPath : envPath;
+            const envContent = existsSync(targetPath) ? readFileSync(targetPath, 'utf-8') : '';
+            const envLines = envContent.split('\n');
+            let existingSecret;
+            envLines.forEach((line) => {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('#'))
+                    return;
+                const match = trimmed.match(/^BETTER_AUTH_SECRET\s*=\s*(.*)$/i);
+                if (match) {
+                    let value = match[1].trim();
+                    if (value.length >= 2) {
+                        if ((value.startsWith('"') && value.endsWith('"')) ||
+                            (value.startsWith("'") && value.endsWith("'"))) {
+                            value = value.slice(1, -1).trim();
+                        }
+                    }
+                    if (value && value.trim() !== '') {
+                        existingSecret = value;
+                    }
+                }
+            });
+            const hasExisting = !!existingSecret && existingSecret.trim() !== '';
+            res.json({
+                success: true,
+                hasExisting,
+                existingSecret: hasExisting ? existingSecret : undefined,
+                path: targetPath,
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to check secret',
+            });
+        }
+    });
+    router.post('/api/tools/write-env-secret', async (req, res) => {
+        try {
+            const { secret, action = 'override' } = req.body || {};
+            if (!secret) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Secret is required',
+                });
+            }
+            const envPath = join(process.cwd(), '.env');
+            const envLocalPath = join(process.cwd(), '.env.local');
+            const targetPath = existsSync(envLocalPath) ? envLocalPath : envPath;
+            const envContent = existsSync(targetPath) ? readFileSync(targetPath, 'utf-8') : '';
+            const envLines = envContent.split('\n');
+            const envMap = new Map();
+            const newLines = [];
+            envLines.forEach((line, index) => {
+                const trimmed = line.trim();
+                if (!trimmed || trimmed.startsWith('#')) {
+                    newLines.push(line);
+                    return;
+                }
+                const match = trimmed.match(/^([^=#]+)\s*=\s*(.*)$/);
+                if (match) {
+                    const key = match[1].trim();
+                    if (key.toUpperCase() === 'BETTER_AUTH_SECRET') {
+                        envMap.set('BETTER_AUTH_SECRET', { line, index });
+                        if (action === 'override') {
+                            newLines.push(`BETTER_AUTH_SECRET=${secret}`);
+                        }
+                        else {
+                            newLines.push(line);
+                        }
+                    }
+                    else {
+                        newLines.push(line);
+                    }
+                }
+                else {
+                    newLines.push(line);
+                }
+            });
+            if (!envMap.has('BETTER_AUTH_SECRET')) {
+                if (newLines.length > 0 && newLines[newLines.length - 1].trim() !== '') {
+                    newLines.push('');
+                }
+                newLines.push(`BETTER_AUTH_SECRET=${secret}`);
+            }
+            const newContent = newLines.join('\n');
+            writeFileSync(targetPath, newContent, 'utf-8');
+            res.json({
+                success: true,
+                message: 'Secret written successfully',
+                path: targetPath,
+            });
+        }
+        catch (error) {
+            res.status(500).json({
+                success: false,
+                message: error instanceof Error ? error.message : 'Failed to write secret to .env',
             });
         }
     });
