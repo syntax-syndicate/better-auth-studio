@@ -5249,10 +5249,25 @@ export const authClient = createAuthClient({
                   </Label>
                   <Input
                     type="number"
-                    value={secretLength}
+                    value={secretLength === 0 ? '' : secretLength}
                     onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === '') {
+                        setSecretLength(0);
+                        return;
+                      }
+                      const numVal = parseInt(val, 10);
+                      if (!isNaN(numVal)) {
+                        setSecretLength(numVal);
+                      }
+                    }}
+                    onBlur={(e) => {
                       const val = parseInt(e.target.value, 10);
-                      if (val >= 16 && val <= 128) {
+                      if (isNaN(val) || val < 16) {
+                        setSecretLength(32);
+                      } else if (val > 128) {
+                        setSecretLength(128);
+                      } else {
                         setSecretLength(val);
                       }
                     }}
