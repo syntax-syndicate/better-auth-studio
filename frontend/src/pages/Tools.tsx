@@ -37,6 +37,7 @@ import { Label } from '../components/ui/label';
 import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { CodeBlock } from '../components/CodeBlock';
+import { CodeEditor } from '../components/CodeEditor';
 import { getProviderIcon } from '../lib/icons';
 
 interface Tool {
@@ -487,7 +488,8 @@ export default function Tools() {
   const [showPluginGeneratorModal, setShowPluginGeneratorModal] = useState(false);
   const [pluginName, setPluginName] = useState('');
   const [pluginDescription, setPluginDescription] = useState('');
-  const [pluginTables, setPluginTables] = useState<Array<{ name: string; fields: Array<{ name: string; type: string; required: boolean; unique: boolean }> }>>([]);
+  const [pluginTables, setPluginTables] = useState<Array<{ name: string; isExtending: boolean; extendedTableName?: string; fields: Array<{ name: string; type: string; required: boolean; unique: boolean }> }>>([]);
+  const [availableTablesForExtension, setAvailableTablesForExtension] = useState<Array<{ name: string; displayName: string }>>([]);
   const [pluginHooks, setPluginHooks] = useState<Array<{
     name: string;
     timing: 'before' | 'after';
@@ -1609,6 +1611,22 @@ export default function Tools() {
     setShowTokenGeneratorModal(true);
   };
 
+  const fetchAvailableTablesForExtension = async () => {
+    try {
+      const response = await fetch('/api/database/schema');
+      const result = await response.json();
+      if (result.success && result.schema && result.schema.tables) {
+        const tables = result.schema.tables.map((table: any) => ({
+          name: table.name,
+          displayName: table.displayName || table.name,
+        }));
+        setAvailableTablesForExtension(tables);
+      }
+    } catch (_error) {
+      // Silently fail, tables just won't be available for extension
+    }
+  };
+
   const handleOpenPluginGenerator = () => {
     setPluginName('');
     setPluginDescription('');
@@ -1626,6 +1644,7 @@ export default function Tools() {
     setPluginResult(null);
     setPluginError(null);
     setActiveCodeTab('server');
+    fetchAvailableTablesForExtension();
     setShowPluginGeneratorModal(true);
   };
 
@@ -1737,6 +1756,8 @@ export const authClient = createAuthClient({
           clientFramework: clientFramework,
           tables: validTables.map((table) => ({
             name: table.name.trim(),
+            isExtending: table.isExtending || false,
+            extendedTableName: table.extendedTableName?.trim(),
             fields: table.fields.filter((f) => f.name.trim()),
           })),
           hooks: validHooks.map((hook) => ({
@@ -3263,19 +3284,34 @@ export const authClient = createAuthClient({
                   <Label className="text-xs uppercase font-mono text-gray-400">
                     Tables (optional)
                   </Label>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() =>
-                      setPluginTables([
-                        ...pluginTables,
-                        { name: '', fields: [{ name: '', type: 'string', required: false, unique: false }] },
-                      ])
-                    }
-                    className="text-xs uppercase font-mono text-gray-400 hover:text-white rounded-none"
-                  >
-                    + Add Table
-                  </Button>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setPluginTables([
+                          ...pluginTables,
+                          { name: '', isExtending: false, fields: [{ name: '', type: 'string', required: false, unique: false }] },
+                        ])
+                      }
+                      className="text-xs uppercase font-mono text-gray-400 hover:text-white rounded-none"
+                    >
+                      + Add Table
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        setPluginTables([
+                          ...pluginTables,
+                          { name: '', isExtending: true, extendedTableName: '', fields: [{ name: '', type: 'string', required: false, unique: false }] },
+                        ])
+                      }
+                      className="text-xs uppercase font-mono text-gray-400 hover:text-white rounded-none"
+                    >
+                      + Extend Table
+                    </Button>
+                  </div>
                 </div>
                 {pluginTables.length === 0 ? (
                   <p className="text-xs text-gray-500 font-mono">No tables added</p>
@@ -3287,16 +3323,42 @@ export const authClient = createAuthClient({
                         className="border px-5 border-dashed border-white/15 p-3 relative"
                       >
                         <div className="flex items-center space-x-2 relative">
-                          <Input
-                            value={table.name}
-                            onChange={(e) => {
-                              const newTables = [...pluginTables];
-                              newTables[tableIndex].name = e.target.value;
-                              setPluginTables(newTables);
-                            }}
-                            placeholder="Table name"
-                            className="bg-black border border-dashed border-white/20 text-white text-xs rounded-none flex-1"
-                          />
+                          {table.isExtending ? (
+                            <>
+                              <Select
+                                value={table.extendedTableName || ''}
+                                onValueChange={(value) => {
+                                  const newTables = [...pluginTables];
+                                  newTables[tableIndex].extendedTableName = value;
+                                  newTables[tableIndex].name = value; 
+                                  setPluginTables(newTables);
+                                }}
+                              >
+                                <SelectTrigger className="bg-black border border-dashed border-white/20 text-white text-xs rounded-none flex-1">
+                                  <SelectValue className='sm:text-[11px] text-white/90 font-mono uppercase' placeholder="Select table to extend" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {availableTablesForExtension.map((t) => (
+                                    <SelectItem className='sm:text-[11px] uppercase font-mono text-white/90 border-b border-dashed last:border-b-0' key={t.name} value={t.name}>
+                                      {t.displayName}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <span className="text-xs text-gray-400 font-mono uppercase whitespace-nowrap">(Extending)</span>
+                            </>
+                          ) : (
+                            <Input
+                              value={table.name}
+                              onChange={(e) => {
+                                const newTables = [...pluginTables];
+                                newTables[tableIndex].name = e.target.value;
+                                setPluginTables(newTables);
+                              }}
+                              placeholder="Table name"
+                              className="bg-black border border-dashed border-white/20 text-white text-xs rounded-none flex-1"
+                            />
+                          )}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -3638,15 +3700,16 @@ export const authClient = createAuthClient({
                                 <p className="text-xs text-gray-400 mb-2 font-mono">
                                   This is the TypeScript code that will be executed when the hook is triggered. This function has properties like ctx so you can access the request context, headers, body, etc. Here is a simple example of a hook logic:
                                 </p>
-                                <textarea
+                                <CodeEditor
                                   value={hook.hookLogic}
-                                  onChange={(e) => {
+                                  onChange={(value) => {
                                     const newHooks = [...pluginHooks];
-                                    newHooks[index].hookLogic = e.target.value;
+                                    newHooks[index].hookLogic = value;
                                     setPluginHooks(newHooks);
                                   }}
-                                  className="w-full min-h-[200px] bg-black border border-dashed border-white/20 text-white font-mono text-xs p-3 rounded-none focus:outline-none focus:border-white/40"
+                                  language="typescript"
                                   placeholder="const context = ctx;"
+                                  className="w-full"
                                 />
                               </div>
                               <Button
@@ -3778,15 +3841,16 @@ export const authClient = createAuthClient({
                                 <p className="text-xs text-gray-400 mb-2 font-mono">
                                   This is the TypeScript code that will be executed when the middleware is triggered. You can access the request context, headers, body, etc.
                                 </p>
-                                <textarea
+                                <CodeEditor
                                   value={mw.middlewareLogic}
-                                  onChange={(e) => {
+                                  onChange={(value) => {
                                     const newMw = [...pluginMiddleware];
-                                    newMw[index].middlewareLogic = e.target.value;
+                                    newMw[index].middlewareLogic = value;
                                     setPluginMiddleware(newMw);
                                   }}
-                                  className="w-full min-h-[200px] bg-black border border-dashed border-white/20 text-white font-mono text-xs p-3 rounded-none focus:outline-none focus:border-white/40"
+                                  language="typescript"
                                   placeholder="const context = ctx;"
+                                  className="w-full"
                                 />
                               </div>
                               <Button
@@ -3921,15 +3985,16 @@ export const authClient = createAuthClient({
                                 <p className="text-xs text-gray-400 mb-2 font-mono">
                                   This is the TypeScript code that will be executed when the endpoint is called. You can access the context via ctx parameter.
                                 </p>
-                                <textarea
+                                <CodeEditor
                                   value={endpoint.handlerLogic}
-                                  onChange={(e) => {
+                                  onChange={(value) => {
                                     const newEndpoints = [...pluginEndpoints];
-                                    newEndpoints[index].handlerLogic = e.target.value;
+                                    newEndpoints[index].handlerLogic = value;
                                     setPluginEndpoints(newEndpoints);
                                   }}
-                                  className="w-full min-h-[200px] bg-black border border-dashed border-white/20 text-white font-mono text-xs p-3 rounded-none focus:outline-none focus:border-white/40"
+                                  language="typescript"
                                   placeholder="// Endpoint handler logic here\nreturn ctx.json({ success: true });"
+                                  className="w-full"
                                 />
                               </div>
                               <Button

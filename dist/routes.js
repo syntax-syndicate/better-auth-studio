@@ -4369,7 +4369,11 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                         return `          ${field.name}: {\n            ${attrStr}\n          }`;
                     })
                         .join(',\n') || '';
-                    return `      ${table.name}: {
+                    // If extending an existing table, use the extended table name
+                    const tableName = table.isExtending && table.extendedTableName
+                        ? table.extendedTableName.trim()
+                        : table.name.trim();
+                    return `      ${tableName}: {
         fields: {
 ${fields}
         },
