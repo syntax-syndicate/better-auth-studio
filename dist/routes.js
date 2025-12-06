@@ -4331,6 +4331,289 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
             res.status(500).json({ success: false, error: 'Failed to generate token' });
         }
     });
+    router.post('/api/tools/plugin-generator', async (req, res) => {
+        try {
+            const { pluginName, description, clientFramework = 'react', tables = [], hooks = [], middleware = [], endpoints = [], rateLimit, } = req.body || {};
+            if (!pluginName || typeof pluginName !== 'string' || pluginName.trim().length === 0) {
+                return res.status(400).json({ success: false, error: 'Plugin name is required' });
+            }
+            // Validate plugin name (must be valid identifier)
+            const validNameRegex = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/;
+            if (!validNameRegex.test(pluginName.trim())) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Plugin name must be a valid JavaScript identifier (letters, numbers, _, $)',
+                });
+            }
+            const sanitizedName = pluginName.trim();
+            const camelCaseName = sanitizedName.charAt(0).toLowerCase() + sanitizedName.slice(1);
+            const pascalCaseName = sanitizedName.charAt(0).toUpperCase() + sanitizedName.slice(1);
+            // Generate schema
+            const schemaCode = tables.length > 0 ? tables.map((table) => {
+                const fields = table.fields?.filter((f) => f.name.trim()).map((field) => {
+                    let attrStr = `type: "${field.type}"`;
+                    if (field.required)
+                        attrStr += ',\n            required: true';
+                    if (field.unique)
+                        attrStr += ',\n            unique: true';
+                    return `          ${field.name}: {\n            ${attrStr}\n          }`;
+                }).join(',\n') || '';
+                return `      ${table.name}: {
+        fields: {
+${fields}
+        },
+      }`;
+            }).join(',\n') : '';
+            // Generate hooks
+            const beforeHooks = hooks.filter((h) => h.timing === 'before').map((hook) => {
+                let matcher = '';
+                if (hook.action === 'sign-up') {
+                    matcher = `(ctx) => ctx.path.startsWith("/sign-up")`;
+                }
+                else if (hook.action === 'sign-in') {
+                    matcher = `(ctx) => ctx.path.startsWith("/sign-in")`;
+                }
+                else if (hook.action === 'custom' && hook.customPath) {
+                    matcher = `(ctx) => ctx.path === "${hook.customPath}"`;
+                    if (hook.customMatcher) {
+                        matcher = `(ctx) => ctx.path === "${hook.customPath}" && (${hook.customMatcher})`;
+                    }
+                }
+                else {
+                    matcher = `(ctx) => true`;
+                }
+                return `        {
+          matcher: ${matcher},
+          handler: createAuthMiddleware(async (ctx) => {
+            // ${hook.name || `${hook.timing} ${hook.action} hook`}
+            ${hook.hookLogic || '// Hook logic here'}
+          }),
+        }`;
+            });
+            const afterHooks = hooks.filter((h) => h.timing === 'after').map((hook) => {
+                let matcher = '';
+                if (hook.action === 'sign-up') {
+                    matcher = `(ctx) => ctx.path.startsWith("/sign-up")`;
+                }
+                else if (hook.action === 'sign-in') {
+                    matcher = `(ctx) => ctx.path.startsWith("/sign-in")`;
+                }
+                else if (hook.action === 'custom' && hook.customPath) {
+                    matcher = `(ctx) => ctx.path === "${hook.customPath}"`;
+                    if (hook.customMatcher) {
+                        matcher = `(ctx) => ctx.path === "${hook.customPath}" && (${hook.customMatcher})`;
+                    }
+                }
+                else {
+                    matcher = `(ctx) => true`;
+                }
+                return `        {
+          matcher: ${matcher},
+          handler: createAuthMiddleware(async (ctx) => {
+            // ${hook.name || `${hook.timing} ${hook.action} hook`}
+            ${hook.hookLogic || '// Hook logic here'}
+          }),
+        }`;
+            });
+            // Generate middleware
+            const middlewareCode = middleware.map((mw) => {
+                return `      {
+        path: "${mw.path}",
+        middleware: createAuthMiddleware(async (ctx) => {
+          // ${mw.name || 'Middleware'}
+          ${mw.middlewareLogic || '// Middleware logic here'}
+        }),
+      }`;
+            }).join(',\n');
+            // Generate endpoints
+            const endpointsCode = endpoints.length > 0 ? endpoints.map((endpoint) => {
+                const endpointName = endpoint.name?.trim() || `endpoint${endpoints.indexOf(endpoint) + 1}`;
+                const sanitizedName = endpointName.replace(/[^a-zA-Z0-9]/g, '');
+                const endpointPath = endpoint.path?.trim() || `/${camelCaseName}/${sanitizedName}`;
+                const handlerLogic = endpoint.handlerLogic || '// Endpoint handler logic here\n          return ctx.json({ success: true });';
+                const formattedHandlerLogic = handlerLogic.split('\n').map((line) => {
+                    const trimmed = line.trim();
+                    if (!trimmed)
+                        return '';
+                    if (!line.startsWith('          ')) {
+                        return '          ' + trimmed;
+                    }
+                    return line;
+                }).filter(Boolean).join('\n');
+                return `      ${sanitizedName}: createAuthEndpoint(
+        "${endpointPath}",
+        {
+          method: "${endpoint.method || 'POST'}" as const,
+        },
+        async (ctx) => {
+          // ${endpoint.name || sanitizedName}
+${formattedHandlerLogic}
+        },
+      ),`;
+            }).join('\n') : '';
+            const rateLimitCode = rateLimit ? (() => {
+                const rl = rateLimit;
+                let pathMatcher = '';
+                if (rl.pathType === 'exact') {
+                    pathMatcher = `(path: string) => path === "${rl.path}"`;
+                }
+                else if (rl.pathType === 'prefix') {
+                    pathMatcher = `(path: string) => path.startsWith("${rl.path}")`;
+                }
+                else if (rl.pathType === 'regex') {
+                    pathMatcher = `(path: string) => new RegExp("${rl.path.replace(/"/g, '\\"')}").test(path)`;
+                }
+                else {
+                    pathMatcher = `(path: string) => true`;
+                }
+                const windowValue = rl.window && rl.window > 0 ? rl.window : 15 * 60 * 1000;
+                const maxValue = rl.max && rl.max > 0 ? rl.max : 100;
+                return `      window: ${windowValue},
+      max: ${maxValue},
+      pathMatcher: ${pathMatcher}`;
+            })() : '';
+            const cleanCode = (code) => {
+                return code
+                    .split('\n')
+                    .map(line => line.trimEnd())
+                    .filter((line, index, arr) => {
+                    if (line === '' && arr[index + 1] === '')
+                        return false;
+                    return true;
+                })
+                    .join('\n')
+                    .replace(/\n{3,}/g, '\n\n')
+                    .trim();
+            };
+            const pluginParts = [];
+            if (schemaCode) {
+                pluginParts.push(`    schema: {\n${schemaCode}\n    }`);
+            }
+            if (beforeHooks.length > 0 || afterHooks.length > 0) {
+                const hooksParts = [];
+                if (beforeHooks.length > 0) {
+                    hooksParts.push(`      before: [\n${beforeHooks.join(',\n')}\n      ]`);
+                }
+                if (afterHooks.length > 0) {
+                    hooksParts.push(`      after: [\n${afterHooks.join(',\n')}\n      ]`);
+                }
+                pluginParts.push(`    hooks: {\n${hooksParts.join(',\n')}\n    }`);
+            }
+            if (middlewareCode) {
+                pluginParts.push(`    middlewares: [\n${middlewareCode}\n    ]`);
+            }
+            if (endpointsCode) {
+                pluginParts.push(`    endpoints: {\n${endpointsCode}\n    }`);
+            }
+            if (rateLimitCode) {
+                pluginParts.push(`    rateLimit: {\n${rateLimitCode}\n    }`);
+            }
+            // Generate server plugin code
+            const imports = ['import type { BetterAuthPlugin } from "@better-auth/core"'];
+            if (hooks.length > 0 || middleware.length > 0 || endpoints.length > 0) {
+                imports.push('import { createAuthEndpoint, createAuthMiddleware } from "@better-auth/core/api"');
+            }
+            const serverPluginBody = pluginParts.length > 0
+                ? `    id: "${camelCaseName}" as const,\n${pluginParts.join(',\n')}`
+                : `    id: "${camelCaseName}" as const`;
+            const serverPluginCode = cleanCode(`import type { BetterAuthPlugin } from "@better-auth/core";
+${imports.join('\n')}
+
+${description ? `/**\n * ${description.replace(/\n/g, '\n * ')}\n */` : ''}
+export const ${camelCaseName} = (options?: Record<string, any>) => {
+  return {
+${serverPluginBody}
+  } satisfies BetterAuthPlugin;
+};
+`);
+            const pathMethods = endpoints.length > 0 ? endpoints.map((endpoint) => {
+                const endpointPath = endpoint.path?.trim() || '';
+                const method = endpoint.method || 'POST';
+                return `      "${endpointPath}": "${method}"`;
+            }).join(',\n') : '';
+            const sessionAffectingPaths = endpoints
+                .filter((endpoint) => {
+                const path = endpoint.path?.trim() || '';
+                return path.includes('/sign-in') || path.includes('/sign-up');
+            })
+                .map((endpoint) => {
+                const endpointPath = endpoint.path?.trim() || '';
+                return `      {
+        matcher: (path) => path === "${endpointPath}",
+        signal: "$sessionSignal",
+      }`;
+            });
+            const atomListenersCode = sessionAffectingPaths.length > 0
+                ? `\n    atomListeners: [\n${sessionAffectingPaths.join(',\n')}\n    ],`
+                : '';
+            const clientPluginCode = cleanCode(`import type { BetterAuthClientPlugin } from "@better-auth/core";
+import type { ${camelCaseName} } from "..";
+
+export const ${camelCaseName}Client = () => {
+  return {
+    id: "${camelCaseName}" as const,
+    $InferServerPlugin: {} as ReturnType<typeof ${camelCaseName}>,${pathMethods ? `\n    pathMethods: {\n${pathMethods}\n    },` : ''}${atomListenersCode}
+  } satisfies BetterAuthClientPlugin;
+};
+`);
+            // Generate server setup code
+            const serverSetupCode = cleanCode(`import { betterAuth } from "@better-auth/core";
+import { ${camelCaseName} } from "./plugin/${camelCaseName}";
+
+export const auth = betterAuth({
+  // ... your existing config
+  plugins: [
+    ${camelCaseName}(),
+  ],
+});
+`);
+            const frameworkImportMap = {
+                react: 'better-auth/react',
+                svelte: 'better-auth/svelte',
+                solid: 'better-auth/solid',
+                vue: 'better-auth/vue',
+            };
+            const frameworkImport = frameworkImportMap[clientFramework] || 'better-auth/react';
+            // Get baseURL based on framework
+            const baseURLMap = {
+                react: 'process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"',
+                svelte: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
+                solid: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
+                vue: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
+            };
+            const baseURL = baseURLMap[clientFramework] || 'process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"';
+            const clientSetupCode = cleanCode(`import { createAuthClient } from "${frameworkImport}";
+import { ${camelCaseName}Client } from "./plugin/${camelCaseName}/client";
+
+export const authClient = createAuthClient({
+  baseURL: ${baseURL},
+  plugins: [
+    ${camelCaseName}Client(),
+  ],
+});
+`);
+            return res.json({
+                success: true,
+                plugin: {
+                    name: sanitizedName,
+                    server: serverPluginCode,
+                    client: clientPluginCode,
+                    serverSetup: serverSetupCode,
+                    clientSetup: clientSetupCode,
+                    filePaths: {
+                        server: `plugin/${camelCaseName}/index.ts`,
+                        client: `plugin/${camelCaseName}/client/index.ts`,
+                        serverSetup: 'auth.ts',
+                        clientSetup: 'auth-client.ts',
+                    },
+                },
+            });
+        }
+        catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to generate plugin';
+            res.status(500).json({ success: false, error: message });
+        }
+    });
     router.post('/api/tools/export', async (req, res) => {
         try {
             const { tables, format, limit } = req.body;
@@ -4344,7 +4627,6 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                 return res.status(500).json({ success: false, error: 'Auth adapter not available' });
             }
             const exportData = {};
-            // Fetch data from each table
             for (const tableName of tables) {
                 try {
                     const data = await adapter.findMany({
@@ -4354,7 +4636,6 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                     exportData[tableName] = data || [];
                 }
                 catch (error) {
-                    // If table doesn't exist or can't be accessed, skip it
                     exportData[tableName] = [];
                 }
             }

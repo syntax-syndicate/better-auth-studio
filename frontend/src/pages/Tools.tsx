@@ -18,6 +18,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import { CodeBlock } from '../components/CodeBlock';
 import {
   ArrowRight,
   Check,
@@ -31,8 +32,17 @@ import {
 } from '../components/PixelIcons';
 import { Terminal } from '../components/Terminal';
 import { Button } from '../components/ui/button';
+import { Checkbox } from '../components/ui/checkbox';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../components/ui/select';
 import { getProviderIcon } from '../lib/icons';
 
 interface Tool {
@@ -480,6 +490,66 @@ export default function Tools() {
   const [isGeneratingSecret, setIsGeneratingSecret] = useState(false);
   const [secretLength, setSecretLength] = useState(32);
   const [secretFormat, setSecretFormat] = useState<'hex' | 'base64'>('hex');
+  const [showPluginGeneratorModal, setShowPluginGeneratorModal] = useState(false);
+  const [pluginName, setPluginName] = useState('');
+  const [pluginDescription, setPluginDescription] = useState('');
+  const [pluginTables, setPluginTables] = useState<
+    Array<{
+      name: string;
+      fields: Array<{ name: string; type: string; required: boolean; unique: boolean }>;
+    }>
+  >([]);
+  const [pluginHooks, setPluginHooks] = useState<
+    Array<{
+      name: string;
+      timing: 'before' | 'after';
+      action: 'sign-up' | 'sign-in' | 'custom';
+      customPath?: string;
+      customMatcher?: string;
+      hookLogic: string;
+      expanded?: boolean;
+    }>
+  >([]);
+  const [pluginMiddleware, setPluginMiddleware] = useState<
+    Array<{
+      name: string;
+      path: string;
+      pathType: 'exact' | 'prefix' | 'regex';
+      middlewareLogic: string;
+      expanded?: boolean;
+    }>
+  >([]);
+  const [pluginEndpoints, setPluginEndpoints] = useState<
+    Array<{
+      name: string;
+      path: string;
+      method: 'GET' | 'POST';
+      handlerLogic: string;
+      expanded?: boolean;
+    }>
+  >([]);
+  const [pluginRateLimitEnabled, setPluginRateLimitEnabled] = useState(false);
+  const [pluginRateLimit, setPluginRateLimit] = useState<{
+    path: string;
+    pathType: 'exact' | 'prefix' | 'regex';
+    window: number;
+    max: number;
+  }>({
+    path: '/my-plugin/*',
+    pathType: 'prefix',
+    window: 15 * 60 * 1000,
+    max: 100,
+  });
+  const [pluginResult, setPluginResult] = useState<any>(null);
+  const codeGenerationRef = useRef<HTMLDivElement>(null);
+  const [isGeneratingPlugin, setIsGeneratingPlugin] = useState(false);
+  const [pluginError, setPluginError] = useState<string | null>(null);
+  const [activeCodeTab, setActiveCodeTab] = useState<
+    'server' | 'client' | 'serverSetup' | 'clientSetup'
+  >('server');
+  const [clientFramework, setClientFramework] = useState<
+    'react' | 'svelte' | 'solid' | 'vue' | 'client'
+  >('client');
   useEffect(() => {
     if (showConfigValidator) {
       document.body.style.overflow = 'hidden';
@@ -564,6 +634,16 @@ export default function Tools() {
       document.body.style.overflow = '';
     };
   }, [showUuidModal]);
+  useEffect(() => {
+    if (showPluginGeneratorModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showPluginGeneratorModal]);
 
   const addLog = (
     type: 'info' | 'success' | 'error' | 'progress',
@@ -1549,6 +1629,196 @@ export default function Tools() {
     setShowTokenGeneratorModal(true);
   };
 
+  const handleOpenPluginGenerator = () => {
+    setPluginName('');
+    setPluginDescription('');
+    setClientFramework('react');
+    setPluginTables([]);
+    setPluginHooks([]);
+    setPluginMiddleware([]);
+    setPluginRateLimitEnabled(false);
+    setPluginRateLimit({
+      path: '/my-plugin/*',
+      pathType: 'prefix',
+      window: 15 * 60 * 1000,
+      max: 100,
+    });
+    setPluginResult(null);
+    setPluginError(null);
+    setActiveCodeTab('server');
+    setShowPluginGeneratorModal(true);
+  };
+
+  const toggleHookExpanded = (index: number) => {
+    const newHooks = [...pluginHooks];
+    newHooks[index].expanded = !newHooks[index].expanded;
+    setPluginHooks(newHooks);
+  };
+
+  const toggleMiddlewareExpanded = (index: number) => {
+    const newMw = [...pluginMiddleware];
+    newMw[index].expanded = !newMw[index].expanded;
+    setPluginMiddleware(newMw);
+  };
+
+  const toggleEndpointExpanded = (index: number) => {
+    const newEndpoints = [...pluginEndpoints];
+    newEndpoints[index].expanded = !newEndpoints[index].expanded;
+    setPluginEndpoints(newEndpoints);
+  };
+
+  // Convert path to camelCase endpoint name (e.g., /sign-in/anonymous -> signInAnonymous)
+  const regenerateClientSetupCode = (framework: string) => {
+    if (!pluginResult) return;
+
+    const frameworkImportMap: Record<string, string> = {
+      react: 'better-auth/react',
+      svelte: 'better-auth/svelte',
+      solid: 'better-auth/solid',
+      vue: 'better-auth/vue',
+    };
+    const frameworkImport = frameworkImportMap[framework] || 'better-auth/react';
+
+    const camelCaseName = pluginResult.name.charAt(0).toLowerCase() + pluginResult.name.slice(1);
+
+    // Get baseURL based on framework
+    const baseURLMap: Record<string, string> = {
+      react: 'process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"',
+      svelte: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
+      solid: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
+      vue: 'import.meta.env.PUBLIC_BETTER_AUTH_URL || "http://localhost:5173"',
+    };
+    const baseURL =
+      baseURLMap[framework] || 'process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000"';
+
+    const clientSetupCode = `import { createAuthClient } from "${frameworkImport}";
+import { ${camelCaseName}Client } from "./plugin/${camelCaseName}/client";
+
+export const authClient = createAuthClient({
+  baseURL: ${baseURL},
+  plugins: [
+    ${camelCaseName}Client(),
+  ],
+});`;
+
+    setPluginResult({
+      ...pluginResult,
+      clientSetup: clientSetupCode,
+    });
+  };
+
+  const pathToCamelCase = (path: string): string => {
+    if (!path) return '';
+    // Remove leading/trailing slashes and split by '/'
+    const segments = path
+      .replace(/^\/+|\/+$/g, '')
+      .split('/')
+      .filter(Boolean);
+    if (segments.length === 0) return '';
+
+    // Convert each segment: kebab-case to camelCase
+    const camelSegments = segments.map((segment, index) => {
+      // Split by hyphens
+      const parts = segment.split('-');
+      // First segment: all lowercase, subsequent segments: capitalize first letter
+      const camelParts = parts.map((part, partIndex) => {
+        if (index === 0 && partIndex === 0) {
+          return part.toLowerCase();
+        }
+        return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+      });
+      return camelParts.join('');
+    });
+
+    return camelSegments.join('');
+  };
+
+  const handleGeneratePlugin = async () => {
+    if (!pluginName.trim()) {
+      toast.error('Please enter a plugin name');
+      return;
+    }
+
+    setIsGeneratingPlugin(true);
+    setPluginError(null);
+    setPluginResult(null);
+
+    try {
+      // Filter out empty tables, hooks, and middleware
+      const validTables = pluginTables.filter(
+        (table) => table.name.trim() && table.fields.some((f) => f.name.trim())
+      );
+      const validHooks = pluginHooks.filter((hook) => hook.name.trim() && hook.hookLogic.trim());
+      const validMiddleware = pluginMiddleware.filter(
+        (mw) => mw.name.trim() && mw.middlewareLogic.trim()
+      );
+
+      const response = await fetch('/api/tools/plugin-generator', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          pluginName: pluginName.trim(),
+          description: pluginDescription.trim() || undefined,
+          clientFramework: clientFramework,
+          tables: validTables.map((table) => ({
+            name: table.name.trim(),
+            fields: table.fields.filter((f) => f.name.trim()),
+          })),
+          hooks: validHooks.map((hook) => ({
+            name: hook.name.trim(),
+            timing: hook.timing,
+            action: hook.action,
+            customPath: hook.customPath?.trim(),
+            customMatcher: hook.customMatcher?.trim(),
+            hookLogic: hook.hookLogic.trim(),
+          })),
+          middleware: validMiddleware.map((mw) => ({
+            name: mw.name.trim(),
+            path: mw.path.trim(),
+            pathType: mw.pathType,
+            middlewareLogic: mw.middlewareLogic.trim(),
+          })),
+          endpoints: pluginEndpoints
+            .filter((ep) => ep.name.trim() && ep.path.trim())
+            .map((ep) => ({
+              name: ep.name.trim(),
+              path: ep.path.trim(),
+              method: ep.method,
+              handlerLogic: ep.handlerLogic.trim(),
+            })),
+          rateLimit: pluginRateLimitEnabled
+            ? {
+                path: pluginRateLimit.path.trim(),
+                pathType: pluginRateLimit.pathType,
+                window: pluginRateLimit.window,
+                max: pluginRateLimit.max,
+              }
+            : undefined,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setPluginResult(result.plugin);
+        toast.success('Plugin generated successfully');
+        // Scroll to code generation component smoothly
+        setTimeout(() => {
+          codeGenerationRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 100);
+      } else {
+        const message = result.error || 'Failed to generate plugin';
+        setPluginError(message);
+        toast.error(message);
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to generate plugin';
+      setPluginError(message);
+      toast.error(message);
+    } finally {
+      setIsGeneratingPlugin(false);
+    }
+  };
+
   const fetchAvailableTables = async () => {
     try {
       const response = await fetch('/api/database/schema');
@@ -1832,6 +2102,7 @@ export default function Tools() {
     'password-strength',
     'oauth-credentials',
     'secret-generator',
+    'plugin-generator',
   ]);
 
   const tools: Tool[] = [
@@ -1905,6 +2176,14 @@ export default function Tools() {
       description: 'Mint short-lived test tokens',
       icon: Zap,
       action: handleOpenTokenGenerator,
+      category: 'utilities',
+    },
+    {
+      id: 'plugin-generator',
+      name: 'Plugin Generator',
+      description: 'Generate Better Auth plugins',
+      icon: Code,
+      action: handleOpenPluginGenerator,
       category: 'utilities',
     },
     {
@@ -2963,6 +3242,1188 @@ export default function Tools() {
         </div>
       )}
 
+      {/* Plugin Generator Modal */}
+      {showPluginGeneratorModal && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[60]">
+          <div className="bg-black border border-dashed border-white/20 rounded-none p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <Code className="w-5 h-5 text-white" />
+                <h3 className="text-xl text-white font-light uppercase tracking-wider">
+                  Plugin Generator
+                </h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPluginGeneratorModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                    Plugin Name *
+                  </Label>
+                  <Input
+                    value={pluginName}
+                    onChange={(event) => setPluginName(event.target.value)}
+                    placeholder="myPlugin"
+                    className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                  />
+                  <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                    Must be a valid JavaScript identifier
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                    Description (optional)
+                  </Label>
+                  <Input
+                    value={pluginDescription}
+                    onChange={(event) => setPluginDescription(event.target.value)}
+                    placeholder="Plugin description"
+                    className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-xs uppercase font-mono text-gray-400">
+                    Tables (optional)
+                  </Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setPluginTables([
+                        ...pluginTables,
+                        {
+                          name: '',
+                          fields: [{ name: '', type: 'string', required: false, unique: false }],
+                        },
+                      ])
+                    }
+                    className="text-xs text-gray-400 hover:text-white rounded-none"
+                  >
+                    + Add Table
+                  </Button>
+                </div>
+                {pluginTables.length === 0 ? (
+                  <p className="text-xs text-gray-500 font-mono">No tables added</p>
+                ) : (
+                  <div className="space-y-4">
+                    {pluginTables.map((table, tableIndex) => (
+                      <div
+                        key={tableIndex}
+                        className="border px-5 border-dashed border-white/15 p-3 relative"
+                      >
+                        <div className="flex items-center space-x-2 relative">
+                          <Input
+                            value={table.name}
+                            onChange={(e) => {
+                              const newTables = [...pluginTables];
+                              newTables[tableIndex].name = e.target.value;
+                              setPluginTables(newTables);
+                            }}
+                            placeholder="Table name"
+                            className="bg-black border border-dashed border-white/20 text-white text-xs rounded-none flex-1"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setPluginTables(pluginTables.filter((_, i) => i !== tableIndex));
+                            }}
+                            className="text-red-400 hover:text-red-300 rounded-none"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        {table.fields.length > 0 && (
+                          <>
+                            <div
+                              className="absolute border border-dashed w-px border-white/30"
+                              style={{
+                                left: '7px',
+                                top: '31px',
+                                bottom: '12px',
+                              }}
+                            />
+                            <div
+                              className="absolute border border-dashed h-px w-[11px] border-white/30"
+                              style={{ left: '9px', top: '31px', bottom: '12px' }}
+                            />
+
+                            <div className="mt-3 relative">
+                              <div className="space-y-0 pl-6">
+                                {table.fields.map((field, fieldIndex) => {
+                                  // const isLast = fieldIndex === table.fields.length - 1;
+                                  return (
+                                    <div key={fieldIndex} className="relative">
+                                      <div
+                                        className="absolute border border-dashed h-px border-white/30 top-1/2 -translate-y-1/2"
+                                        style={{
+                                          left: '-36px',
+                                          width: '36px',
+                                        }}
+                                      />
+                                      <div className="flex items-center space-x-2 py-2">
+                                        <Input
+                                          value={field.name}
+                                          onChange={(e) => {
+                                            const newTables = [...pluginTables];
+                                            newTables[tableIndex].fields[fieldIndex].name =
+                                              e.target.value;
+                                            setPluginTables(newTables);
+                                          }}
+                                          placeholder="Field name"
+                                          className="bg-black border border-dashed border-white/20 text-white text-xs rounded-none flex-1"
+                                        />
+                                        <Select
+                                          value={field.type}
+                                          onValueChange={(value: string) => {
+                                            const newTables = [...pluginTables];
+                                            newTables[tableIndex].fields[fieldIndex].type = value;
+                                            setPluginTables(newTables);
+                                          }}
+                                        >
+                                          <SelectTrigger className="sm:h-full sm:w-56 border px-0 border-dashed border-white/20 text-white/90 text-xs rounded-none py-1">
+                                            <SelectValue className="font-mono uppercase text-[10px] px-0 text-white/90" />
+                                          </SelectTrigger>
+                                          <SelectContent className="font-mono uppercase text-[10px]">
+                                            <SelectItem
+                                              className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                                              value="string"
+                                            >
+                                              string
+                                            </SelectItem>
+                                            <SelectItem
+                                              className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                                              value="number"
+                                            >
+                                              number
+                                            </SelectItem>
+                                            <SelectItem
+                                              className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                                              value="boolean"
+                                            >
+                                              boolean
+                                            </SelectItem>
+                                            <SelectItem
+                                              className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                                              value="date"
+                                            >
+                                              date
+                                            </SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                        <div className="flex items-center space-x-2">
+                                          <Checkbox
+                                            id={`required-${tableIndex}-${fieldIndex}`}
+                                            checked={field.required}
+                                            onCheckedChange={(checked) => {
+                                              const newTables = [...pluginTables];
+                                              newTables[tableIndex].fields[fieldIndex].required =
+                                                checked === true;
+                                              setPluginTables(newTables);
+                                            }}
+                                          />
+                                          <Label
+                                            htmlFor={`required-${tableIndex}-${fieldIndex}`}
+                                            className="text-xs text-gray-400 font-mono uppercase cursor-pointer"
+                                          >
+                                            Required
+                                          </Label>
+                                        </div>
+                                        <div className="flex items-center space-x-2">
+                                          <Checkbox
+                                            id={`unique-${tableIndex}-${fieldIndex}`}
+                                            checked={field.unique}
+                                            onCheckedChange={(checked) => {
+                                              const newTables = [...pluginTables];
+                                              newTables[tableIndex].fields[fieldIndex].unique =
+                                                checked === true;
+                                              setPluginTables(newTables);
+                                            }}
+                                          />
+                                          <Label
+                                            htmlFor={`unique-${tableIndex}-${fieldIndex}`}
+                                            className="text-xs text-gray-400 font-mono uppercase cursor-pointer"
+                                          >
+                                            Unique
+                                          </Label>
+                                        </div>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => {
+                                            const newTables = [...pluginTables];
+                                            newTables[tableIndex].fields = newTables[
+                                              tableIndex
+                                            ].fields.filter((_, i) => i !== fieldIndex);
+                                            setPluginTables(newTables);
+                                          }}
+                                          className="text-red-400 hover:text-red-300 rounded-none"
+                                        >
+                                          <X className="w-3 h-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+
+                                <div className="relative pt-2">
+                                  <div
+                                    className="absolute border border-dashed h-px border-white/30"
+                                    style={{
+                                      left: '-35px',
+                                      width: '36px',
+                                      top: '31px',
+                                    }}
+                                  />
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => {
+                                      const newTables = [...pluginTables];
+                                      newTables[tableIndex].fields.push({
+                                        name: '',
+                                        type: 'string',
+                                        required: false,
+                                        unique: false,
+                                      });
+                                      setPluginTables(newTables);
+                                    }}
+                                    className="text-xs text-gray-400 hover:text-white rounded-none"
+                                  >
+                                    + Add Field
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )}
+
+                        {/* Add Field button when no fields exist */}
+                        {table.fields.length === 0 && (
+                          <div className="mt-3">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const newTables = [...pluginTables];
+                                newTables[tableIndex].fields.push({
+                                  name: '',
+                                  type: 'string',
+                                  required: false,
+                                  unique: false,
+                                });
+                                setPluginTables(newTables);
+                              }}
+                              className="text-xs text-gray-400 hover:text-white rounded-none"
+                            >
+                              + Add Field
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <FileText className="w-4 h-4 text-white" />
+                    <Label className="text-xs uppercase font-mono text-gray-400">Hooks</Label>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setPluginHooks([
+                        ...pluginHooks,
+                        {
+                          name: '',
+                          timing: 'before',
+                          action: 'sign-up',
+                          hookLogic: 'const context = ctx;',
+                          expanded: true,
+                        },
+                      ])
+                    }
+                    className="text-xs text-gray-400 hover:text-white rounded-none"
+                  >
+                    + Add Hook
+                  </Button>
+                </div>
+                {pluginHooks.length === 0 ? (
+                  <p className="text-xs text-gray-500 font-mono">No hooks added</p>
+                ) : (
+                  <div className="space-y-2">
+                    {pluginHooks.map((hook, index) => {
+                      const hookLabel = `${hook.timing} ${hook.action === 'custom' ? 'custom' : hook.action}: ${hook.name || `Hook ${index + 1}`}`;
+                      return (
+                        <div key={index} className="border border-dashed border-white/10">
+                          <button
+                            onClick={() => toggleHookExpanded(index)}
+                            className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors text-left"
+                          >
+                            <span className="text-xs font-mono text-white px-2 py-1 bg-black/40 border border-dashed border-white/20 rounded-none">
+                              {hookLabel}
+                            </span>
+                            <ChevronRight
+                              className={`w-4 h-4 text-white/60 transition-transform ${
+                                hook.expanded ? 'rotate-90' : ''
+                              }`}
+                            />
+                          </button>
+                          {hook.expanded && (
+                            <div className="border-t border-dashed border-white/10 p-4 space-y-4">
+                              <div>
+                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                  Hook Name
+                                </Label>
+                                <Input
+                                  value={hook.name}
+                                  onChange={(e) => {
+                                    const newHooks = [...pluginHooks];
+                                    newHooks[index].name = e.target.value;
+                                    setPluginHooks(newHooks);
+                                  }}
+                                  placeholder="e.g., Age Verification, TOS Check"
+                                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                                />
+                              </div>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Timing
+                                  </Label>
+                                  <RadioGroup
+                                    value={hook.timing}
+                                    onValueChange={(value: 'before' | 'after') => {
+                                      const newHooks = [...pluginHooks];
+                                      newHooks[index].timing = value;
+                                      setPluginHooks(newHooks);
+                                    }}
+                                    className="flex space-x-4"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem
+                                        value="before"
+                                        id={`hook-timing-before-${index}`}
+                                      />
+                                      <Label
+                                        htmlFor={`hook-timing-before-${index}`}
+                                        className="text-xs text-white font-mono cursor-pointer"
+                                      >
+                                        Before
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem
+                                        value="after"
+                                        id={`hook-timing-after-${index}`}
+                                      />
+                                      <Label
+                                        htmlFor={`hook-timing-after-${index}`}
+                                        className="text-xs text-white font-mono cursor-pointer"
+                                      >
+                                        After
+                                      </Label>
+                                    </div>
+                                  </RadioGroup>
+                                </div>
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Action
+                                  </Label>
+                                  <RadioGroup
+                                    value={hook.action}
+                                    onValueChange={(value: 'sign-up' | 'sign-in' | 'custom') => {
+                                      const newHooks = [...pluginHooks];
+                                      newHooks[index].action = value;
+                                      setPluginHooks(newHooks);
+                                    }}
+                                    className="flex space-x-4"
+                                  >
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem
+                                        value="sign-up"
+                                        id={`hook-action-signup-${index}`}
+                                      />
+                                      <Label
+                                        htmlFor={`hook-action-signup-${index}`}
+                                        className="text-xs text-white font-mono cursor-pointer"
+                                      >
+                                        Sign-up
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem
+                                        value="sign-in"
+                                        id={`hook-action-signin-${index}`}
+                                      />
+                                      <Label
+                                        htmlFor={`hook-action-signin-${index}`}
+                                        className="text-xs text-white font-mono cursor-pointer"
+                                      >
+                                        Sign-in
+                                      </Label>
+                                    </div>
+                                    <div className="flex items-center space-x-2">
+                                      <RadioGroupItem
+                                        value="custom"
+                                        id={`hook-action-custom-${index}`}
+                                      />
+                                      <Label
+                                        htmlFor={`hook-action-custom-${index}`}
+                                        className="text-xs text-white font-mono cursor-pointer"
+                                      >
+                                        Custom
+                                      </Label>
+                                    </div>
+                                  </RadioGroup>
+                                </div>
+                              </div>
+                              {hook.action === 'custom' && (
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Custom Path
+                                  </Label>
+                                  <Input
+                                    value={hook.customPath || ''}
+                                    onChange={(e) => {
+                                      const newHooks = [...pluginHooks];
+                                      newHooks[index].customPath = e.target.value;
+                                      setPluginHooks(newHooks);
+                                    }}
+                                    placeholder="/my-plugin/custom-endpoint"
+                                    className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                                  />
+                                </div>
+                              )}
+                              <div>
+                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                  Custom Matcher (optional)
+                                </Label>
+                                <Input
+                                  value={hook.customMatcher || ''}
+                                  onChange={(e) => {
+                                    const newHooks = [...pluginHooks];
+                                    newHooks[index].customMatcher = e.target.value;
+                                    setPluginHooks(newHooks);
+                                  }}
+                                  placeholder="e.g., context.headers.get('x-custom') === 'value'"
+                                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                                />
+                                <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                                  Leave empty to use default path matching
+                                </p>
+                              </div>
+                              <div>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <Code className="w-4 h-4 text-white" />
+                                  <Label className="text-xs uppercase font-mono text-gray-400">
+                                    Hook Logic (TypeScript)
+                                  </Label>
+                                </div>
+                                <p className="text-xs text-gray-400 mb-2 font-mono">
+                                  This is the TypeScript code that will be executed when the hook is
+                                  triggered. This function has properties like ctx so you can access
+                                  the request context, headers, body, etc. Here is a simple example
+                                  of a hook logic:
+                                </p>
+                                <textarea
+                                  value={hook.hookLogic}
+                                  onChange={(e) => {
+                                    const newHooks = [...pluginHooks];
+                                    newHooks[index].hookLogic = e.target.value;
+                                    setPluginHooks(newHooks);
+                                  }}
+                                  className="w-full min-h-[200px] bg-black border border-dashed border-white/20 text-white font-mono text-xs p-3 rounded-none focus:outline-none focus:border-white/40"
+                                  placeholder="const context = ctx;"
+                                />
+                              </div>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setPluginHooks(pluginHooks.filter((_, i) => i !== index));
+                                }}
+                                className="w-full border border-dashed border-red-500/50 text-red-400 hover:bg-red-500/10 rounded-none"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Remove Hook
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Shield className="w-4 h-4 text-white" />
+                    <Label className="text-xs uppercase font-mono text-gray-400">Middleware</Label>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setPluginMiddleware([
+                        ...pluginMiddleware,
+                        {
+                          name: '',
+                          path: '/my-plugin/protected',
+                          pathType: 'exact',
+                          middlewareLogic: 'const context = ctx;',
+                          expanded: true,
+                        },
+                      ])
+                    }
+                    className="text-xs text-gray-400 hover:text-white rounded-none"
+                  >
+                    + Add Middleware
+                  </Button>
+                </div>
+                {pluginMiddleware.length === 0 ? (
+                  <p className="text-xs text-gray-500 font-mono">No middleware added</p>
+                ) : (
+                  <div className="space-y-2">
+                    {pluginMiddleware.map((mw, index) => {
+                      const mwLabel = `${mw.path}: ${mw.name || `Middleware ${index + 1}`}`;
+                      return (
+                        <div key={index} className="border border-dashed border-white/10">
+                          <button
+                            onClick={() => toggleMiddlewareExpanded(index)}
+                            className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors text-left"
+                          >
+                            <span className="text-xs font-mono text-white px-2 py-1 bg-black/40 border border-dashed border-white/20 rounded-none">
+                              {mwLabel}
+                            </span>
+                            <ChevronRight
+                              className={`w-4 h-4 text-white/60 transition-transform ${
+                                mw.expanded ? 'rotate-90' : ''
+                              }`}
+                            />
+                          </button>
+                          {mw.expanded && (
+                            <div className="border-t border-dashed border-white/10 p-4 space-y-4">
+                              <div>
+                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                  Middleware Name
+                                </Label>
+                                <Input
+                                  value={mw.name}
+                                  onChange={(e) => {
+                                    const newMw = [...pluginMiddleware];
+                                    newMw[index].name = e.target.value;
+                                    setPluginMiddleware(newMw);
+                                  }}
+                                  placeholder="e.g., Auth Check, Rate Limiter"
+                                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                  Path
+                                </Label>
+                                <Input
+                                  value={mw.path}
+                                  onChange={(e) => {
+                                    const newMw = [...pluginMiddleware];
+                                    newMw[index].path = e.target.value;
+                                    setPluginMiddleware(newMw);
+                                  }}
+                                  placeholder="/my-plugin/protected"
+                                  className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                                />
+                              </div>
+                              <div>
+                                <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                  Path Type
+                                </Label>
+                                <Select
+                                  value={mw.pathType}
+                                  onValueChange={(value: string) => {
+                                    const newMw = [...pluginMiddleware];
+                                    newMw[index].pathType = value as 'exact' | 'prefix' | 'regex';
+                                    setPluginMiddleware(newMw);
+                                  }}
+                                >
+                                  <SelectTrigger className="bg-black border border-dashed border-white/20 text-white rounded-none">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="exact">Exact Match</SelectItem>
+                                    <SelectItem value="prefix">Prefix Match</SelectItem>
+                                    <SelectItem value="regex">Regex Match</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <Code className="w-4 h-4 text-white" />
+                                  <Label className="text-xs uppercase font-mono text-gray-400">
+                                    Middleware Logic (TypeScript)
+                                  </Label>
+                                </div>
+                                <p className="text-xs text-gray-400 mb-2 font-mono">
+                                  This is the TypeScript code that will be executed when the
+                                  middleware is triggered. You can access the request context,
+                                  headers, body, etc.
+                                </p>
+                                <textarea
+                                  value={mw.middlewareLogic}
+                                  onChange={(e) => {
+                                    const newMw = [...pluginMiddleware];
+                                    newMw[index].middlewareLogic = e.target.value;
+                                    setPluginMiddleware(newMw);
+                                  }}
+                                  className="w-full min-h-[200px] bg-black border border-dashed border-white/20 text-white font-mono text-xs p-3 rounded-none focus:outline-none focus:border-white/40"
+                                  placeholder="const context = ctx;"
+                                />
+                              </div>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setPluginMiddleware(
+                                    pluginMiddleware.filter((_, i) => i !== index)
+                                  );
+                                }}
+                                className="w-full border border-dashed border-red-500/50 text-red-400 hover:bg-red-500/10 rounded-none"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Remove Middleware
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <Zap className="w-4 h-4 text-white" />
+                    <Label className="text-xs uppercase font-mono text-gray-400">Endpoints</Label>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const defaultPath = '/my-plugin/endpoint';
+                      const defaultName = pathToCamelCase(defaultPath);
+                      setPluginEndpoints([
+                        ...pluginEndpoints,
+                        {
+                          name: defaultName,
+                          path: defaultPath,
+                          method: 'POST',
+                          handlerLogic:
+                            '// Endpoint handler logic here\nreturn ctx.json({ success: true });',
+                          expanded: true,
+                        },
+                      ]);
+                    }}
+                    className="text-xs text-gray-400 hover:text-white rounded-none"
+                  >
+                    + Add Endpoint
+                  </Button>
+                </div>
+                {pluginEndpoints.length === 0 ? (
+                  <p className="text-xs text-gray-500 font-mono">No endpoints added</p>
+                ) : (
+                  <div className="space-y-2">
+                    {pluginEndpoints.map((endpoint, index) => {
+                      const endpointLabel = `${endpoint.method} ${endpoint.path}: ${endpoint.name || pathToCamelCase(endpoint.path) || `Endpoint ${index + 1}`}`;
+                      return (
+                        <div key={index} className="border border-dashed border-white/10">
+                          <button
+                            onClick={() => toggleEndpointExpanded(index)}
+                            className="w-full flex items-center justify-between p-3 hover:bg-white/5 transition-colors text-left"
+                          >
+                            <span className="text-xs font-mono text-white px-2 py-1 bg-black/40 border border-dashed border-white/20 rounded-none">
+                              {endpointLabel}
+                            </span>
+                            <ChevronRight
+                              className={`w-4 h-4 text-white/60 transition-transform ${endpoint.expanded ? 'rotate-90' : ''}`}
+                            />
+                          </button>
+                          {endpoint.expanded && (
+                            <div className="border-t border-dashed border-white/10 p-4 space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Path
+                                  </Label>
+                                  <Input
+                                    value={endpoint.path}
+                                    onChange={(e) => {
+                                      const newPath = e.target.value;
+                                      const newName = pathToCamelCase(newPath);
+                                      const newEndpoints = [...pluginEndpoints];
+                                      newEndpoints[index].path = newPath;
+                                      newEndpoints[index].name = newName;
+                                      setPluginEndpoints(newEndpoints);
+                                    }}
+                                    placeholder="/sign-in/anonymous"
+                                    className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Endpoint Name (Auto-generated)
+                                  </Label>
+                                  <Input
+                                    value={endpoint.name}
+                                    readOnly
+                                    className="bg-black/50 border border-dashed border-white/10 text-white/70 rounded-none cursor-not-allowed"
+                                  />
+                                  <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                                    Generated from path
+                                  </p>
+                                </div>
+                                <div>
+                                  <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                                    Method
+                                  </Label>
+                                  <Select
+                                    value={endpoint.method}
+                                    onValueChange={(value: string) => {
+                                      const newEndpoints = [...pluginEndpoints];
+                                      newEndpoints[index].method = value as 'GET' | 'POST';
+                                      setPluginEndpoints(newEndpoints);
+                                    }}
+                                  >
+                                    <SelectTrigger className="bg-black border border-dashed border-white/20 text-white rounded-none">
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                      <SelectItem value="GET">GET</SelectItem>
+                                      <SelectItem value="POST">POST</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                </div>
+                              </div>
+                              <div>
+                                <div className="flex items-center space-x-2 mb-2">
+                                  <Code className="w-4 h-4 text-white" />
+                                  <Label className="text-xs uppercase font-mono text-gray-400">
+                                    Handler Logic (TypeScript)
+                                  </Label>
+                                </div>
+                                <p className="text-xs text-gray-400 mb-2 font-mono">
+                                  This is the TypeScript code that will be executed when the
+                                  endpoint is called. You can access the context via ctx parameter.
+                                </p>
+                                <textarea
+                                  value={endpoint.handlerLogic}
+                                  onChange={(e) => {
+                                    const newEndpoints = [...pluginEndpoints];
+                                    newEndpoints[index].handlerLogic = e.target.value;
+                                    setPluginEndpoints(newEndpoints);
+                                  }}
+                                  className="w-full min-h-[200px] bg-black border border-dashed border-white/20 text-white font-mono text-xs p-3 rounded-none focus:outline-none focus:border-white/40"
+                                  placeholder="// Endpoint handler logic here\nreturn ctx.json({ success: true });"
+                                />
+                              </div>
+                              <Button
+                                variant="outline"
+                                onClick={() => {
+                                  setPluginEndpoints(pluginEndpoints.filter((_, i) => i !== index));
+                                }}
+                                className="w-full border border-dashed border-red-500/50 text-red-400 hover:bg-red-500/10 rounded-none"
+                              >
+                                <X className="w-4 h-4 mr-2" />
+                                Remove Endpoint
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center space-x-2 mb-3">
+                  <Checkbox
+                    id="rate-limit"
+                    checked={pluginRateLimitEnabled}
+                    onCheckedChange={(checked) => setPluginRateLimitEnabled(checked === true)}
+                  />
+                  <Label
+                    htmlFor="rate-limit"
+                    className="text-xs uppercase font-mono text-gray-400 cursor-pointer"
+                  >
+                    Enable Rate Limiting
+                  </Label>
+                </div>
+                {pluginRateLimitEnabled && (
+                  <div className="border border-dashed border-white/10 p-4 space-y-4 mt-3">
+                    <div>
+                      <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                        Path
+                      </Label>
+                      <Input
+                        value={pluginRateLimit.path}
+                        onChange={(e) => {
+                          setPluginRateLimit({
+                            ...pluginRateLimit,
+                            path: e.target.value,
+                          });
+                        }}
+                        placeholder="/my-plugin/*"
+                        className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                        Path Type
+                      </Label>
+                      <Select
+                        value={pluginRateLimit.pathType}
+                        onValueChange={(value: string) => {
+                          setPluginRateLimit({
+                            ...pluginRateLimit,
+                            pathType: value as 'exact' | 'prefix' | 'regex',
+                          });
+                        }}
+                      >
+                        <SelectTrigger className="bg-black border border-dashed border-white/20 text-white rounded-none">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="exact">Exact Match</SelectItem>
+                          <SelectItem value="prefix">Prefix Match</SelectItem>
+                          <SelectItem value="regex">Regex Match</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                          Window (ms)
+                        </Label>
+                        <Input
+                          type="number"
+                          value={pluginRateLimit.window || ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setPluginRateLimit({
+                              ...pluginRateLimit,
+                              window: value === '' ? 0 : parseInt(value, 10) || 0,
+                            });
+                          }}
+                          onBlur={(e) => {
+                            if (!e.target.value || parseInt(e.target.value, 10) <= 0) {
+                              setPluginRateLimit({
+                                ...pluginRateLimit,
+                                window: 15 * 60 * 1000,
+                              });
+                            }
+                          }}
+                          placeholder="900000"
+                          className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                        />
+                        <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                          Time window in milliseconds (e.g., 900000 = 15 minutes)
+                        </p>
+                      </div>
+                      <div>
+                        <Label className="text-xs uppercase font-mono text-gray-400 mb-2 block">
+                          Max Requests
+                        </Label>
+                        <Input
+                          type="number"
+                          value={pluginRateLimit.max || ''}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            setPluginRateLimit({
+                              ...pluginRateLimit,
+                              max: value === '' ? 0 : parseInt(value, 10) || 0,
+                            });
+                          }}
+                          onBlur={(e) => {
+                            if (!e.target.value || parseInt(e.target.value, 10) <= 0) {
+                              setPluginRateLimit({
+                                ...pluginRateLimit,
+                                max: 100,
+                              });
+                            }
+                          }}
+                          placeholder="100"
+                          className="bg-black border border-dashed border-white/20 text-white rounded-none"
+                        />
+                        <p className="text-[11px] text-gray-500 mt-1 font-mono">
+                          Maximum requests per window
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-end space-x-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setPluginName('');
+                    setPluginDescription('');
+                    setClientFramework('react');
+                    setPluginTables([]);
+                    setPluginHooks([]);
+                    setPluginMiddleware([]);
+                    setPluginEndpoints([]);
+                    setPluginRateLimitEnabled(false);
+                    setPluginRateLimit({
+                      path: '/my-plugin/*',
+                      pathType: 'prefix',
+                      window: 15 * 60 * 1000,
+                      max: 100,
+                    });
+                    setPluginResult(null);
+                    setPluginError(null);
+                  }}
+                  className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                >
+                  Reset
+                </Button>
+                <Button
+                  onClick={handleGeneratePlugin}
+                  disabled={isGeneratingPlugin || !pluginName.trim()}
+                  className="rounded-none"
+                >
+                  {isGeneratingPlugin ? (
+                    <>
+                      <Loader className="w-4 h-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    'Generate Plugin'
+                  )}
+                </Button>
+              </div>
+
+              {pluginError && (
+                <div className="border border-dashed border-red-500/30 bg-red-500/10 text-red-300 text-xs font-mono p-3 rounded-none">
+                  {pluginError}
+                </div>
+              )}
+
+              {pluginResult && (
+                <div
+                  ref={codeGenerationRef}
+                  className="space-y-4 border border-dashed border-white/15 p-4"
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <p className="text-xs uppercase font-mono text-gray-400">Generated Code</p>
+                    <div className="flex items-center space-x-2">
+                      {activeCodeTab === 'clientSetup' && (
+                        <div className="flex items-center space-x-2 mr-2">
+                          <Label className="text-xs uppercase font-mono text-gray-400 whitespace-nowrap">
+                            Framework:
+                          </Label>
+                          <Select
+                            value={clientFramework}
+                            onValueChange={(value: any) => {
+                              setClientFramework(value);
+                              regenerateClientSetupCode(value);
+                            }}
+                          >
+                            <SelectTrigger className="bg-black sm:w-56 border border-dashed border-white/20 text-white rounded-none w-[220px] h-10 text-xs font-mono uppercase px-4 py-2">
+                              <SelectValue className="font-mono uppercase text-xs text-white" />
+                            </SelectTrigger>
+                            <SelectContent className="font-mono uppercase text-[10px] bg-black border border-dashed border-white/20">
+                              <SelectItem
+                                value="react"
+                                className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                              >
+                                {' '}
+                                React
+                              </SelectItem>
+                              <SelectItem
+                                value="svelte"
+                                className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                              >
+                                {' '}
+                                Svelte
+                              </SelectItem>
+                              <SelectItem
+                                value="solid"
+                                className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                              >
+                                {' '}
+                                Solid
+                              </SelectItem>
+                              <SelectItem
+                                value="vue"
+                                className="sm:text-[11px] text-white/90 border-b border-dashed last:border-b-0"
+                              >
+                                {' '}
+                                Vue
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const code = pluginResult[activeCodeTab];
+                          copyToClipboard(code);
+                        }}
+                        className="text-gray-400 hover:text-white rounded-none"
+                      >
+                        <Copy className="w-4 h-4 mr-1" />
+                        Copy
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const code = pluginResult[activeCodeTab];
+                          const filePath =
+                            [
+                              {
+                                id: 'server',
+                                path:
+                                  pluginResult.filePaths?.server ||
+                                  `plugin/${pluginResult.name}/index.ts`,
+                              },
+                              {
+                                id: 'client',
+                                path:
+                                  pluginResult.filePaths?.client ||
+                                  `plugin/${pluginResult.name}/client/index.ts`,
+                              },
+                              {
+                                id: 'serverSetup',
+                                path: pluginResult.filePaths?.serverSetup || 'auth.ts',
+                              },
+                              {
+                                id: 'clientSetup',
+                                path: pluginResult.filePaths?.clientSetup || 'auth-client.ts',
+                              },
+                            ].find((t) => t.id === activeCodeTab)?.path ||
+                            `${pluginResult.name}-${activeCodeTab}.ts`;
+                          const blob = new Blob([code], { type: 'text/plain' });
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          const fileName = filePath.split('/').pop() || filePath;
+                          a.download = fileName;
+                          document.body.appendChild(a);
+                          a.click();
+                          document.body.removeChild(a);
+                          window.URL.revokeObjectURL(url);
+                        }}
+                        className="text-gray-400 hover:text-white rounded-none"
+                      >
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2 border-b border-dashed border-white/10">
+                    {[
+                      {
+                        id: 'server',
+                        label: 'Server Plugin',
+                        path:
+                          pluginResult.filePaths?.server || `plugin/${pluginResult.name}/index.ts`,
+                      },
+                      {
+                        id: 'client',
+                        label: 'Client Plugin',
+                        path:
+                          pluginResult.filePaths?.client ||
+                          `plugin/${pluginResult.name}/client/index.ts`,
+                      },
+                      {
+                        id: 'serverSetup',
+                        label: 'Server Setup',
+                        path: pluginResult.filePaths?.serverSetup || 'auth.ts',
+                      },
+                      {
+                        id: 'clientSetup',
+                        label: 'Client Setup',
+                        path: pluginResult.filePaths?.clientSetup || 'auth-client.ts',
+                      },
+                    ].map((tab) => (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveCodeTab(tab.id as any)}
+                        className={`px-3 py-2 text-xs uppercase font-mono border-b-2 transition-colors ${
+                          activeCodeTab === tab.id
+                            ? 'border-white text-white'
+                            : 'border-transparent text-gray-400 hover:text-white'
+                        }`}
+                        title={tab.path}
+                      >
+                        {tab.label}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="border border-dashed border-white/10">
+                    <CodeBlock
+                      code={pluginResult[activeCodeTab]}
+                      language="typescript"
+                      fileName={
+                        [
+                          {
+                            id: 'server',
+                            path:
+                              pluginResult.filePaths?.server ||
+                              `plugin/${pluginResult.name}/index.ts`,
+                          },
+                          {
+                            id: 'client',
+                            path:
+                              pluginResult.filePaths?.client ||
+                              `plugin/${pluginResult.name}/client/index.ts`,
+                          },
+                          {
+                            id: 'serverSetup',
+                            path: pluginResult.filePaths?.serverSetup || 'auth.ts',
+                          },
+                          {
+                            id: 'clientSetup',
+                            path: pluginResult.filePaths?.clientSetup || 'auth-client.ts',
+                          },
+                        ].find((t) => t.id === activeCodeTab)?.path ||
+                        `${pluginResult.name}-${activeCodeTab}.ts`
+                      }
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Config Validator Modal */}
       {showConfigValidator && configValidationResults && (
         <div
@@ -3029,7 +4490,6 @@ export default function Tools() {
               </div>
             </div>
 
-            {/* Results by Category */}
             <div className="space-y-4">
               {Object.entries(
                 configValidationResults.results.reduce(
@@ -3182,7 +4642,6 @@ export default function Tools() {
                   );
                 }
 
-                // Regular rendering for other categories
                 return (
                   <div key={category} className="border border-dashed border-white/10 p-4">
                     <h4 className="text-white font-mono uppercase text-xs mb-4 text-left">
