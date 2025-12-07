@@ -42,13 +42,19 @@ export function CodeEditor({
     }
   }, []);
 
+  const baseFontSize = '12px';
+  const baseLineHeight = '1.5';
+  const basePadding = '0.75rem';
+  const baseFontFamily =
+    'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace';
+
   // Custom style for syntax highlighter
   const customStyle = {
     ...vscDarkPlus,
     'pre[class*="language-"]': {
       ...vscDarkPlus['pre[class*="language-"]'],
       background: 'transparent',
-      padding: '0.75rem',
+      padding: 0,
       margin: 0,
       borderRadius: 0,
       overflow: 'visible',
@@ -56,19 +62,17 @@ export function CodeEditor({
     'code[class*="language-"]': {
       ...vscDarkPlus['code[class*="language-"]'],
       background: 'transparent',
-      fontSize: '12px',
-      lineHeight: '1.5',
-      fontFamily:
-        'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
+      fontSize: baseFontSize,
+      lineHeight: baseLineHeight,
+      fontFamily: baseFontFamily,
     },
   };
 
   const textareaStyle = {
-    fontFamily:
-      'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
-    fontSize: '12px',
-    lineHeight: '1.5',
-    padding: '0.75rem',
+    fontFamily: baseFontFamily,
+    fontSize: baseFontSize,
+    lineHeight: baseLineHeight,
+    padding: basePadding,
     margin: 0,
     border: 'none',
     outline: 'none',
@@ -79,6 +83,7 @@ export function CodeEditor({
     width: '100%',
     minHeight: '200px',
     overflow: 'auto',
+    tabSize: 2,
   };
 
   return (
@@ -88,10 +93,10 @@ export function CodeEditor({
       {/* Syntax highlighted background */}
       <div
         ref={highlightRef}
-        className="absolute inset-0 pointer-events-none overflow-hidden"
+        className="absolute inset-0 pointer-events-none overflow-auto"
         style={{
-          padding: '0.75rem',
-          overflow: 'auto',
+          padding: basePadding,
+          boxSizing: 'border-box',
         }}
       >
         <SyntaxHighlighter
@@ -101,15 +106,31 @@ export function CodeEditor({
             margin: 0,
             padding: 0,
             background: 'transparent',
+            minHeight: '200px',
           }}
           codeTagProps={{
             style: {
-              fontFamily:
-                'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
-              fontSize: '12px',
-              lineHeight: '1.5',
+              fontFamily: baseFontFamily,
+              fontSize: baseFontSize,
+              lineHeight: baseLineHeight,
+              display: 'block',
             },
           }}
+          PreTag={({ children, ...props }) => (
+            <pre
+              {...props}
+              style={{
+                margin: 0,
+                padding: 0,
+                background: 'transparent',
+                fontSize: baseFontSize,
+                lineHeight: baseLineHeight,
+                fontFamily: baseFontFamily,
+              }}
+            >
+              {children}
+            </pre>
+          )}
         >
           {highlightCode}
         </SyntaxHighlighter>
@@ -122,7 +143,12 @@ export function CodeEditor({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className="relative w-full min-h-[200px] bg-transparent text-white font-mono text-xs rounded-none focus:outline-none resize-none"
-        style={textareaStyle}
+        style={{
+          ...textareaStyle,
+          boxSizing: 'border-box',
+          position: 'relative',
+          zIndex: 1,
+        }}
         spellCheck={false}
       />
     </div>
