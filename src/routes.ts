@@ -27,7 +27,7 @@ import type { AuthConfig } from './config.js';
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
-
+import { possiblePaths } from './config.js';
 const config = {
   N: 16384,
   r: 16,
@@ -91,7 +91,6 @@ export async function safeImportAuthConfig(authConfigPath: string, noCache = fal
       const aliases: Record<string, string> = {};
       const authConfigDir = dirname(authConfigPath);
 
-      // Find project root by looking for tsconfig.json
       let projectDir = authConfigDir;
       let tsconfigPath = join(projectDir, 'tsconfig.json');
       while (!existsSync(tsconfigPath) && projectDir !== dirname(projectDir)) {
@@ -101,11 +100,9 @@ export async function safeImportAuthConfig(authConfigPath: string, noCache = fal
 
       const content = readFileSync(authConfigPath, 'utf-8');
 
-      // Get path aliases from tsconfig (including extends chain)
       const { getPathAliases } = await import('./config.js');
       const tsconfigAliases = getPathAliases(projectDir) || {};
 
-      // Handle relative imports
       const relativeImportRegex = /import\s+.*?\s+from\s+['"](\.\/[^'"]+)['"]/g;
       const dynamicImportRegex = /import\s*\(\s*['"](\.\/[^'"]+)['"]\s*\)/g;
       const foundImports = new Set<string>();
@@ -143,7 +140,6 @@ export async function safeImportAuthConfig(authConfigPath: string, noCache = fal
       const pathAliasRegex = /import\s+.*?\s+from\s+['"](\$[^'"]+)['"]/g;
       while ((match = pathAliasRegex.exec(content)) !== null) {
         const aliasPath = match[1];
-        // Check if we have a matching alias
         const aliasBase = aliasPath.split('/')[0];
         if (tsconfigAliases[aliasBase]) {
           const remainingPath = aliasPath.replace(aliasBase, '').replace(/^\//, '');
@@ -275,15 +271,6 @@ export async function safeImportAuthConfig(authConfigPath: string, noCache = fal
 async function findAuthConfigPath(): Promise<string | null> {
   const { join, dirname } = await import('node:path');
   const { existsSync } = await import('node:fs');
-
-  const possiblePaths = [
-    'auth.js',
-    'auth.ts',
-    'src/auth.js',
-    'src/auth.ts',
-    'lib/auth.js',
-    'lib/auth.ts',
-  ];
 
   for (const path of possiblePaths) {
     const fullPath = join(process.cwd(), path);
