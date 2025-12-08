@@ -5122,14 +5122,11 @@ export const authClient = createAuthClient({
             }
             const envPath = join(process.cwd(), '.env');
             const envLocalPath = join(process.cwd(), '.env.local');
-            // Try .env.local first, then .env
             const targetPath = existsSync(envLocalPath) ? envLocalPath : envPath;
             const envContent = existsSync(targetPath) ? readFileSync(targetPath, 'utf-8') : '';
-            // Generate environment variable names
             const providerUpper = provider.toUpperCase();
             const clientIdKey = `${providerUpper}_CLIENT_ID`;
             const clientSecretKey = `${providerUpper}_CLIENT_SECRET`;
-            // Parse existing .env file
             const envLines = envContent.split('\n');
             const existingCredentials = {};
             envLines.forEach((line) => {
@@ -5325,30 +5322,58 @@ export const authClient = createAuthClient({
                 'password-reset': {
                     regex: /sendResetPassword\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
                     fn: `sendResetPassword: async ({ user, url, token }, request) => {
+        const subject = \\\`${escapedSubject}\\\`
+          .replace(/{{user.name}}/g, user?.name || '')
+          .replace(/{{user.email}}/g, user?.email || '');
+
+        const html = \\\`${escapedHtml}\\\`
+          .replace(/{{user.name}}/g, user?.name || '')
+          .replace(/{{user.email}}/g, user?.email || '')
+          .replace(/{{url}}/g, url || '')
+          .replace(/{{token}}/g, token || '');
+
         void sendEmail({
           to: user.email,
-          subject: "Reset your password",
-          text: \\\`Click the link to reset your password: \\\${url}\\\`,
+          subject,
+          html,
         });
       }`,
                 },
                 'email-verification': {
                     regex: /sendVerificationEmail\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
                     fn: `sendVerificationEmail: async ({ user, url, token }, request) => {
+        const subject = \\\`${escapedSubject}\\\`
+          .replace(/{{user.name}}/g, user?.name || '')
+          .replace(/{{user.email}}/g, user?.email || '');
+
+        const html = \\\`${escapedHtml}\\\`
+          .replace(/{{user.name}}/g, user?.name || '')
+          .replace(/{{user.email}}/g, user?.email || '')
+          .replace(/{{url}}/g, url || '')
+          .replace(/{{token}}/g, token || '');
+
         void sendEmail({
           to: user.email,
-          subject: "Verify your email address",
-          text: \\\`Click the link to verify your email: \\\${url}\\\`,
+          subject,
+          html,
         });
       }`,
                 },
                 'magic-link': {
                     regex: /sendMagicLink\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
                     fn: `sendMagicLink: async ({ email, token, url }, ctx) => {
+        const subject = \\\`${escapedSubject}\\\`
+          .replace(/{{user.email}}/g, email || '');
+
+        const html = \\\`${escapedHtml}\\\`
+          .replace(/{{user.email}}/g, email || '')
+          .replace(/{{url}}/g, url || '')
+          .replace(/{{token}}/g, token || '');
+
         void sendEmail({
           to: email,
-          subject: "Sign in to your account",
-          text: \\\`Click the link to sign in: \\\${url}\\\`,
+          subject,
+          html,
         });
       }`,
                 },
