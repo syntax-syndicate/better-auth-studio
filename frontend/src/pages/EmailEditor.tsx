@@ -275,6 +275,7 @@ export default function EmailEditor() {
   >('all');
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
   const [showFieldSimulator, setShowFieldSimulator] = useState(false);
+  const [renderedHtml, setRenderedHtml] = useState('');
   const [isApplying, setIsApplying] = useState(false);
 
   useEffect(() => {
@@ -288,12 +289,15 @@ export default function EmailEditor() {
     };
   }, [showCodeModal]);
 
+  // If a template is preselected externally, you can set it here; otherwise remains null until user selects
+
   const handleSelectTemplate = (templateId: string) => {
     const template = emailTemplates[templateId];
     if (template) {
       setSelectedTemplate(templateId);
       setEmailHtml(template.html);
       setEmailSubject(template.subject);
+      setRenderedHtml(template.html);
       const defaults: Record<string, string> = {};
       template.fields.forEach((field) => {
         if (field.includes('user.name')) defaults[field] = 'John Doe';
@@ -325,20 +329,17 @@ export default function EmailEditor() {
     setEmailSubject(newSubject);
   };
 
-  const handleApplyToAuth = async () => {
-    if (selectedTemplate !== 'org-invitation') {
-      toast.error('Apply is only available for Organization Invitation');
-      return;
-    }
+  const handleApplyToAuth = async (templateId: string) => {
     const subjectToApply =
-      emailSubject || emailTemplates[selectedTemplate]?.subject || 'You have an invitation';
-    const htmlToApply = emailHtml || emailTemplates[selectedTemplate]?.html || '';
+      emailSubject || emailTemplates[templateId]?.subject || 'Email subject';
+    const htmlToApply =
+      renderedHtml || emailHtml || emailTemplates[templateId]?.html || '';
     setIsApplying(true);
     try {
-      const resp = await fetch('/api/tools/apply-org-invitation-template', {
+      const resp = await fetch('/api/tools/apply-email-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject: subjectToApply, html: htmlToApply }),
+        body: JSON.stringify({ templateId, subject: subjectToApply, html: htmlToApply }),
       });
       const data = await resp.json();
       if (!resp.ok || !data.success) {
@@ -350,6 +351,22 @@ export default function EmailEditor() {
     } finally {
       setIsApplying(false);
     }
+  };
+
+  const getSimulatedHtml = (html: string): string => {
+    let simulatedHtml = html.replace(/\{\{year\}\}/g, new Date().getFullYear().toString());
+    Object.entries(fieldValues).forEach(([field, value]) => {
+      const placeholder = `{{${field}}}`;
+      simulatedHtml = simulatedHtml.replace(
+        new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
+        value
+      );
+    });
+    return simulatedHtml;
+  };
+
+  const handleApplyFields = () => {
+    setRenderedHtml(getSimulatedHtml(emailHtml));
   };
 
   const generateCodeSnippet = (templateId: string) => {
@@ -512,31 +529,6 @@ export const auth = betterAuth({
     (template) => activeCategory === 'all' || template.category === activeCategory
   );
 
-  const getSimulatedHtml = (html: string): string => {
-    let simulatedHtml = html;
-
-    // Always replace {{year}} with current year
-    simulatedHtml = simulatedHtml.replace(/\{\{year\}\}/g, new Date().getFullYear().toString());
-
-    if (!showFieldSimulator || Object.keys(fieldValues).length === 0) {
-      return simulatedHtml;
-    }
-
-    Object.entries(fieldValues).forEach(([field, value]) => {
-      const placeholder = `{{${field}}}`;
-      simulatedHtml = simulatedHtml.replace(
-        new RegExp(placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-        value
-      );
-    });
-    return simulatedHtml;
-  };
-
-  const getDisplayHtml = (html: string): string => {
-    // Always replace {{year}} with current year, even when field simulator is off
-    return html.replace(/\{\{year\}\}/g, new Date().getFullYear().toString());
-  };
-
   return (
     <div className="h-full flex flex-col bg-black">
       <div className="flex items-center justify-between p-5 pt-7">
@@ -631,10 +623,10 @@ export const auth = betterAuth({
                     <Copy className="w-4 h-4 mr-2" />
                     Copy HTML
                   </Button>
-                  {selectedTemplate === 'org-invitation' && (
+                  {selectedTemplate && (
                     <Button
                       variant="outline"
-                      onClick={handleApplyToAuth}
+                      onClick={() => handleApplyToAuth(selectedTemplate)}
                       disabled={isApplying}
                       className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
                     >
@@ -689,6 +681,15 @@ export const auth = betterAuth({
                         </div>
                       ))}
                     </div>
+                    <div className="mt-4 flex justify-end">
+                      <Button
+                        variant="outline"
+                        onClick={handleApplyFields}
+                        className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                      >
+                        Apply Changes
+                      </Button>
+                    </div>
                   </div>
                 )}
                 {selectedTemplate && (
@@ -716,9 +717,7 @@ export const auth = betterAuth({
 
                 <div className="flex-1 overflow-hidden">
                   <VisualEmailBuilder
-                    html={
-                      showFieldSimulator ? getSimulatedHtml(emailHtml) : getDisplayHtml(emailHtml)
-                    }
+                    html={renderedHtml || emailHtml}
                     onChange={handleHtmlChange}
                   />
                 </div>

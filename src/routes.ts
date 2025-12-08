@@ -6025,11 +6025,13 @@ export const authClient = createAuthClient({
   });
 
   // Apply org invitation email template into examples auth.ts
-  router.post('/api/tools/apply-org-invitation-template', async (req: Request, res: Response) => {
+  router.post('/api/tools/apply-email-template', async (req: Request, res: Response) => {
     try {
-      const { subject, html } = req.body || {};
-      if (!subject || !html) {
-        return res.status(400).json({ success: false, message: 'subject and html are required' });
+      const { subject, html, templateId } = req.body || {};
+      if (!subject || !html || !templateId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'templateId, subject and html are required' });
       }
 
       const authPath = join(process.cwd(), 'examples/nextjs/prisma/lib/auth.ts');
@@ -6061,7 +6063,47 @@ export const authClient = createAuthClient({
         }
       }
 
-      const newFn = `sendInvitationEmail: async ({ data, request }) => {
+      const handlers: Record<
+        string,
+        { regex: RegExp; fn: string; injectRegex?: RegExp; injectLabel?: string }
+      > = {
+        'password-reset': {
+          regex:
+            /sendResetPassword\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          fn: `sendResetPassword: async ({ user, url, token }, request) => {
+        void sendEmail({
+          to: user.email,
+          subject: "Reset your password",
+          text: \\\`Click the link to reset your password: \\\${url}\\\`,
+        });
+      }`,
+        },
+        'email-verification': {
+          regex:
+            /sendVerificationEmail\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          fn: `sendVerificationEmail: async ({ user, url, token }, request) => {
+        void sendEmail({
+          to: user.email,
+          subject: "Verify your email address",
+          text: \\\`Click the link to verify your email: \\\${url}\\\`,
+        });
+      }`,
+        },
+        'magic-link': {
+          regex:
+            /sendMagicLink\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          fn: `sendMagicLink: async ({ email, token, url }, ctx) => {
+        void sendEmail({
+          to: email,
+          subject: "Sign in to your account",
+          text: \\\`Click the link to sign in: \\\${url}\\\`,
+        });
+      }`,
+        },
+        'org-invitation': {
+          regex:
+            /sendInvitationEmail\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          fn: `sendInvitationEmail: async ({ data, request }) => {
         const { invitation, organization, inviter } = data;
         const url =
           (invitation as any)?.url ||
@@ -6069,41 +6111,66 @@ export const authClient = createAuthClient({
           request?.url ||
           invitation.id;
 
-        const subject = \`${escapedSubject}\`
+        const subject = \\\`${escapedSubject}\\\`
           .replace(/{{organization.name}}/g, organization?.name || '')
           .replace(/{{invitation.role}}/g, invitation.role || '')
           .replace(/{{inviter.user.name}}/g, inviter?.user?.name || '')
           .replace(/{{inviter.user.email}}/g, inviter?.user?.email || '');
 
-        const html = \`${escapedHtml}\`
+        const html = \\\`${escapedHtml}\\\`
           .replace(/{{invitation.url}}/g, url)
           .replace(/{{invitation.role}}/g, invitation.role || '')
           .replace(/{{organization.name}}/g, organization?.name || '')
           .replace(/{{inviter.user.name}}/g, inviter?.user?.name || '')
           .replace(/{{inviter.user.email}}/g, inviter?.user?.email || '');
 
-        await resend.emails.send({
-          from: 'noreply@yourdomain.com',
+        await sendEmail({
           to: invitation.email,
           subject,
-          html,
+          text: url,
         });
-      }`;
+      }`,
+        },
+      };
 
-      const sendInviteRegex =
-        /sendInvitationEmail\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/;
+      const handler = handlers[templateId];
+      if (!handler) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Unsupported templateId for apply' });
+      }
 
-      if (sendInviteRegex.test(fileContent)) {
-        fileContent = fileContent.replace(sendInviteRegex, `${newFn},`);
+      // ensure sendEmail helper exists
+      if (!fileContent.includes('const sendEmail = async')) {
+        const insertPoint = fileContent.indexOf('export const auth');
+        fileContent =
+          fileContent.slice(0, insertPoint) +
+          `const sendEmail = async ({ to, subject, text }: { to: string; subject: string; text: string }) => {\n  console.log(\`Sending email to \${to} | \${subject} | \${text}\`);\n};\n\n` +
+          fileContent.slice(insertPoint);
+      }
+
+      if (handler.regex.test(fileContent)) {
+        fileContent = fileContent.replace(handler.regex, `${handler.fn},`);
       } else {
-        const orgPluginRegex = /organization\(\s*\{\s*/;
-        if (orgPluginRegex.test(fileContent)) {
-          fileContent = fileContent.replace(orgPluginRegex, (m) => `${m}${newFn},\n      `);
+        // try to inject into emailAndPassword or organization plugin based on template
+        if (templateId === 'org-invitation') {
+          const orgPluginRegex = /organization\(\s*\{\s*/;
+          if (!orgPluginRegex.test(fileContent)) {
+            return res.status(400).json({
+              success: false,
+              message: 'organization plugin config not found in auth.ts',
+            });
+          }
+          fileContent = fileContent.replace(orgPluginRegex, (m) => `${m}${handler.fn},\n      `);
         } else {
-          return res.status(400).json({
-            success: false,
-            message: 'organization plugin config not found in auth.ts',
-          });
+          const emailAndPasswordRegex = /emailAndPassword\s*:\s*\{\s*/;
+          if (!emailAndPasswordRegex.test(fileContent)) {
+            return res.status(400).json({
+              success: false,
+              message: 'emailAndPassword config not found in auth.ts',
+            });
+          }
+          fileContent = fileContent.replace(emailAndPasswordRegex, (m) => `${m}${handler.fn},\n    `);
         }
       }
 
