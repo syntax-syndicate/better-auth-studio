@@ -516,38 +516,6 @@ export const auth = betterAuth({
     }),
   ],
 });`,
-      welcome: `import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-export const auth = betterAuth({
-  // ... other config
-  emailAndPassword: {
-    enabled: true,
-    sendWelcomeEmail: async ({ user }) => {
-      const appName = process.env.APP_NAME || 'Your App';
-      const dashboardUrl = process.env.DASHBOARD_URL || 'https://yourdomain.com/dashboard';
-
-      const subject = \`${escapedSubject}\`
-        .replace(/{{user.name}}/g, user?.name || '')
-        .replace(/{{user.email}}/g, user?.email || '')
-        .replace(/{{app.name}}/g, appName);
-
-      const html = \`${escapedHtml}\`
-        .replace(/{{user.name}}/g, user?.name || '')
-        .replace(/{{user.email}}/g, user?.email || '')
-        .replace(/{{app.name}}/g, appName)
-        .replace(/{{dashboardUrl}}/g, dashboardUrl);
-
-      await resend.emails.send({
-        from: 'noreply@yourdomain.com',
-        to: user.email,
-        subject,
-        html,
-      });
-    },
-  },
-});`,
       'email-otp': `import { Resend } from 'resend';
 import { emailOTP } from 'better-auth/plugins';
 
