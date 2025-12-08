@@ -418,7 +418,7 @@ export default function Layout({ children }: LayoutProps) {
                   }`}
                 >
                   <item.icon className="w-4 h-4" />
-                  <span className="inline-flex items-start">
+                  <span className="inline-flex font-mono uppercase font-light text-xs items-start">
                     {item.name}
                     {item.badge && (
                       <sup className="text-xs text-gray-500 ml-1">
