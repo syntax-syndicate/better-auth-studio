@@ -685,7 +685,7 @@ ${e.map(n=>{var s,i,o;const a=Object.entries(n.styles).filter(([l,c])=>c).map(([
   <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
   <p style="color: #999; font-size: 12px; text-align: center;">© {{year}} Better Auth. All rights reserved.</p>
 </body>
-</html>`,fields:["user.email","url","token","expiresIn"],category:"authentication"},"org-invitation":{id:"org-invitation",name:"Organization Invitation",subject:"You've been invited to {{org.name}}",html:`<!DOCTYPE html>
+</html>`,fields:["user.email","url","token","expiresIn"],category:"authentication"},"org-invitation":{id:"org-invitation",name:"Organization Invitation",subject:"You've been invited to {{organization.name}}",html:`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -702,21 +702,21 @@ ${e.map(n=>{var s,i,o;const a=Object.entries(n.styles).filter(([l,c])=>c).map(([
   
   <p>Hello,</p>
   
-  <p><strong>{{inviter.name}}</strong> has invited you to join <strong>{{org.name}}</strong>.</p>
+  <p><strong>{{inviter.user.name}}</strong> has invited you to join <strong>{{organization.name}}</strong>.</p>
   
   <div style="text-align: center; margin: 30px 0;">
-    <a href="{{url}}" style="display: inline-block; background: #000; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: 500;">Accept Invitation</a>
+    <a href="{{invitation.url}}" style="display: inline-block; background: #000; color: #fff; padding: 12px 30px; text-decoration: none; border-radius: 4px; font-weight: 500;">Accept Invitation</a>
   </div>
   
   <p style="color: #666; font-size: 14px;">Or copy and paste this link into your browser:</p>
-  <p style="color: #666; font-size: 14px; word-break: break-all;">{{url}}</p>
+  <p style="color: #666; font-size: 14px; word-break: break-all;">{{invitation.url}}</p>
   
   <p style="color: #666; font-size: 14px;">This invitation will expire in {{expiresIn}}.</p>
   
   <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;">
   <p style="color: #999; font-size: 12px; text-align: center;">© {{year}} Better Auth. All rights reserved.</p>
 </body>
-</html>`,fields:["inviter.name","inviter.email","org.name","org.slug","url","role","expiresIn"],category:"organization"},welcome:{id:"welcome",name:"Welcome Email",subject:"Welcome to {{app.name}}",html:`<!DOCTYPE html>
+</html>`,fields:["invitation.url","invitation.expiresAt","invitation.email","invitation.role","inviter.user.name","inviter.user.email","organization.name","organization.slug","expiresIn"],category:"organization"},welcome:{id:"welcome",name:"Welcome Email",subject:"Welcome to {{app.name}}",html:`<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -837,12 +837,22 @@ export const auth = betterAuth({
   // ... other config
   plugins: [
     organization({
-      sendInvitationEmail: async ({ invitation, org, inviter, url }) => {
+      sendInvitationEmail: async ( data, request ) => {
+        const { invitation, organization, inviter } = data;
+        const url =
+          (invitation as any).url ||
+          (invitation as any).link ||
+          request?.url ||
+          invitation.id;
         await resend.emails.send({
           from: 'noreply@yourdomain.com',
-          to: invitation.email,
+          to: invitation.email || data.email,
           subject: \`${A}\`,
-          html: \`${j}\`,
+          html: \`${j}\`
+            .replace(/{{invitation.url}}/g, url)
+            .replace(/{{organization.name}}/g, organization?.name || '')
+            .replace(/{{inviter.user.name}}/g, inviter?.user?.name || '')
+            .replace(/{{inviter.user.email}}/g, inviter?.user?.email || '')\`,
         });
       },
     }),

@@ -35,6 +35,9 @@ export const auth = betterAuth({
       teams: {
         enabled: true,
       },
+    sendInvitationEmail: async (data, request) => {
+      console.log('sendInvitationEmail', data, request);
+    },
     }),
     admin(),
   ],
