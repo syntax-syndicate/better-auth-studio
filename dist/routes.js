@@ -8,10 +8,10 @@ import { scryptAsync } from '@noble/hashes/scrypt.js';
 import { Router } from 'express';
 import { createJiti } from 'jiti';
 import { createMockAccount, createMockSession, createMockUser, createMockVerification, getAuthAdapter, } from './auth-adapter.js';
+import { possiblePaths } from './config.js';
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
-import { possiblePaths } from './config.js';
 const config = {
     N: 16384,
     r: 16,
@@ -4348,7 +4348,9 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
                         attrs.push(`unique: ${field.unique ? 'true' : 'false'}`);
                         attrs.push('input: false');
                         // Handle defaultValue
-                        if (field.defaultValue !== undefined && field.defaultValue !== null && field.defaultValue !== '') {
+                        if (field.defaultValue !== undefined &&
+                            field.defaultValue !== null &&
+                            field.defaultValue !== '') {
                             if (field.type === 'string') {
                                 attrs.push(`defaultValue: "${field.defaultValue}"`);
                             }
@@ -4390,15 +4392,15 @@ ${fields}
                 if (!code.trim())
                     return '';
                 const lines = code.split('\n');
-                const nonEmptyLines = lines.filter(line => line.trim());
+                const nonEmptyLines = lines.filter((line) => line.trim());
                 if (nonEmptyLines.length === 0)
                     return '';
-                const minIndent = Math.min(...nonEmptyLines.map(line => {
+                const minIndent = Math.min(...nonEmptyLines.map((line) => {
                     const match = line.match(/^(\s*)/);
                     return match ? match[1].length : 0;
                 }));
                 return lines
-                    .map(line => {
+                    .map((line) => {
                     if (!line.trim())
                         return '';
                     const currentIndent = line.match(/^(\s*)/)?.[1] || '';
