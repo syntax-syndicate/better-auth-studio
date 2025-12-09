@@ -663,11 +663,10 @@ export const auth = betterAuth({
                   <button
                     key={category}
                     onClick={() => setActiveCategory(category)}
-                    className={`px-2 py-1 text-[10px] font-mono uppercase border border-dashed rounded-none transition-colors ${
-                      activeCategory === category
+                    className={`px-2 py-1 text-[10px] font-mono uppercase border border-dashed rounded-none transition-colors ${activeCategory === category
                         ? 'border-white/30 bg-white/5 text-white'
                         : 'border-white/10 bg-black/40 text-gray-300 hover:border-white/20'
-                    }`}
+                      }`}
                   >
                     {category}
                   </button>
@@ -683,11 +682,10 @@ export const auth = betterAuth({
               <button
                 key={template.id}
                 onClick={() => handleSelectTemplate(template.id)}
-                className={`w-full text-left p-3 border border-dashed rounded-none transition-colors ${
-                  selectedTemplate === template.id
+                className={`w-full text-left p-3 border border-dashed rounded-none transition-colors ${selectedTemplate === template.id
                     ? 'border-white/30 bg-white/5 text-white'
                     : 'border-white/15 bg-black/40 text-gray-300 hover:border-white/20 hover:bg-white/5'
-                }`}
+                  }`}
               >
                 <div className="text-sm uppercase font-mono">{template.name}</div>
                 <div className="text-xs text-gray-500 mt-1">{template.fields.length} fields</div>
@@ -711,6 +709,14 @@ export const auth = betterAuth({
                 <div className="flex items-center space-x-2">
                   <Button
                     variant="outline"
+                    onClick={() => setShowTestEmailModal(true)}
+                    className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                  >
+                    <Send className="w-4 h-4 mr-2" />
+                    Test Email
+                  </Button>
+                  <Button
+                    variant="outline"
                     onClick={() => {
                       const code = generateCodeSnippet(selectedTemplate);
                       if (code) {
@@ -721,14 +727,6 @@ export const auth = betterAuth({
                   >
                     <Code className="w-4 h-4 mr-2" />
                     Export Code
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowTestEmailModal(true)}
-                    className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
-                  >
-                    <Send className="w-4 h-4 mr-2" />
-                    Test Email
                   </Button>
                   <Button
                     variant="outline"
