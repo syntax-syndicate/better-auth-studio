@@ -269,29 +269,29 @@ export default function DatabaseVisualizer() {
         }
       });
 
-        newNodes.forEach((node) => {
-          const isConnected = connectedTableNames.has(node.id);
-          const isHighlighted = node.id === highlightedTableName;
-          
-          // Preserve existing position and other properties
-          const existingNode = nodes.find((n) => n.id === node.id);
-          if (existingNode) {
-            node.position = existingNode.position;
-            node.dragging = existingNode.dragging;
-            node.selected = existingNode.selected;
-          }
-          
-          node.style = {
-            ...node.style,
-            opacity: isConnected ? 1 : 0.25,
-          };
-          
-          node.data = {
-            ...node.data,
-            isHighlighted,
-            isConnected: isConnected && !isHighlighted,
-          };
-        });
+      newNodes.forEach((node) => {
+        const isConnected = connectedTableNames.has(node.id);
+        const isHighlighted = node.id === highlightedTableName;
+
+        // Preserve existing position and other properties
+        const existingNode = nodes.find((n) => n.id === node.id);
+        if (existingNode) {
+          node.position = existingNode.position;
+          node.dragging = existingNode.dragging;
+          node.selected = existingNode.selected;
+        }
+
+        node.style = {
+          ...node.style,
+          opacity: isConnected ? 1 : 0.25,
+        };
+
+        node.data = {
+          ...node.data,
+          isHighlighted,
+          isConnected: isConnected && !isHighlighted,
+        };
+      });
 
       const filteredEdges = allEdges.filter(
         (edge) => edge.source === highlightedTableName || edge.target === highlightedTableName
@@ -319,25 +319,25 @@ export default function DatabaseVisualizer() {
       setNodes(newNodes);
       setEdges(filteredEdges);
     } else {
-        newNodes.forEach((node) => {
-          // Preserve existing position and other properties
-          const existingNode = nodes.find((n) => n.id === node.id);
-          if (existingNode) {
-            node.position = existingNode.position;
-            node.dragging = existingNode.dragging;
-            node.selected = existingNode.selected;
-          }
-          
-          node.style = {
-            ...node.style,
-            opacity: 1,
-          };
-          node.data = {
-            ...node.data,
-            isHighlighted: false,
-            isConnected: false,
-          };
-        });
+      newNodes.forEach((node) => {
+        // Preserve existing position and other properties
+        const existingNode = nodes.find((n) => n.id === node.id);
+        if (existingNode) {
+          node.position = existingNode.position;
+          node.dragging = existingNode.dragging;
+          node.selected = existingNode.selected;
+        }
+
+        node.style = {
+          ...node.style,
+          opacity: 1,
+        };
+        node.data = {
+          ...node.data,
+          isHighlighted: false,
+          isConnected: false,
+        };
+      });
 
       setNodes(newNodes);
       setEdges(allEdges);
