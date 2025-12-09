@@ -423,7 +423,9 @@ export default function Layout({ children }: LayoutProps) {
                     {item.badge && (
                       <sup className="text-xs text-gray-500 ml-1">
                         <span className="mr-0.5">[</span>
-                        <span className="text-white/80 lowercase font-mono text-xs">{item.badge}</span>
+                        <span className="text-white/80 lowercase font-mono text-xs">
+                          {item.badge}
+                        </span>
                         <span className="ml-0.5">]</span>
                       </sup>
                     )}

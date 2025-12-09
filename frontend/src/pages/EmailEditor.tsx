@@ -1,7 +1,7 @@
 import { Code, Copy, Mail, X } from 'lucide-react';
-import { Check } from '@/components/PixelIcons';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { Check } from '@/components/PixelIcons';
 import { CodeBlock } from '../components/CodeBlock';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -308,10 +308,8 @@ export default function EmailEditor() {
 
   const confirmApplyToAuth = async (templateId: string) => {
     setShowResendModal(false);
-    const subjectToApply =
-      emailSubject || emailTemplates[templateId]?.subject || 'Email subject';
-    const htmlToApply =
-      renderedHtml || emailHtml || emailTemplates[templateId]?.html || '';
+    const subjectToApply = emailSubject || emailTemplates[templateId]?.subject || 'Email subject';
+    const htmlToApply = renderedHtml || emailHtml || emailTemplates[templateId]?.html || '';
     setIsApplying(true);
     try {
       const resp = await fetch('/api/tools/apply-email-template', {
@@ -727,10 +725,7 @@ export const auth = betterAuth({
                 )}
 
                 <div className="flex-1 overflow-hidden">
-                  <VisualEmailBuilder
-                    html={memoizedHtml}
-                    onChange={handleHtmlChange}
-                  />
+                  <VisualEmailBuilder html={memoizedHtml} onChange={handleHtmlChange} />
                 </div>
               </div>
             </>
@@ -849,7 +844,8 @@ export const auth = betterAuth({
                     Install Resend
                   </h2>
                   <p className="text-gray-300 mb-4 font-sans leading-relaxed">
-                    You need to install the Resend package to send emails. Run the following command in your terminal:
+                    You need to install the Resend package to send emails. Run the following command
+                    in your terminal:
                   </p>
                   <div className="bg-black/80 border border-dashed border-white/20 p-2 pl-3 rounded-none font-mono text-sm relative group">
                     <div className="flex items-center justify-between gap-4">

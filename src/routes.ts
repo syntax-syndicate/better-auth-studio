@@ -6040,7 +6040,10 @@ export const authClient = createAuthClient({
 
       // Escape backticks and ${ for template literals
       // First escape backslashes, then escape backticks and ${ to avoid double-escaping
-      const escapedSubject = subject.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
+      const escapedSubject = subject
+        .replace(/\\/g, '\\\\')
+        .replace(/`/g, '\\`')
+        .replace(/\${/g, '\\${');
       const escapedHtml = html.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
 
       if (!fileContent.includes("from 'resend'")) {
