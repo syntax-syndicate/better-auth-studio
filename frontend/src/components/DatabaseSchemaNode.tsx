@@ -120,7 +120,6 @@ const DatabaseSchemaNode = ({
         style={{ width: SCHEMA_NODE_WIDTH }}
         id={`${data.name}-schema-node`}
       >
-        {/* Header */}
         <div
           className={cn(
             'px-4 py-3 border-b flex items-center justify-between',
@@ -186,14 +185,14 @@ const DatabaseSchemaNode = ({
               <div
                 key={column.id}
                 className={cn(
-                  'relative flex items-center overflow-x-hidden px-4 py-2 text-xs',
+                  'relative flex items-center overflow-x-hidden px-3 py-2 text-xs',
                   'bg-black/30 hover:bg-black/40 transition-colors duration-150',
                   'border-b border-white/20 last:border-b-0'
                 )}
                 style={{ minHeight: SCHEMA_NODE_ROW_HEIGHT }}
               >
                 {/* Column Icons */}
-                <div className="flex items-center gap-1 mr-3 min-w-[40px]">
+                <div className="flex items-center gap-1 mr-1 min-w-[40px]">
                   {column.isPrimary && (
                     <TooltipProvider delayDuration={100}>
                       <Tooltip>

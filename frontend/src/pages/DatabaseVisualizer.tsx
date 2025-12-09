@@ -171,13 +171,16 @@ export default function DatabaseVisualizer() {
         description: field.description,
       }));
 
+      const existingNode = nodes.find((n) => n.id === table.name);
+      const position = existingNode?.position || {
+        x: (index % 3) * 380,
+        y: Math.floor(index / 3) * 320,
+      };
+
       newNodes.push({
         id: table.name,
         type: 'databaseSchemaNode',
-        position: {
-          x: (index % 3) * 380,
-          y: Math.floor(index / 3) * 320,
-        },
+        position,
         data: {
           name: table.name,
           displayName: table.displayName,
@@ -266,21 +269,29 @@ export default function DatabaseVisualizer() {
         }
       });
 
-      newNodes.forEach((node) => {
-        const isConnected = connectedTableNames.has(node.id);
-        const isHighlighted = node.id === highlightedTableName;
-
-        node.style = {
-          ...node.style,
-          opacity: isConnected ? 1 : 0.25,
-        };
-
-        node.data = {
-          ...node.data,
-          isHighlighted,
-          isConnected: isConnected && !isHighlighted,
-        };
-      });
+        newNodes.forEach((node) => {
+          const isConnected = connectedTableNames.has(node.id);
+          const isHighlighted = node.id === highlightedTableName;
+          
+          // Preserve existing position and other properties
+          const existingNode = nodes.find((n) => n.id === node.id);
+          if (existingNode) {
+            node.position = existingNode.position;
+            node.dragging = existingNode.dragging;
+            node.selected = existingNode.selected;
+          }
+          
+          node.style = {
+            ...node.style,
+            opacity: isConnected ? 1 : 0.25,
+          };
+          
+          node.data = {
+            ...node.data,
+            isHighlighted,
+            isConnected: isConnected && !isHighlighted,
+          };
+        });
 
       const filteredEdges = allEdges.filter(
         (edge) => edge.source === highlightedTableName || edge.target === highlightedTableName
@@ -308,17 +319,25 @@ export default function DatabaseVisualizer() {
       setNodes(newNodes);
       setEdges(filteredEdges);
     } else {
-      newNodes.forEach((node) => {
-        node.style = {
-          ...node.style,
-          opacity: 1,
-        };
-        node.data = {
-          ...node.data,
-          isHighlighted: false,
-          isConnected: false,
-        };
-      });
+        newNodes.forEach((node) => {
+          // Preserve existing position and other properties
+          const existingNode = nodes.find((n) => n.id === node.id);
+          if (existingNode) {
+            node.position = existingNode.position;
+            node.dragging = existingNode.dragging;
+            node.selected = existingNode.selected;
+          }
+          
+          node.style = {
+            ...node.style,
+            opacity: 1,
+          };
+          node.data = {
+            ...node.data,
+            isHighlighted: false,
+            isConnected: false,
+          };
+        });
 
       setNodes(newNodes);
       setEdges(allEdges);
@@ -429,17 +448,14 @@ export default function DatabaseVisualizer() {
                       key={table.name}
                       onClick={() => {
                         setSelectedTable(table);
-                        // Also highlight the table in the visualizer
                         setHighlightedTableName(table.name);
                       }}
                       onMouseEnter={() => {
-                        // Only highlight on hover if nothing is currently selected
                         if (!highlightedTableName) {
                           setHighlightedTableName(table.name);
                         }
                       }}
                       onMouseLeave={() => {
-                        // Only clear hover highlight if it's not the clicked table
                         if (
                           highlightedTableName === table.name &&
                           (!selectedTable || selectedTable.name !== table.name)
