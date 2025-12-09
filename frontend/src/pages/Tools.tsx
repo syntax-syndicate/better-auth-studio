@@ -2229,8 +2229,8 @@ export const authClient = createAuthClient({
     },
     {
       id: 'run-migration',
-      name: 'Run Migration',
-      description: 'Run database migrations',
+      name: 'Migrate to Better Auth',
+      description: 'Migrate to Better Auth',
       icon: Database,
       action: handleRunMigration,
       category: 'database',

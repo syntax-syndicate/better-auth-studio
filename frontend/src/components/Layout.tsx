@@ -402,7 +402,7 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </div>
       </div>
-      <div className="bg-black/50 border-b border-white/10">
+      <div className="bg-black/50 border-b border-white/15">
         <div className="px-6">
           <nav className="flex space-x-8">
             {navigation.map((item) => {
