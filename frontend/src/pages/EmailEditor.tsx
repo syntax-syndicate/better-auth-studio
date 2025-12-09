@@ -1,4 +1,5 @@
 import { Code, Copy, Mail, X } from 'lucide-react';
+import { Check } from '@/components/PixelIcons';
 import { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { CodeBlock } from '../components/CodeBlock';
@@ -247,9 +248,11 @@ export default function EmailEditor() {
   const [showFieldSimulator, setShowFieldSimulator] = useState(false);
   const [renderedHtml, setRenderedHtml] = useState('');
   const [isApplying, setIsApplying] = useState(false);
+  const [showResendModal, setShowResendModal] = useState(false);
+  const [commandCopied, setCommandCopied] = useState(false);
 
   useEffect(() => {
-    if (showCodeModal) {
+    if (showCodeModal || showResendModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -257,7 +260,7 @@ export default function EmailEditor() {
     return () => {
       document.body.style.overflow = '';
     };
-  }, [showCodeModal]);
+  }, [showCodeModal, showResendModal]);
 
   // If a template is preselected externally, you can set it here; otherwise remains null until user selects
 
@@ -299,7 +302,12 @@ export default function EmailEditor() {
     setEmailSubject(newSubject);
   };
 
-  const handleApplyToAuth = async (templateId: string) => {
+  const handleApplyToAuth = () => {
+    setShowResendModal(true);
+  };
+
+  const confirmApplyToAuth = async (templateId: string) => {
+    setShowResendModal(false);
     const subjectToApply =
       emailSubject || emailTemplates[templateId]?.subject || 'Email subject';
     const htmlToApply =
@@ -788,11 +796,108 @@ export const auth = betterAuth({
             </div>
             <div className="flex items-center justify-end p-6 border-t border-white/15 bg-black/50">
               <Button
-                onClick={() => handleApplyToAuth(selectedTemplate)}
+                onClick={handleApplyToAuth}
                 disabled={isApplying}
                 className="bg-white text-black hover:bg-white/90 rounded-none font-mono uppercase text-xs px-6 py-2"
               >
                 {isApplying ? 'Applying...' : 'Apply to auth config'}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResendModal && selectedTemplate && (
+        <div
+          className="fixed inset-0 bg-black/95 flex items-center justify-center z-50 overflow-hidden"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowResendModal(false);
+            }
+          }}
+        >
+          <div
+            className="bg-black border border-white/15 rounded-none p-0 w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between px-6 py-4 border-white/15 border-b bg-black/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-xl font-normal uppercase text-white tracking-tight">
+                    Setup Required
+                  </h1>
+                  <p className="text-gray-300 mt-2 uppercase font-mono font-light text-xs">
+                    Install Resend before applying email template
+                  </p>
+                </div>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowResendModal(false)}
+                className="text-gray-400 hover:text-white rounded-none"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+
+            <div className="flex-1 overflow-auto p-8 bg-black">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-md font-mono uppercase font-normal text-white mb-3">
+                    Install Resend
+                  </h2>
+                  <p className="text-gray-300 mb-4 font-sans leading-relaxed">
+                    You need to install the Resend package to send emails. Run the following command in your terminal:
+                  </p>
+                  <div className="bg-black/80 border border-dashed border-white/20 p-2 rounded-none font-mono text-sm relative group">
+                    <div className="flex items-center justify-between gap-4">
+                      <code className="text-gray-200">
+                        <span className="text-white">$</span>{' '}
+                        <span className="text-blue-600">pnpm</span>{' '}
+                        <span className="text-white">install</span>{' '}
+                        <span className="text-white">resend</span>
+                      </code>
+                      <button
+                        onClick={() => {
+                          navigator.clipboard.writeText('pnpm install resend');
+                          setCommandCopied(true);
+                          setTimeout(() => setCommandCopied(false), 2000);
+                        }}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-none transition-colors text-gray-300 hover:text-white"
+                        title="Copy command"
+                      >
+                        {commandCopied ? (
+                          <>
+                            <Check className="w-4 h-4" />
+                          </>
+                        ) : (
+                          <>
+                            <Copy className="w-4 h-4" />
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 p-6 border-t border-white/15 bg-black/50">
+              <Button
+                variant="ghost"
+                onClick={() => setShowResendModal(false)}
+                className="text-gray-400 hover:text-white rounded-none font-mono uppercase text-xs px-6 py-2"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => confirmApplyToAuth(selectedTemplate)}
+                disabled={isApplying}
+                className="bg-white text-black hover:bg-white/90 rounded-none font-mono uppercase text-xs px-6 py-2"
+              >
+                {isApplying ? 'Applying...' : 'Continue'}
               </Button>
             </div>
           </div>

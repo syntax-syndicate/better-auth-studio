@@ -6030,15 +6030,18 @@ export const authClient = createAuthClient({
           .json({ success: false, message: 'templateId, subject and html are required' });
       }
 
-      const authPath = join(process.cwd(), 'examples/nextjs/prisma/lib/auth.ts');
-      if (!existsSync(authPath)) {
+      const authPathFromConfig = configPath ? join(process.cwd(), configPath) : null;
+      const authPath = authPathFromConfig || (await findAuthConfigPath());
+      if (!authPath || !existsSync(authPath)) {
         return res.status(404).json({ success: false, message: 'auth.ts not found' });
       }
 
       let fileContent = readFileSync(authPath, 'utf-8');
 
-      const escapedSubject = subject.replace(/`/g, '\\`').replace(/\${/g, '\\${');
-      const escapedHtml = html.replace(/`/g, '\\`').replace(/\${/g, '\\${');
+      // Escape backticks and ${ for template literals
+      // First escape backslashes, then escape backticks and ${ to avoid double-escaping
+      const escapedSubject = subject.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
+      const escapedHtml = html.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\${/g, '\\${');
 
       if (!fileContent.includes("from 'resend'")) {
         fileContent = `import { Resend } from 'resend';\n` + fileContent;
@@ -6059,16 +6062,21 @@ export const authClient = createAuthClient({
 
       const handlers: Record<
         string,
-        { regex: RegExp; fn: string; injectRegex?: RegExp; injectLabel?: string }
+        {
+          regex: RegExp;
+          fn: string;
+          sectionRegex?: RegExp;
+        }
       > = {
         'password-reset': {
           regex: /sendResetPassword\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          sectionRegex: /emailAndPassword\s*:\s*\{\s*/,
           fn: `sendResetPassword: async ({ user, url, token }, request) => {
-        const subject = \\\`${escapedSubject}\\\`
+        const subject = \`${escapedSubject}\`
           .replace(/{{user.name}}/g, user?.name || '')
           .replace(/{{user.email}}/g, user?.email || '');
 
-        const html = \\\`${escapedHtml}\\\`
+        const html = \`${escapedHtml}\`
           .replace(/{{user.name}}/g, user?.name || '')
           .replace(/{{user.email}}/g, user?.email || '')
           .replace(/{{url}}/g, url || '')
@@ -6083,12 +6091,13 @@ export const authClient = createAuthClient({
         },
         'email-verification': {
           regex: /sendVerificationEmail\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          sectionRegex: /emailVerification\s*:\s*\{\s*/,
           fn: `sendVerificationEmail: async ({ user, url, token }, request) => {
-        const subject = \\\`${escapedSubject}\\\`
+        const subject = \`${escapedSubject}\`
           .replace(/{{user.name}}/g, user?.name || '')
           .replace(/{{user.email}}/g, user?.email || '');
 
-        const html = \\\`${escapedHtml}\\\`
+        const html = \`${escapedHtml}\`
           .replace(/{{user.name}}/g, user?.name || '')
           .replace(/{{user.email}}/g, user?.email || '')
           .replace(/{{url}}/g, url || '')
@@ -6103,11 +6112,12 @@ export const authClient = createAuthClient({
         },
         'magic-link': {
           regex: /sendMagicLink\s*:\s*async\s*\([^)]*\)\s*=>\s*\{[\s\S]*?\},?/,
+          sectionRegex: /magicLink\s*:\s*\{\s*/,
           fn: `sendMagicLink: async ({ email, token, url }, ctx) => {
-        const subject = \\\`${escapedSubject}\\\`
+        const subject = \`${escapedSubject}\`
           .replace(/{{user.email}}/g, email || '');
 
-        const html = \\\`${escapedHtml}\\\`
+        const html = \`${escapedHtml}\`
           .replace(/{{user.email}}/g, email || '')
           .replace(/{{url}}/g, url || '')
           .replace(/{{token}}/g, token || '');
@@ -6141,16 +6151,16 @@ export const authClient = createAuthClient({
       }) => {
         const { invitation, organization, inviter } = data;
         const baseUrl = process.env.BETTER_AUTH_URL || 'http://localhost:3000';
-        const url = \\\`\\\${baseUrl}/accept-invitation?id=\\\${invitation.id}\\\`;
+        const url = \`\${baseUrl}/accept-invitation?id=\${invitation.id}\`;
 
-        const subject = \\\`${escapedSubject}\\\`
+        const subject = \`${escapedSubject}\`
           .replace(/{{organization.name}}/g, organization?.name || '')
           .replace(/{{invitation.role}}/g, invitation.role || '')
           .replace(/{{inviter.user.name}}/g, inviter?.user?.name || '')
           .replace(/{{inviter.user.email}}/g, inviter?.user?.email || '')
           .replace(/{{invitation.email}}/g, invitation.email || '');
 
-        const html = \\\`${escapedHtml}\\\`
+        const html = \`${escapedHtml}\`
           .replace(/{{invitation.url}}/g, url)
           .replace(/{{invitation.role}}/g, invitation.role || '')
           .replace(/{{organization.name}}/g, organization?.name || '')
@@ -6159,7 +6169,7 @@ export const authClient = createAuthClient({
           .replace(/{{inviter.user.email}}/g, inviter?.user?.email || '')
           .replace(/{{invitation.email}}/g, invitation.email || '')
           .replace(/{{invitation.expiresAt}}/g, invitation.expiresAt?.toLocaleString() || '')
-          .replace(/{{expiresIn}}/g, invitation.expiresAt ? \\\`\\\${Math.ceil((invitation.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days\\\` : '');
+          .replace(/{{expiresIn}}/g, invitation.expiresAt ? \`\${Math.ceil((invitation.expiresAt.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days\` : '');
 
         void sendEmail({
           to: invitation.email,
@@ -6187,29 +6197,24 @@ export const authClient = createAuthClient({
 
       if (handler.regex.test(fileContent)) {
         fileContent = fileContent.replace(handler.regex, `${handler.fn},`);
-      } else {
-        if (templateId === 'org-invitation') {
-          const orgPluginRegex = /organization\(\s*\{\s*/;
-          if (!orgPluginRegex.test(fileContent)) {
-            return res.status(400).json({
-              success: false,
-              message: 'organization plugin config not found in auth.ts',
-            });
-          }
-          fileContent = fileContent.replace(orgPluginRegex, (m) => `${m}${handler.fn},\n      `);
-        } else {
-          const emailAndPasswordRegex = /emailAndPassword\s*:\s*\{\s*/;
-          if (!emailAndPasswordRegex.test(fileContent)) {
-            return res.status(400).json({
-              success: false,
-              message: 'emailAndPassword config not found in auth.ts',
-            });
-          }
-          fileContent = fileContent.replace(
-            emailAndPasswordRegex,
-            (m) => `${m}${handler.fn},\n    `
-          );
+      } else if (templateId === 'org-invitation') {
+        const orgPluginRegex = /organization\(\s*\{\s*/;
+        if (!orgPluginRegex.test(fileContent)) {
+          return res.status(400).json({
+            success: false,
+            message: 'organization plugin config not found in auth.ts',
+          });
         }
+        fileContent = fileContent.replace(orgPluginRegex, (m) => `${m}${handler.fn},\n      `);
+      } else {
+        const sectionRegex = handler.sectionRegex || /emailAndPassword\s*:\s*\{\s*/;
+        if (!sectionRegex.test(fileContent)) {
+          return res.status(400).json({
+            success: false,
+            message: 'target email config section not found in auth.ts',
+          });
+        }
+        fileContent = fileContent.replace(sectionRegex, (m) => `${m}${handler.fn},\n    `);
       }
 
       writeFileSync(authPath, fileContent, 'utf-8');
