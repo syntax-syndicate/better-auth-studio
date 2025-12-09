@@ -1,5 +1,9 @@
+import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+// @ts-expect-error
+import { hex } from '@better-auth/utils/hex';
+import { scryptAsync } from '@noble/hashes/scrypt.js';
 import { createJiti } from 'jiti';
 import { possibleConfigFiles } from './utils.js';
 const _authInstance = null;
@@ -187,8 +191,27 @@ async function findAuthConfigPath() {
     }
     return null;
 }
+async function hashPassword(password) {
+    const config = {
+        N: 16384,
+        r: 16,
+        p: 1,
+        dkLen: 64,
+    };
+    const salt = hex.encode(randomBytes(16));
+    const key = await scryptAsync(password.normalize('NFKC'), salt, {
+        N: config.N,
+        p: config.p,
+        r: config.r,
+        dkLen: config.dkLen,
+        maxmem: 128 * config.N * config.r * 2,
+    });
+    return `${salt}:${hex.encode(key)}`;
+}
 export async function createMockUser(adapter, index, role) {
     const randomString = Math.random().toString(36).substring(2, 8);
+    // Hash password so credential account can be created properly
+    const hashedPassword = await hashPassword('password123');
     const userData = {
         email: `user${randomString}@example.com`,
         name: `User ${index}`,
@@ -196,6 +219,7 @@ export async function createMockUser(adapter, index, role) {
         image: `https://api.dicebear.com/7.x/avataaars/svg?seed=user${index}`,
         createdAt: new Date(),
         updatedAt: new Date(),
+        password: hashedPassword, // Add hashed password so credential account is created
     };
     if (role) {
         userData.role = role;

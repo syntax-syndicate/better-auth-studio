@@ -1,6 +1,10 @@
+import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import type { InternalAdapter } from 'better-auth';
+// @ts-expect-error
+import { hex } from '@better-auth/utils/hex';
+import { scryptAsync } from '@noble/hashes/scrypt.js';
 import { createJiti } from 'jiti';
 import { possibleConfigFiles } from './utils.js';
 
@@ -224,8 +228,28 @@ async function findAuthConfigPath(): Promise<string | null> {
   return null;
 }
 
+async function hashPassword(password: string): Promise<string> {
+  const config = {
+    N: 16384,
+    r: 16,
+    p: 1,
+    dkLen: 64,
+  };
+  const salt = hex.encode(randomBytes(16));
+  const key = await scryptAsync(password.normalize('NFKC'), salt, {
+    N: config.N,
+    p: config.p,
+    r: config.r,
+    dkLen: config.dkLen,
+    maxmem: 128 * config.N * config.r * 2,
+  });
+  return `${salt}:${hex.encode(key)}`;
+}
+
 export async function createMockUser(adapter: AuthAdapter, index: number, role?: string) {
   const randomString = Math.random().toString(36).substring(2, 8);
+
+  const hashedPassword = await hashPassword('password123');
 
   const userData: any = {
     email: `user${randomString}@example.com`,
@@ -234,6 +258,7 @@ export async function createMockUser(adapter: AuthAdapter, index: number, role?:
     image: `https://api.dicebear.com/7.x/avataaars/svg?seed=user${index}`,
     createdAt: new Date(),
     updatedAt: new Date(),
+    password: hashedPassword,
   };
   if (role) {
     userData.role = role;
