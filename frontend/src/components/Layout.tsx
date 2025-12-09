@@ -404,33 +404,37 @@ export default function Layout({ children }: LayoutProps) {
       </div>
       <div className="bg-black/50 border-b border-white/15">
         <div className="px-6">
-          <nav className="flex space-x-8">
-            {navigation.map((item) => {
+          <nav className="flex overflow-y-hidden overflow-x-auto">
+            {navigation.map((item, index) => {
               const isActive = location.pathname === item.href;
               return (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center space-x-2 px-3 py-4 text-sm font-medium border-b-2 transition-all duration-200 ${
-                    isActive
-                      ? 'border-white text-white'
-                      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-300'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4" />
-                  <span className="inline-flex font-mono uppercase font-light text-xs items-start">
-                    {item.name}
-                    {item.badge && (
-                      <sup className="text-xs text-gray-500 ml-1">
-                        <span className="mr-0.5">[</span>
-                        <span className="text-white/80 lowercase font-mono text-xs">
-                          {item.badge}
-                        </span>
-                        <span className="ml-0.5">]</span>
-                      </sup>
-                    )}
-                  </span>
-                </Link>
+                <div key={item.name} className="flex items-center">
+                  <Link
+                    to={item.href}
+                    className={`flex items-center space-x-2 border-x-0 px-8 py-4 text-sm font-medium border-b-2 transition-all duration-200 relative ${
+                      isActive
+                        ? 'border-white text-white'
+                        : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500/50'
+                    }`}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span className="inline-flex font-mono uppercase border-x-0 font-light text-xs items-start">
+                      {item.name}
+                      {item.badge && (
+                        <sup className="text-xs text-gray-500 ml-1">
+                          <span className="mr-0.5">[</span>
+                          <span className="text-white/80 lowercase font-mono text-xs">
+                            {item.badge}
+                          </span>
+                          <span className="ml-0.5">]</span>
+                        </sup>
+                      )}
+                    </span>
+                  </Link>
+                  {index <= navigation.length - 1 && (
+                    <div className="h-[50px] -my-5 w-px bg-transparent border-dashed border-r border-white/20" />
+                  )}
+                </div>
               );
             })}
           </nav>
