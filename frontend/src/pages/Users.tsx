@@ -55,6 +55,13 @@ interface User {
   role?: string;
 }
 
+const formatDateTime = (value?: string) => {
+  if (!value) return '—';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return format(d, 'dd MMM yyyy; HH:mm');
+};
+
 export default function Users() {
   const navigate = useNavigate();
   const { counts, refetchCounts } = useCounts();
@@ -130,7 +137,16 @@ export default function Users() {
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, [actionMenuOpen, checkAdminPlugin, fetchUsers]);
-
+  useEffect(() => {
+   if (showViewModal) {
+    document.body.style.overflow = 'hidden';
+   } else {
+    document.body.style.overflow = '';
+   }
+   return () => {
+    document.body.style.overflow = '';
+   }
+  }, [showViewModal , selectedUser]);
   const handleSeedUsers = async (count: number, role?: string) => {
     setSeedingLogs([]);
     setIsSeeding(true);
@@ -861,9 +877,8 @@ export default function Users() {
                 currentUsers.map((user) => (
                   <tr
                     key={user.id}
-                    className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${
-                      user.banned ? 'border-red-500/30 bg-red-500/5' : 'border-white/5'
-                    }`}
+                    className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${user.banned ? 'border-red-500/30 bg-red-500/5' : 'border-white/5'
+                      }`}
                     onClick={() => navigate(`/users/${user.id}`)}
                   >
                     <td className="py-4 px-4">
@@ -875,9 +890,8 @@ export default function Users() {
                               `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`
                             }
                             alt={user.name}
-                            className={`w-10 h-10 rounded-none border border-dashed ${
-                              user.banned ? 'border-red-400/50 opacity-60' : 'border-white/20'
-                            }`}
+                            className={`w-10 h-10 rounded-none border border-dashed ${user.banned ? 'border-red-400/50 opacity-60' : 'border-white/20'
+                              }`}
                           />
                           {user.banned && (
                             <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5">
@@ -1419,62 +1433,87 @@ export default function Users() {
 
       {/* View User Modal */}
       {showViewModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-black border border-white/15 rounded-none w-full max-w-lg p-6 shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">User Details</h3>
+              <div className="flex flex-col gap-2">
+                <h3 className="text-lg text-white font-light uppercase font-mono">User Details</h3>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setShowViewModal(false)}
-                className="text-gray-400 hover:text-white rounded-none"
+                className="text-gray-400 -mt-2 hover:text-white rounded-none"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
+
+            <div className="flex flex-col items-center justify-center mt-2">
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+              <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+            </div>
+
+            <div className="space-y-6 mt-4">
+              <div className="flex items-center gap-3">
                 <img
                   src={
                     selectedUser.image ||
                     `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.id}`
                   }
                   alt={selectedUser.name}
-                  className="w-16 h-16 rounded-none border border-dashed border-white/20"
+                  className="w-14 h-14 rounded-none border border-dashed border-white/15"
                 />
-                <div>
-                  <div className="text-white font-light">{selectedUser.name}</div>
+                <div className="space-y-1">
+                  <div className="text-white font-medium leading-tight flex items-center gap-2">
+                    <span>{selectedUser.name}</span>
+                    <CopyableId id={selectedUser.id} variant="subscript" nonSliced />
+                  </div>
                   <div className="text-sm text-gray-400">{selectedUser.email}</div>
                 </div>
               </div>
-              <div className="space-y-2">
-                <CopyableId id={selectedUser.id} variant="detail" />
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Email Verified:</span>
-                  <span className="text-white text-sm">
-                    {selectedUser.emailVerified ? 'Yes' : 'No'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Created:</span>
-                  <span className="text-white text-sm">
-                    {new Date(selectedUser.createdAt).toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-400">Updated:</span>
-                  <span className="text-white text-sm">
-                    {new Date(selectedUser.updatedAt).toLocaleString()}
-                  </span>
-                </div>
+
+              <div className="space-y-2 text-sm">
+                {[
+                  { label: 'Email Verified', value: selectedUser.emailVerified ? 'Yes' : 'No' },
+                  { label: 'Role', value: selectedUser.role || '—' },
+                  { label: 'Banned', value: selectedUser.banned ? 'Yes' : 'No' },
+                  { label: 'Ban Reason', value: selectedUser.banReason || '—' },
+                  { label: 'Ban Expires', value: formatDateTime(selectedUser.banExpires) },
+                  { label: 'Created', value: formatDateTime(selectedUser.createdAt) },
+                  { label: 'Updated', value: formatDateTime(selectedUser.updatedAt) },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center justify-between border border-dashed border-white/15 bg-black/90 px-3 py-2 rounded-none"
+                  >
+                    <div className="text-[11px] font-mono font-light uppercase tracking-wide text-gray-400">
+                      {item.label}
+                    </div>
+                    <div className="text-sm text-white text-right break-words max-w-[60%]">
+                      {item.value}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="flex justify-end mt-6">
+
+            <div className="flex justify-end gap-3 mt-8">
               <Button
                 onClick={() => setShowViewModal(false)}
-                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                className="border border-white/20 bg-white/5 text-white hover:bg-white/10 rounded-none"
               >
                 Close
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowViewModal(false);
+                  navigate(`/users/${selectedUser.id}`);
+                }}
+                className="border border-white/20 bg-white text-black hover:bg-white/90 rounded-none"
+              >
+                View Details
               </Button>
             </div>
           </div>
