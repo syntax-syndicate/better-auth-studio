@@ -24,7 +24,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWebSocket } from '../hooks/useWebSocket';
-
 interface AuthConfig {
   appName?: string;
   baseURL?: string;
@@ -49,16 +48,7 @@ interface AuthConfig {
     clientSecret?: string;
     redirectUri?: string;
   }>;
-  user?: {
-    modelName?: string;
-    changeEmail?: {
-      enabled: boolean;
-    };
-    deleteUser?: {
-      enabled?: boolean;
-      deleteTokenExpiresIn?: number;
-    };
-  };
+  user?: BetterAuthOptions['user']
   session?: BetterAuthOptions['session'];
   account?: BetterAuthOptions['account'];
   verification?: BetterAuthOptions['verification'];
@@ -74,7 +64,6 @@ interface SystemInfo {
   studioVersion: string;
   nodeVersion: string;
   platform: string;
-  uptime: string;
 }
 
 interface Plugin {
@@ -111,7 +100,6 @@ export default function Settings() {
   const [loading, setLoading] = useState(true);
   const [studioVersion, setStudioVersion] = useState<string | null>(null);
 
-  // WebSocket hook to listen for config changes
   useWebSocket((message) => {
     if (message.type === 'config_changed') {
       // Add a small delay to ensure the server is fully reloaded
@@ -148,7 +136,6 @@ export default function Settings() {
           studioVersion: studioVersion || 'v1.0.0',
           nodeVersion: process.version,
           platform: navigator.platform,
-          uptime: '2h 15m',
         }
       );
     } catch (_error) {
@@ -156,7 +143,6 @@ export default function Settings() {
         studioVersion: studioVersion || 'v1.0.0',
         nodeVersion: 'v18.0.0',
         platform: 'macOS',
-        uptime: '2h 15m',
       });
     }
   }, [studioVersion]);
@@ -1203,22 +1189,6 @@ export default function Settings() {
               <div className="text-right">
                 <p className="text-sm font-medium text-white">{systemInfo?.platform || 'macOS'}</p>
                 <p className="text-[10px] font-light uppercase font-mono text-gray-400">System</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 px-5 border-b border-white/15 last:border-b-0">
-              <div className="flex items-center space-x-3">
-                <Clock className="w-5 h-5 text-white" />
-                <div>
-                  <p className="text-sm font-light uppercase text-white">Uptime</p>
-                  <p className="text-[10px] font-light uppercase font-mono text-gray-400">
-                    Service uptime
-                  </p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="text-sm font-medium text-white">{systemInfo?.uptime || '2h 15m'}</p>
-                <p className="text-[10px] font-light uppercase font-mono text-gray-400">Running</p>
               </div>
             </div>
           </CardContent>
