@@ -320,7 +320,7 @@ export default function Settings() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono font-medium text-white">
+                <p className="text-sm font-mono font-light text-white">
                   {config?.baseURL || 'http://localhost:3000'}
                 </p>
               </div>
@@ -337,7 +337,7 @@ export default function Settings() {
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono font-medium text-white">
+                <p className="text-sm font-mono font-light text-white">
                   {config?.basePath || '/api/auth'}
                 </p>
               </div>
