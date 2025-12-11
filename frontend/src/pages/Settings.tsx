@@ -23,7 +23,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useWebSocket } from '../hooks/useWebSocket';
-
+import { BetterAuthOptions } from "better-auth"
 interface AuthConfig {
   appName?: string;
   baseURL?: string;
@@ -51,23 +51,9 @@ interface AuthConfig {
       [key: string]: any;
     };
   };
-  secondaryStorage?: any;
-  emailVerification?: {
-    sendOnSignUp?: boolean;
-    sendOnSignIn?: boolean;
-    autoSignInAfterVerification?: boolean;
-    expiresIn?: number;
-  };
-  emailAndPassword?: {
-    enabled: boolean;
-    disableSignUp?: boolean;
-    requireEmailVerification?: boolean;
-    maxPasswordLength?: number;
-    minPasswordLength?: number;
-    resetPasswordTokenExpiresIn?: number;
-    autoSignIn?: boolean;
-    revokeSessionsOnPasswordReset?: boolean;
-  };
+  secondaryStorage?: BetterAuthOptions['secondaryStorage'];
+  emailVerification?: BetterAuthOptions['emailVerification'];
+  emailAndPassword?: BetterAuthOptions['emailAndPassword'] 
   socialProviders?: Array<{
     type: string;
     clientId?: string;
@@ -113,40 +99,12 @@ interface AuthConfig {
     modelName?: string;
     disableCleanup?: boolean;
   };
-  trustedOrigins?: string[];
-  rateLimit?: {
-    enabled?: boolean;
-    window?: number;
-    max?: number;
-    storage?: string;
-    modelName?: string;
-  };
-  advanced?: {
-    ipAddress?: {
-      ipAddressHeaders?: string[];
-      disableIpTracking?: boolean;
-    };
-    useSecureCookies?: boolean;
-    disableCSRFCheck?: boolean;
-    crossSubDomainCookies?: {
-      enabled: boolean;
-      additionalCookies?: string[];
-      domain?: string;
-    };
-    cookies?: Record<string, any>;
-    defaultCookieAttributes?: any;
-    cookiePrefix?: string;
-    database?: {
-      defaultFindManyLimit?: number;
-      useNumberId?: boolean;
-    };
-  };
-  logger?: any;
-  disabledPaths?: string[];
-  telemetry?: {
-    enabled?: boolean;
-    debug?: boolean;
-  };
+  trustedOrigins?: BetterAuthOptions['trustedOrigins'];
+  rateLimit?: BetterAuthOptions['rateLimit'];
+  advanced?:  BetterAuthOptions['advanced']
+  logger?: BetterAuthOptions['logger'];
+  disabledPaths?: BetterAuthOptions['disabledPaths'];
+  telemetry?: BetterAuthOptions['telemetry']
 }
 
 interface SystemInfo {
@@ -488,7 +446,7 @@ export default function Settings() {
                     {databaseInfo?.displayName ||
                       (config?.database?.type &&
                         config?.database?.type.charAt(0).toUpperCase() +
-                          config?.database?.type.slice(1)) ||
+                        config?.database?.type.slice(1)) ||
                       'Unknown'}
                   </p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
