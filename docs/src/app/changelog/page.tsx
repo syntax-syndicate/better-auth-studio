@@ -74,7 +74,7 @@ export default function Changelog() {
                   <li className="flex items-start">
                     <span className="text-white/50 mr-3">•</span>
                     Resend API key verification based on your api key
-                    </li> 
+                  </li>
                 </ul>
               </div>
 
@@ -199,7 +199,7 @@ export default function Changelog() {
               </div>
             </div>
           </PixelCard>
-          
+
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Shadcn UI Integration & Admin Functionality</h3>
