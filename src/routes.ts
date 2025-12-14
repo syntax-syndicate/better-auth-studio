@@ -3685,7 +3685,6 @@ export function createRoutes(
   });
 
   router.get('/api/tools/oauth/providers', async (_req: Request, res: Response) => {
-    const _result = await getAuthAdapterWithConfig();
     try {
       const providers = authConfig.socialProviders || [];
       res.json({
@@ -3705,7 +3704,6 @@ export function createRoutes(
   router.post('/api/tools/oauth/test', async (req: Request, res: Response) => {
     try {
       const { provider } = req.body;
-
       if (!provider) {
         return res.status(400).json({ success: false, error: 'Provider is required' });
       }

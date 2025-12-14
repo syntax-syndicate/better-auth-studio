@@ -33,9 +33,7 @@ describe('Config', () => {
     `;
     
     writeFileSync(join(testDir, 'auth.js'), authConfigContent);
-    
     const config = await findAuthConfig(join(testDir, 'auth.js'));
-    
     expect(config === null || typeof config === 'object').toBe(true);
   });
 

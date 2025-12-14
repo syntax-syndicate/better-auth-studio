@@ -3169,9 +3169,10 @@ export function createRoutes(authConfig, configPath, geoDbPath) {
         }
     });
     router.get('/api/tools/oauth/providers', async (_req, res) => {
-        const _result = await getAuthAdapterWithConfig();
+        const configs = await getAuthAdapterWithConfig();
+        console.log({ config });
         try {
-            const providers = authConfig.socialProviders || [];
+            const providers = configs?.socialProviders || [];
             res.json({
                 success: true,
                 providers: providers.map((provider) => ({

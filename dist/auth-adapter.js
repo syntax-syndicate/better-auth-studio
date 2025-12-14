@@ -1,7 +1,7 @@
 import { randomBytes } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-// @ts-expect-error - No types available for current moduleResolution and bundler mode 
+// @ts-expect-error - No types available for current moduleResolution and bundler mode
 import { hex } from '@better-auth/utils/hex';
 import { scryptAsync } from '@noble/hashes/scrypt.js';
 import { createJiti } from 'jiti';

@@ -41,7 +41,7 @@ export interface AuthConfig {
   };
   emailAndPassword?: BetterAuthOptions['emailAndPassword'];
   socialProviders?: Array<{
-    id: string;
+    id?: string;
     name: string;
     clientId?: string;
     clientSecret?: string;
