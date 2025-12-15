@@ -15,6 +15,9 @@ describe('Routes', () => {
       },
       baseURL: 'http://localhost:3000',
       basePath: '/api/auth',
+      emailAndPassword: {
+        enabled: true,
+      }
     };
 
     app = express();

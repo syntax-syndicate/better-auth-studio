@@ -6,7 +6,6 @@ import { getAuthAdapter } from '../src/auth-adapter';
 
 describe('Config', () => {
   const testDir = join(process.cwd(), '.test-temp');
-  const originalCwd = process.cwd();
 
   beforeEach(() => {
     if (existsSync(testDir)) {

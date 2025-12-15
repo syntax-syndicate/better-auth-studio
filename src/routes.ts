@@ -483,7 +483,6 @@ export function createRoutes(
       baseURL: authConfig.baseURL || process.env.BETTER_AUTH_URL,
       basePath: authConfig.basePath || '/api/auth',
       secret: authConfig.secret ? 'Configured' : 'Not set',
-
       database: {
         type: databaseType,
         adapter: authConfig.database?.adapter || databaseAdapter,
@@ -494,28 +493,8 @@ export function createRoutes(
         adapterConfig: adapterConfig,
         dialect: adapterProvider,
       },
-
-      emailVerification: {
-        sendOnSignUp: authConfig.emailVerification?.sendOnSignUp || false,
-        sendOnSignIn: authConfig.emailVerification?.sendOnSignIn || false,
-        autoSignInAfterVerification:
-          authConfig.emailVerification?.autoSignInAfterVerification || false,
-        expiresIn: authConfig.emailVerification?.expiresIn || 3600,
-      },
-
-      emailAndPassword: {
-        enabled: authConfig.emailAndPassword?.enabled ?? false,
-        disableSignUp: authConfig.emailAndPassword?.disableSignUp ?? false,
-        requireEmailVerification: authConfig.emailAndPassword?.requireEmailVerification ?? false,
-        maxPasswordLength: authConfig.emailAndPassword?.maxPasswordLength ?? 128,
-        minPasswordLength: authConfig.emailAndPassword?.minPasswordLength ?? 8,
-        resetPasswordTokenExpiresIn:
-          authConfig.emailAndPassword?.resetPasswordTokenExpiresIn ?? 3600,
-        autoSignIn: authConfig.emailAndPassword?.autoSignIn ?? true, // defaults to true
-        revokeSessionsOnPasswordReset:
-          authConfig.emailAndPassword?.revokeSessionsOnPasswordReset ?? false,
-      },
-
+      emailVerification:  authConfig.emailVerification,
+      emailAndPassword: authConfig.emailAndPassword,
       socialProviders: authConfig.socialProviders
         ? authConfig.socialProviders.map((provider: any) => ({
             type: provider.id,
@@ -536,78 +515,17 @@ export function createRoutes(
           deleteTokenExpiresIn: authConfig.user?.deleteUser?.deleteTokenExpiresIn || 86400,
         },
       },
-
-      session: {
-        modelName: authConfig.session?.modelName || 'session',
-        expiresIn: authConfig.session?.expiresIn || 604800, // 7 days
-        updateAge: authConfig.session?.updateAge || 86400, // 1 day
-        disableSessionRefresh: authConfig.session?.disableSessionRefresh || false,
-        storeSessionInDatabase: authConfig.session?.storeSessionInDatabase || false,
-        preserveSessionInDatabase: authConfig.session?.preserveSessionInDatabase || false,
-        cookieCache: {
-          enabled: authConfig.session?.cookieCache?.enabled || false,
-          maxAge: authConfig.session?.cookieCache?.maxAge || 300,
-        },
-        freshAge: authConfig.session?.freshAge || 86400,
-      },
-
-      account: {
-        modelName: authConfig.account?.modelName || 'account',
-        updateAccountOnSignIn: authConfig.account?.updateAccountOnSignIn !== false, // defaults to true
-        accountLinking: {
-          enabled: authConfig.account?.accountLinking?.enabled !== false, // defaults to true
-          trustedProviders: authConfig.account?.accountLinking?.trustedProviders || [],
-          allowDifferentEmails: authConfig.account?.accountLinking?.allowDifferentEmails || false,
-          allowUnlinkingAll: authConfig.account?.accountLinking?.allowUnlinkingAll || false,
-          updateUserInfoOnLink: authConfig.account?.accountLinking?.updateUserInfoOnLink || false,
-        },
-        encryptOAuthTokens: authConfig.account?.encryptOAuthTokens || false,
-      },
-
+      session: authConfig.session, 
+      account: authConfig.account, 
       verification: {
         modelName: authConfig.verification?.modelName || 'verification',
         disableCleanup: authConfig.verification?.disableCleanup || false,
       },
-
-      trustedOrigins: Array.isArray(authConfig.trustedOrigins) ? authConfig.trustedOrigins : [],
-
-      rateLimit: {
-        enabled: authConfig.rateLimit?.enabled ?? false,
-        window: authConfig.rateLimit?.window || 10,
-        max: authConfig.rateLimit?.max || 100,
-        storage: authConfig.rateLimit?.storage || 'memory',
-        modelName: authConfig.rateLimit?.modelName || 'rateLimit',
-        customStorage: authConfig.rateLimit?.customStorage || null,
-        customRules: authConfig.rateLimit?.customRules || [],
-      },
-
-      advanced: {
-        ipAddress: {
-          ipAddressHeaders: authConfig.advanced?.ipAddress?.ipAddressHeaders || [],
-          disableIpTracking: authConfig.advanced?.ipAddress?.disableIpTracking || false,
-        },
-        useSecureCookies: authConfig.advanced?.useSecureCookies || false,
-        disableCSRFCheck: authConfig.advanced?.disableCSRFCheck || false,
-        crossSubDomainCookies: {
-          enabled: authConfig.advanced?.crossSubDomainCookies?.enabled || false,
-          additionalCookies: authConfig.advanced?.crossSubDomainCookies?.additionalCookies || [],
-          domain: authConfig.advanced?.crossSubDomainCookies?.domain,
-        },
-        cookies: authConfig.advanced?.cookies || {},
-        defaultCookieAttributes: authConfig.advanced?.defaultCookieAttributes || {},
-        cookiePrefix: authConfig.advanced?.cookiePrefix,
-        database: {
-          defaultFindManyLimit: authConfig.advanced?.database?.defaultFindManyLimit || 100,
-          useNumberId: authConfig.advanced?.database?.useNumberId || false,
-        },
-      },
-
+      trustedOrigins: authConfig.trustedOrigins,
+      rateLimit: authConfig.rateLimit, 
+      advanced: authConfig.advanced,
       disabledPaths: authConfig.disabledPaths || [],
-
-      telemetry: {
-        enabled: authConfig.telemetry?.enabled ?? false,
-        debug: authConfig.telemetry?.debug || false,
-      },
+      telemetry: authConfig.telemetry,
       studio: {
         version: getStudioVersion(),
         nodeVersion: process.version,
