@@ -116,14 +116,14 @@ function Scene() {
         <Bloom
           kernelSize={3}
           luminanceThreshold={0}
-          luminanceSmoothing={0.4}
-          intensity={0.8}
+          luminanceSmoothing={0.3}
+          intensity={0.2}
         />
         <Bloom
           kernelSize={KernelSize.HUGE}
           luminanceThreshold={0}
           luminanceSmoothing={0}
-          intensity={0.7}
+          intensity={0.2}
         />
         <SMAA />
       </EffectComposer>
