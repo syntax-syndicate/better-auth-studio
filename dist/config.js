@@ -164,7 +164,6 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, n
                         configFile: possiblePath,
                         jitiOptions: jitiOptions(cwd, noCache),
                     });
-                    console.log({ config });
                     const hasConfig = Object.keys(config).length > 0;
                     if (hasConfig) {
                         configFile = config.auth?.options || config.default?.options || null;
@@ -199,7 +198,6 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, n
                 }
             }
         }
-        console.log({ configFile });
         return configFile;
     }
     catch (e) {
