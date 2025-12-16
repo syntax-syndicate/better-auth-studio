@@ -19,7 +19,6 @@ export const Plus: React.FC<IconProps> = ({ className = '', size = 24 }) => (
     <path d="M11 4h2v7h7v2h-7v7h-2v-7H4v-2h7V4z" fill="currentColor" />
   </svg>
 );
-
 export const Monitor: React.FC<IconProps> = ({ className = '', size = 24 }) => (
   <svg
     fill="none"
