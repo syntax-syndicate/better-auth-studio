@@ -12,7 +12,7 @@ const ChevronUpRight = () => (
     fill="none" 
     xmlns="http://www.w3.org/2000/svg" 
     viewBox="0 0 24 24"
-    className="w-4 h-4 mb-[2px] inline-flex ml-[2px] rotate-45"
+    className="w-4 h-4 mb-[1px] inline-flex rotate-[42deg]"
   >
     <path 
       d="M11 20h2V8h2V6h-2V4h-2v2H9v2h2v12zM7 10V8h2v2H7zm0 0v2H5v-2h2zm10 0V8h-2v2h2zm0 0v2h2v-2h-2z" 
@@ -45,7 +45,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
               }`}
             >
               {item.name}
-              <span className={`${hoveredItem === item.name ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-2'}`}>
+              <span className={`${hoveredItem === item.name ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-1'}`}>
                 <ChevronUpRight />
               </span>
             </Link>
