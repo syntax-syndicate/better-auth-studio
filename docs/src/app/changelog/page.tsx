@@ -48,62 +48,6 @@ export default function Changelog() {
 
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-light tracking-tight text-white">Email Editor & Database Visualization Enhancements</h3>
-              <span className="text-sm font-light tracking-tight text-white/50">2025-02-12</span>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-light tracking-tight mb-2 text-white">📧 Advanced Email Editor</h4>
-                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Visual drag-and-drop email builder with real-time preview and customization
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Template testing functionality with dynamic placeholder replacement and Resend integration
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Code export with syntax highlighting and one-click auth config application
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Field simulator for testing email templates with custom values before deployment along with Resend in
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Resend API key verification based on your api key
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-light tracking-tight mb-2 text-white">🗄️ Advanced Database Visualization</h4>
-                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Interactive schema visualizer with table highlighting and relationship mapping
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Focus mode for isolating table connections and exploring database relationships
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Dynamic schema loading from Better Auth context with plugin-aware table detection
-                  </li>
-                  <li className="flex items-start">
-                    <span className="text-white/50 mr-3">•</span>
-                    Collapsible field lists with preserved node positioning for optimal workflow
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </PixelCard>
-
-          <PixelCard className="mb-6">
-            <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Email Editor Enhancements & Password Strength Tool</h3>
               <span className="text-sm font-light tracking-tight text-white/50">2025-01-31</span>
             </div>
@@ -199,7 +143,7 @@ export default function Changelog() {
               </div>
             </div>
           </PixelCard>
-
+          
           <PixelCard className="mb-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-light tracking-tight text-white">Shadcn UI Integration & Admin Functionality</h3>
