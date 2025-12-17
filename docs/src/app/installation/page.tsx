@@ -730,7 +730,6 @@ export const auth = betterAuth({
         </section>
 
         <section>
-          <h2 className="text-2xl font-light tracking-tight mb-6 text-white">DEVELOPMENT</h2>
           <PixelCard className="mb-6 relative">
             <div className="absolute -top-10 left-0">
               <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
@@ -827,7 +826,6 @@ export const auth = betterAuth({
           </PixelCard>
         </section>
         <section>
-          <h2 className="text-2xl font-light tracking-tight mb-6 text-white">SUPPORT</h2>
           <PixelCard className="relative">
             <div className="absolute -top-10 left-0">
               <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">

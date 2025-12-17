@@ -14,7 +14,7 @@ A sneak peek of the studio dashboard and management interface.
   <table>
     <tr>
       <td width="50%">
-        <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJoDfkJ9wMTlHmhCfKGn1VSWOkq0g8sLJirp6A" alt="Better Auth Studio Preview 0" width="100%" />
+        <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJI57TKc4BY9GjOlTtSmoRXCZJ2D50IWsLq6vd" alt="Better Auth Studio Preview 0" width="100%" />
       </td>
       <td width="50%">
         <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJ4L7IilBo7ItO3420CBLpvnPJlA6j5zaFYZbG" alt="Better Auth Studio Preview 4" width="100%" />
