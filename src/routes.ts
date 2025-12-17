@@ -1352,10 +1352,13 @@ export function createRoutes(
       }
       if (script) {
         // TODO: use more of sandbox environment to execute the script for security reasons
+        try {
         const result = eval(script);
+        } catch (error) {
+          return res.status(500).json({ success: false, error: 'Failed to execute migration script' });
+        }
         return res.json({
           success: true,
-          result: result,
         });
       } else {
         return res.status(400).json({ success: false, error: 'No script provided' });
