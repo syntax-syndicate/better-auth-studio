@@ -103,10 +103,57 @@ export function getPathAliases(cwd) {
     }
 }
 /**
+ * Resolve aliased imports from config file content
+ */
+function resolveAliasedImports(configFilePath, cwd) {
+    const aliases = {};
+    if (!existsSync(configFilePath)) {
+        return aliases;
+    }
+    const content = fs.readFileSync(configFilePath, 'utf-8');
+    const configDir = path.dirname(path.resolve(configFilePath));
+    const tsconfigAliases = getPathAliases(configDir) || {};
+    // Match imports like: import ... from '@/lib/email' or import ... from "@/prisma"
+    const aliasImportRegex = /import\s+.*?\s+from\s+['"](@[^'"]+)['"]/g;
+    let match;
+    while ((match = aliasImportRegex.exec(content)) !== null) {
+        const aliasPath = match[1];
+        const aliasBase = aliasPath.split('/')[0];
+        if (tsconfigAliases[aliasBase + '/']) {
+            const remainingPath = aliasPath.replace(aliasBase + '/', '');
+            const resolvedPath = path.join(tsconfigAliases[aliasBase + '/'], remainingPath);
+            const possiblePaths = [
+                `${resolvedPath}.ts`,
+                `${resolvedPath}.js`,
+                `${resolvedPath}.mjs`,
+                `${resolvedPath}.cjs`,
+                path.join(resolvedPath, 'index.ts'),
+                path.join(resolvedPath, 'index.js'),
+                path.join(resolvedPath, 'index.mjs'),
+                path.join(resolvedPath, 'index.cjs'),
+            ];
+            for (const filePath of possiblePaths) {
+                if (existsSync(filePath)) {
+                    aliases[aliasPath] = filePath;
+                    break;
+                }
+            }
+        }
+    }
+    return aliases;
+}
+/**
  * .tsx files are not supported by Jiti.
  */
-const jitiOptions = (cwd, noCache = false) => {
-    const alias = getPathAliases(cwd) || {};
+const jitiOptions = (cwd, configFilePath, noCache = false) => {
+    let alias = {};
+    if (configFilePath) {
+        // Resolve specific aliased imports from the config file
+        alias = resolveAliasedImports(configFilePath, cwd);
+    }
+    // Fallback to general tsconfig aliases
+    const generalAliases = getPathAliases(cwd) || {};
+    alias = { ...generalAliases, ...alias };
     return {
         debug: false,
         fsCache: noCache ? false : undefined,
@@ -143,10 +190,12 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, n
             let resolvedPath = path.join(cwd, configPath);
             if (existsSync(configPath))
                 resolvedPath = configPath;
+            // Use config file's directory for resolving path aliases
+            const configDir = path.dirname(path.resolve(resolvedPath));
             const { config } = await loadConfig({
                 configFile: resolvedPath,
                 dotenv: true,
-                jitiOptions: jitiOptions(cwd, noCache),
+                jitiOptions: jitiOptions(configDir, resolvedPath, noCache),
             });
             if (!('auth' in config) && !isDefaultExport(config)) {
                 if (shouldThrowOnError) {
@@ -160,9 +209,10 @@ export async function getConfig({ cwd, configPath, shouldThrowOnError = false, n
         if (!configFile) {
             for (const possiblePath of possiblePaths) {
                 try {
+                    const fullPath = path.join(cwd, possiblePath);
                     const { config } = await loadConfig({
                         configFile: possiblePath,
-                        jitiOptions: jitiOptions(cwd, noCache),
+                        jitiOptions: jitiOptions(cwd, fullPath, noCache),
                     });
                     const hasConfig = Object.keys(config).length > 0;
                     if (hasConfig) {
