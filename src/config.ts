@@ -166,12 +166,9 @@ export function getPathAliases(cwd: string): Record<string, string> | null {
 /**
  * Resolve aliased imports from config file content
  */
-function resolveAliasedImports(
-  configFilePath: string,
-  cwd: string
-): Record<string, string> {
+function resolveAliasedImports(configFilePath: string, cwd: string): Record<string, string> {
   const aliases: Record<string, string> = {};
-  
+
   if (!existsSync(configFilePath)) {
     return aliases;
   }
@@ -186,11 +183,11 @@ function resolveAliasedImports(
   while ((match = aliasImportRegex.exec(content)) !== null) {
     const aliasPath = match[1];
     const aliasBase = aliasPath.split('/')[0];
-    
+
     if (tsconfigAliases[aliasBase + '/']) {
       const remainingPath = aliasPath.replace(aliasBase + '/', '');
       const resolvedPath = path.join(tsconfigAliases[aliasBase + '/'], remainingPath);
-      
+
       const possiblePaths = [
         `${resolvedPath}.ts`,
         `${resolvedPath}.js`,
@@ -219,11 +216,11 @@ function resolveAliasedImports(
  */
 const jitiOptions = (cwd: string, configFilePath?: string, noCache = false): JO => {
   let alias: Record<string, string> = {};
-  
+
   if (configFilePath) {
     alias = resolveAliasedImports(configFilePath, cwd);
   }
-  
+
   const generalAliases = getPathAliases(cwd) || {};
   alias = { ...generalAliases, ...alias };
 
@@ -276,10 +273,10 @@ export async function getConfig({
     if (configPath) {
       let resolvedPath: string = path.join(cwd, configPath);
       if (existsSync(configPath)) resolvedPath = configPath;
-      
+
       // Use config file's directory for resolving path aliases
       const configDir = path.dirname(path.resolve(resolvedPath));
-      
+
       const { config } = await loadConfig<
         | {
             auth: {
@@ -311,7 +308,7 @@ export async function getConfig({
       for (const possiblePath of possiblePaths) {
         try {
           const fullPath = path.join(cwd, possiblePath);
-          
+
           const { config } = await loadConfig<{
             auth: {
               options: BetterAuthOptions;
