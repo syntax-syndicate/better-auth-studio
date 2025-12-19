@@ -48,7 +48,7 @@ describe('Config', () => {
     expect(config).toBeNull();
   });
 
-  it.only('should find config in src directory', async () => {
+  it('should find config in src directory', async () => {
     mkdirSync(join(testDir, 'src'), { recursive: true });
 
     const authConfigContent = `
