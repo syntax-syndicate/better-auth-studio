@@ -60,13 +60,6 @@ A sneak peek of the studio dashboard and management interface.
         <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJwnJFq9htT259fPAQY0eIdDmn7O4xVlGaCjZR" alt="Better Auth Studio Preview 5" width="100%" />
       </td>
     </tr>
-    <tr>
-      <td width="50%">
-        <img src="https://gk6bju9ndq.ufs.sh/f/M5pOhOFFvHQJkz1easgu2KZih3mCdzIoB1GSvQxAOH8E7fVp" alt="Better Auth Studio Preview 16" width="100%" />
-      </td>
-      <td width="50%">
-      </td>
-    </tr>
   </table>
 </div>
 
