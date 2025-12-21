@@ -427,7 +427,7 @@ export const Hero: React.FC<HeroProps> = ({ title, description, links, version }
               <button
                 onClick={() => {
                   setCopied(true)
-                  navigator.clipboard.writeText('pnpx better-auth-studio@latest')
+                  navigator.clipboard.writeText('pnpx better-auth-studio@latest start')
                   setTimeout(() => {
                     setCopied(false)
                   }, 3000)
