@@ -149,7 +149,7 @@ export default function Layout({ children }: LayoutProps) {
         if (data.studio?.version) {
           setStudioVersion(`v${data.studio.version}`);
         }
-      } catch (_error) { }
+      } catch (_error) {}
     };
 
     const fetchSchemaCount = async () => {
@@ -338,9 +338,7 @@ export default function Layout({ children }: LayoutProps) {
                     </span>
                     <span className="inline-flex items-center">
                       <span className="mr-1">[</span>
-                      <span className="text-white/80 font-mono text-xs">
-                        PUBLIC BETA
-                      </span>
+                      <span className="text-white/80 font-mono text-xs">PUBLIC BETA</span>
                       <span className="ml-1">]</span>
                     </span>
                     <span
@@ -421,10 +419,11 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                   <Link
                     to={item.href}
-                    className={`flex items-center space-x-2 border-x-0 px-8 py-4 text-sm font-medium border-b-2 transition-all duration-200 relative ${isActive
-                      ? 'border-white text-white'
-                      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500/50'
-                      }`}
+                    className={`flex items-center space-x-2 border-x-0 px-8 py-4 text-sm font-medium border-b-2 transition-all duration-200 relative ${
+                      isActive
+                        ? 'border-white text-white'
+                        : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500/50'
+                    }`}
                   >
                     <item.icon className="w-4 h-4" />
                     <span className="inline-flex font-mono uppercase border-x-0 font-light text-xs items-start">
