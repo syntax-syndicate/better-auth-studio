@@ -1,37 +1,35 @@
-import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 export async function initCommand() {
-    console.log('🚀 Initializing Better Auth Studio...\n');
+  console.log('🚀 Initializing Better Auth Studio...\n');
 
-    const framework = detectFramework();
-    console.log('🔍 Detected framework:', framework);
+  const framework = detectFramework();
+  console.log('🔍 Detected framework:', framework);
 
-    const configPath = await createStudioConfig(framework);
-    console.log('✅ Created config:', configPath);
+  const configPath = await createStudioConfig(framework);
+  console.log('✅ Created config:', configPath);
 
-    const basePath = '/api/studio';
+  const basePath = '/api/studio';
 
-    if (framework === 'nextjs') {
-        await setupNextJS(basePath);
-    } else {
-        showManualInstructions(framework, basePath);
-    }
+  if (framework === 'nextjs') {
+    await setupNextJS(basePath);
+  } else {
+    showManualInstructions(framework, basePath);
+  }
 }
 
 async function createStudioConfig(framework: string): Promise<string> {
-    const configPath = 'studio.config.ts';
-    
-    if (existsSync(configPath)) {
-        console.log('⚠️  studio.config.ts already exists, skipping...');
-        return configPath;
-    }
+  const configPath = 'studio.config.ts';
 
-    const authImportPath = framework === 'nextjs' 
-        ? '@/lib/auth'
-        : './src/auth';
+  if (existsSync(configPath)) {
+    console.log('⚠️  studio.config.ts already exists, skipping...');
+    return configPath;
+  }
 
-    const configContent = `import type { StudioConfig } from 'better-auth-studio';
+  const authImportPath = framework === 'nextjs' ? '@/lib/auth' : './src/auth';
+
+  const configContent = `import type { StudioConfig } from 'better-auth-studio';
 import { auth } from '${authImportPath}';
 
 const config: StudioConfig = {
@@ -46,25 +44,25 @@ const config: StudioConfig = {
 export default config;
 `;
 
-    writeFileSync(configPath, configContent, 'utf-8');
-    return configPath;
+  writeFileSync(configPath, configContent, 'utf-8');
+  return configPath;
 }
 
 async function setupNextJS(basePath: string) {
-    const segments = basePath.split('/').filter(Boolean);
-    const routeDir = join(process.cwd(), 'app', ...segments, '[[...path]]');
-    const routeFile = join(routeDir, 'route.ts');
+  const segments = basePath.split('/').filter(Boolean);
+  const routeDir = join(process.cwd(), 'app', ...segments, '[[...path]]');
+  const routeFile = join(routeDir, 'route.ts');
 
-    if (existsSync(routeFile)) {
-        console.log('⚠️  Route file already exists:', routeFile);
-    } else {
-        mkdirSync(routeDir, { recursive: true });
-        const code = generateNextJSRoute();
-        writeFileSync(routeFile, code, 'utf-8');
-        console.log('✅ Generated route file:', routeFile);
-    }
+  if (existsSync(routeFile)) {
+    console.log('⚠️  Route file already exists:', routeFile);
+  } else {
+    mkdirSync(routeDir, { recursive: true });
+    const code = generateNextJSRoute();
+    writeFileSync(routeFile, code, 'utf-8');
+    console.log('✅ Generated route file:', routeFile);
+  }
 
-    console.log(`
+  console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                    ✅ Next.js Setup Complete!                  ║
 ╠═══════════════════════════════════════════════════════════════╣
@@ -84,7 +82,7 @@ async function setupNextJS(basePath: string) {
 }
 
 function generateNextJSRoute(): string {
-    return `import { createStudioHandler } from 'better-auth-studio/nextjs';
+  return `import { createStudioHandler } from 'better-auth-studio/nextjs';
 import studioConfig from '@/studio.config';
 
 const handler = createStudioHandler(studioConfig);
@@ -100,9 +98,9 @@ export {
 }
 
 function showManualInstructions(framework: string, basePath: string) {
-    const frameworkName = framework === 'express' ? 'Express' : 'your app';
-    
-    console.log(`
+  const frameworkName = framework === 'express' ? 'Express' : 'your app';
+
+  console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║              📝 Manual Setup Required for ${frameworkName.padEnd(10)}       ║
 ╠═══════════════════════════════════════════════════════════════╣
@@ -128,29 +126,33 @@ app.use('${basePath}', betterAuthStudio(studioConfig));
 }
 
 function detectFramework(): string {
-    if (existsSync('next.config.js') || existsSync('next.config.mjs') || existsSync('next.config.ts')) {
+  if (
+    existsSync('next.config.js') ||
+    existsSync('next.config.mjs') ||
+    existsSync('next.config.ts')
+  ) {
+    return 'nextjs';
+  }
+
+  if (existsSync('src/index.ts') || existsSync('src/app.ts') || existsSync('src/server.ts')) {
+    return 'express';
+  }
+  if (existsSync('app.js') || existsSync('server.js') || existsSync('index.js')) {
+    return 'express';
+  }
+
+  try {
+    const pkgPath = join(process.cwd(), 'package.json');
+    if (existsSync(pkgPath)) {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+      if (pkg.dependencies?.express || pkg.devDependencies?.express) {
+        return 'express';
+      }
+      if (pkg.dependencies?.next || pkg.devDependencies?.next) {
         return 'nextjs';
+      }
     }
-    
-    if (existsSync('src/index.ts') || existsSync('src/app.ts') || existsSync('src/server.ts')) {
-        return 'express';
-    }
-    if (existsSync('app.js') || existsSync('server.js') || existsSync('index.js')) {
-        return 'express';
-    }
-    
-    try {
-        const pkgPath = join(process.cwd(), 'package.json');
-        if (existsSync(pkgPath)) {
-            const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-            if (pkg.dependencies?.express || pkg.devDependencies?.express) {
-                return 'express';
-            }
-            if (pkg.dependencies?.next || pkg.devDependencies?.next) {
-                return 'nextjs';
-            }
-        }
-    } catch {}
-    
-    return 'unknown';
+  } catch {}
+
+  return 'unknown';
 }

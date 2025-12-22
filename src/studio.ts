@@ -97,12 +97,15 @@ export async function startStudio(options: StudioOptions) {
     ? join(__dirname, '../public')
     : join(__dirname, '../../public');
 
-  app.use('/assets', express.static(join(publicDir, 'assets'), {
-    setHeaders: (res) => {
-      res.setHeader('Cache-Control', 'public, max-age=31536000');
-    }
-  }));
-  
+  app.use(
+    '/assets',
+    express.static(join(publicDir, 'assets'), {
+      setHeaders: (res) => {
+        res.setHeader('Cache-Control', 'public, max-age=31536000');
+      },
+    })
+  );
+
   app.get('/vite.svg', (_req, res) => {
     res.sendFile(join(publicDir, 'vite.svg'));
   });
@@ -113,9 +116,9 @@ export async function startStudio(options: StudioOptions) {
       metadata: {
         title: 'Better Auth Studio',
         theme: 'dark',
-      }
+      },
     });
-    
+
     res.setHeader('Content-Type', 'text/html');
     res.send(html);
   });

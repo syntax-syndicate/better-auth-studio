@@ -30,14 +30,13 @@ export function createStudioHandler(config: StudioConfig) {
 }
 
 async function nextToUniversal(req: NextRequest): Promise<UniversalRequest> {
-  let body: any = undefined;
+  let body: any;
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     const contentType = req.headers.get('content-type') || '';
     if (contentType.includes('application/json')) {
       try {
         body = await req.json();
-      } catch {
-      }
+      } catch {}
     }
   }
 
@@ -60,4 +59,3 @@ function universalToNext(res: UniversalResponse): Response {
     headers: res.headers,
   });
 }
-

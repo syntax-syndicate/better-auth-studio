@@ -20,7 +20,7 @@ export type ApiResponse = {
  */
 export async function routeApiRequest(ctx: ApiContext): Promise<ApiResponse> {
   const { handleStudioApiRequest } = await import('../routes.js');
-  
+
   try {
     return await handleStudioApiRequest(ctx);
   } catch (error) {
@@ -31,4 +31,3 @@ export async function routeApiRequest(ctx: ApiContext): Promise<ApiResponse> {
     };
   }
 }
-

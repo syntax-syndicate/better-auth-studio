@@ -1,4 +1,4 @@
-import type { Request, Response, NextFunction, Router as ExpressRouter } from 'express';
+import type { Router as ExpressRouter, NextFunction, Request, Response } from 'express';
 import { Router } from 'express';
 import { handleStudioRequest } from '../core/handler.js';
 import type { StudioConfig, UniversalRequest, UniversalResponse } from '../types/handler.js';
@@ -46,4 +46,3 @@ function sendExpressResponse(res: Response, universal: UniversalResponse): void 
     res.send(universal.body);
   }
 }
-

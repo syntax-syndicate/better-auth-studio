@@ -12,17 +12,17 @@ export function getBasePath(): string {
  */
 export function buildApiUrl(path: string): string {
   const basePath = getBasePath();
-  
+
   // If path already starts with basePath, return as-is
   if (path.startsWith(basePath)) {
     return path;
   }
-  
+
   // If path starts with /api/, prepend basePath
   if (path.startsWith('/api/')) {
     return `${basePath}${path}`;
   }
-  
+
   // Otherwise, assume it's a relative path and prepend basePath/api
   return `${basePath}/api${path.startsWith('/') ? '' : '/'}${path}`;
 }
@@ -34,4 +34,3 @@ export async function apiFetch(path: string, init?: RequestInit): Promise<Respon
   const url = buildApiUrl(path);
   return fetch(url, init);
 }
-

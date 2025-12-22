@@ -289,7 +289,7 @@ export function createRoutes(
   preloadedAuthOptions?: any // Optional auth options for self-hosted (avoids reloading config)
 ): Router {
   const isSelfHosted = !!preloadedAdapter;
-  
+
   const getAuthConfigSafe = async (): Promise<any | null> => {
     if (isSelfHosted && preloadedAuthOptions) {
       return preloadedAuthOptions;
@@ -390,18 +390,22 @@ export function createRoutes(
         getUsers: async () => {
           try {
             if (typeof preloadedAdapter.findMany === 'function') {
-              return await preloadedAdapter.findMany({ model: 'user' }) || [];
+              return (await preloadedAdapter.findMany({ model: 'user' })) || [];
             }
             return [];
-          } catch { return []; }
+          } catch {
+            return [];
+          }
         },
         getSessions: async () => {
           try {
             if (typeof preloadedAdapter.findMany === 'function') {
-              return await preloadedAdapter.findMany({ model: 'session' }) || [];
+              return (await preloadedAdapter.findMany({ model: 'session' })) || [];
             }
             return [];
-          } catch { return []; }
+          } catch {
+            return [];
+          }
         },
       };
     }
@@ -526,7 +530,7 @@ export function createRoutes(
 
   router.get('/api/config', async (_req: Request, res: Response) => {
     const effectiveConfig = preloadedAuthOptions || authConfig;
-    
+
     let databaseType = 'unknown';
     let databaseDialect = 'unknown';
     let databaseAdapter = 'unknown';
@@ -574,7 +578,7 @@ export function createRoutes(
         databaseType = type;
       }
     }
-    
+
     const config = {
       appName: effectiveConfig.appName || 'Better Auth',
       baseURL: effectiveConfig.baseURL || process.env.BETTER_AUTH_URL,
@@ -678,7 +682,7 @@ export function createRoutes(
 
       try {
         let betterAuthConfig = preloadedAuthOptions;
-        
+
         if (!betterAuthConfig && !isSelfHosted) {
           const authConfigPath = configPath || (await findAuthConfigPath());
           if (authConfigPath) {
@@ -5770,7 +5774,6 @@ export const authClient = createAuthClient({
   return router;
 }
 
-
 export async function handleStudioApiRequest(ctx: {
   path: string;
   method: string;
@@ -5787,28 +5790,27 @@ export async function handleStudioApiRequest(ctx: {
       if (context?.adapter) {
         preloadedAdapter = context.adapter;
       }
-    } catch {
-    }
+    } catch {}
   }
-  
+
   const authOptions = ctx.auth?.options || null;
   const router = createRoutes(
-    ctx.auth as any, 
-    ctx.configPath || '', 
+    ctx.auth as any,
+    ctx.configPath || '',
     undefined,
     preloadedAdapter,
     authOptions
   );
-  
+
   const [pathname, queryString] = ctx.path.split('?');
   const query: Record<string, string> = {};
   if (queryString) {
-    queryString.split('&').forEach(param => {
+    queryString.split('&').forEach((param) => {
       const [key, value] = param.split('=');
       if (key) query[key] = decodeURIComponent(value || '');
     });
   }
-  
+
   try {
     const route = findMatchingRoute(router, pathname, ctx.method);
     if (!route) {
@@ -5852,14 +5854,18 @@ export async function handleStudioApiRequest(ctx: {
   }
 }
 
-function findMatchingRoute(router: any, path: string, method: string): { handler: Function; params: Record<string, string> } | null {
+function findMatchingRoute(
+  router: any,
+  path: string,
+  method: string
+): { handler: Function; params: Record<string, string> } | null {
   const routes = router.stack || [];
-  
+
   for (const layer of routes) {
     if (layer.route) {
       const routePath = layer.route.path;
       const routeMethods = Object.keys(layer.route.methods);
-      
+
       if (routeMethods.includes(method.toLowerCase())) {
         const params = extractParams(routePath, path);
         if (params !== null) {
@@ -5871,14 +5877,13 @@ function findMatchingRoute(router: any, path: string, method: string): { handler
       }
     }
   }
-  
+
   return null;
 }
 
-
 function extractParams(routePath: string, requestPath: string): Record<string, string> | null {
   if (routePath === requestPath) return {};
-  
+
   const paramNames: string[] = [];
   const routeRegex = routePath
     .replace(/:([^/]+)/g, (_, paramName) => {
@@ -5886,17 +5891,16 @@ function extractParams(routePath: string, requestPath: string): Record<string, s
       return '([^/]+)';
     })
     .replace(/\*/g, '.*');
-  
+
   const regex = new RegExp(`^${routeRegex}$`);
   const match = requestPath.match(regex);
-  
+
   if (!match) return null;
-  
+
   const params: Record<string, string> = {};
   paramNames.forEach((name, index) => {
     params[name] = match[index + 1];
   });
-  
+
   return params;
 }
-

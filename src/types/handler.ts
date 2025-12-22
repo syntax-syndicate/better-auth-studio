@@ -53,4 +53,3 @@ export type WindowStudioConfig = {
 export function defineStudioConfig(config: StudioConfig): StudioConfig {
   return config;
 }
-

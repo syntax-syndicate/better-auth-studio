@@ -26,10 +26,7 @@ export interface WindowStudioConfig {
   metadata: Required<StudioMetadata>;
 }
 
-export function serveIndexHtml(
-  publicDir: string,
-  config: Partial<StudioConfig> = {}
-): string {
+export function serveIndexHtml(publicDir: string, config: Partial<StudioConfig> = {}): string {
   const indexPath = join(publicDir, 'index.html');
   let html = readFileSync(indexPath, 'utf-8');
 
@@ -83,7 +80,7 @@ function injectConfig(html: string, config: WindowStudioConfig): string {
   `;
 
   let modifiedHtml = html;
-  
+
   if (config.basePath) {
     const basePath = config.basePath;
     modifiedHtml = modifiedHtml
@@ -95,4 +92,3 @@ function injectConfig(html: string, config: WindowStudioConfig): string {
   // Inject the script before </head>
   return modifiedHtml.replace('</head>', `${script}</head>`);
 }
-
