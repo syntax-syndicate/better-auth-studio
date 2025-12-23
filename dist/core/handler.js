@@ -10,32 +10,47 @@ const __dirname = dirname(__filename);
  * Route mapping:
  * - CLI studio: basePath = ''
  *   - /api/users → API route /api/users
- *   - /dashboard → SPA route
+ *   - /users → SPA route (serves index.html)
  * - Self-hosted: basePath = '/api/studio'
- *   - /api/studio/users → API route /api/users (adds /api prefix internally)
- *   - /api/studio/dashboard → SPA route
+ *   - /api/studio/users (JSON request) → API route /api/users
+ *   - /api/studio/users (HTML request) → SPA route (serves index.html)
  */
 export async function handleStudioRequest(request, config) {
     try {
         const basePath = config.basePath || '/api/studio';
-        // 1. Check access control
-        //   const hasAccess = await checkAccess(request, config);
-        //   if (!hasAccess) {
-        //     return jsonResponse(403, { error: 'Forbidden' });
-        //   }
+        const isSelfHosted = !!config.basePath;
         let path = request.url.replace(basePath, '') || '/';
         if (path === '' || path === '/') {
             path = '/';
         }
+        // Static assets: serve directly
         if (path.startsWith('/assets/') || path === '/vite.svg') {
             return handleStaticFile(path, config);
         }
+        // Root path: serve index.html
         if (path === '/') {
             return handleStaticFile(path, config);
         }
+        // CLI studio: paths already have /api/ prefix
         if (path.startsWith('/api/')) {
             return await handleApiRoute(request, path, config);
         }
+        // Self-hosted mode: determine if this is an API route or SPA navigation
+        if (isSelfHosted) {
+            // Check Accept header to distinguish API calls from browser navigation
+            const acceptHeader = request.headers['accept'] || request.headers['Accept'] || '';
+            const wantsJson = acceptHeader.includes('application/json') ||
+                acceptHeader === '*/*' ||
+                !acceptHeader.includes('text/html');
+            // If client wants JSON or this looks like an API call, route to API
+            // /users → /api/users, /config → /api/config
+            if (wantsJson) {
+                return await handleApiRoute(request, '/api' + path, config);
+            }
+            // Otherwise, it's a browser navigation - serve SPA
+            return handleStaticFile(path, config);
+        }
+        // Fallback: serve index.html for SPA routing
         return handleStaticFile(path, config);
     }
     catch (error) {

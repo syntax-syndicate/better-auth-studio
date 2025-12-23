@@ -5,7 +5,7 @@ const config: StudioConfig = {
   auth,
   basePath: '/api/studio',
   metadata: {
-    title: 'Admin Dashboard',
+    title: 'Better Auth Studio',
     theme: 'dark',
   },
 };
