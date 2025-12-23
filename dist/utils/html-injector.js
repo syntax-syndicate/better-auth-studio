@@ -50,7 +50,10 @@ function injectConfig(html, config) {
         modifiedHtml = modifiedHtml
             .replace(/href="\/assets\//g, `href="${basePath}/assets/`)
             .replace(/src="\/assets\//g, `src="${basePath}/assets/`)
-            .replace(/href="\/vite\.svg"/g, `href="${basePath}/vite.svg"`);
+            .replace(/href="\/vite\.svg"/g, `href="${basePath}/vite.svg"`)
+            .replace(/href="\/favicon\.svg"/g, `href="${basePath}/favicon.svg"`)
+            .replace(/href="\/logo\.png"/g, `href="${basePath}/logo.png"`)
+            .replace(/src="\/logo\.png"/g, `src="${basePath}/logo.png"`);
     }
     // Inject the script before </head>
     return modifiedHtml.replace('</head>', `${script}</head>`);

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AlertCircle, Loader2 } from 'lucide-react';
+import { assetPath } from '@/lib/utils';
 
 export default function LoginPage() {
     const navigate = useNavigate();
@@ -67,11 +68,7 @@ export default function LoginPage() {
                 <div className="border border-dashed border-white/20 bg-black p-6">
                     <div className="mb-6">
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="w-6 h-6 border border-dashed border-white/30 flex items-center justify-center">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" className="text-white">
-                                    <path d="M6 10V8h2v2H6zm10 0h2V8h-2v2zm-6 6h4v-2h2v-2h2v-2H6v2h2v2h2v2z" fill="currentColor" />
-                                </svg>
-                            </div>
+                            <img src={assetPath('/logo.png')} alt="Logo" className="w-10 h-10 object-contain" />
                             <span className="text-white text-xs font-mono uppercase tracking-wider">better auth studio</span>
                         </div>
                         <div className="flex flex-col items-center justify-center mt-2">

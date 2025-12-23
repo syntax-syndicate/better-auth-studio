@@ -18,13 +18,16 @@ const __dirname = dirname(__filename);
  */
 export async function handleStudioRequest(request, config) {
     try {
-        const basePath = config.basePath || '/api/studio';
         const isSelfHosted = !!config.basePath;
-        let path = request.url.replace(basePath, '') || '/';
+        const basePath = config.basePath || '';
+        let path = request.url;
+        if (isSelfHosted && basePath) {
+            path = path.replace(basePath, '') || '/';
+        }
         if (path === '' || path === '/') {
             path = '/';
         }
-        if (path.startsWith('/assets/') || path === '/vite.svg') {
+        if (path.startsWith('/assets/') || path === '/vite.svg' || path === '/favicon.svg' || path === '/logo.png') {
             return handleStaticFile(path, config);
         }
         if (path === '/') {

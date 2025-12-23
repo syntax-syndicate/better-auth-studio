@@ -30,15 +30,18 @@ export async function handleStudioRequest(
   config: StudioConfig
 ): Promise<UniversalResponse> {
   try {
-    const basePath = config.basePath || '/api/studio';
     const isSelfHosted = !!config.basePath;
+    const basePath = config.basePath || '';
 
-    let path = request.url.replace(basePath, '') || '/';
+    let path = request.url;
+    if (isSelfHosted && basePath) {
+      path = path.replace(basePath, '') || '/';
+    }
     if (path === '' || path === '/') {
       path = '/';
     }
 
-    if (path.startsWith('/assets/') || path === '/vite.svg') {
+    if (path.startsWith('/assets/') || path === '/vite.svg' || path === '/favicon.svg' || path === '/logo.png') {
       return handleStaticFile(path, config);
     }
 

@@ -110,6 +110,14 @@ export async function startStudio(options: StudioOptions) {
     res.sendFile(join(publicDir, 'vite.svg'));
   });
 
+  app.get('/favicon.svg', (_req, res) => {
+    res.sendFile(join(publicDir, 'favicon.svg'));
+  });
+
+  app.get('/logo.png', (_req, res) => {
+    res.sendFile(join(publicDir, 'logo.png'));
+  });
+
   app.get('*', (_req, res) => {
     const html = serveIndexHtml(publicDir, {
       basePath: '', // CLI studio uses root path

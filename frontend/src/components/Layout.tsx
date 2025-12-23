@@ -16,6 +16,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useCounts } from '../contexts/CountsContext';
 import { useWebSocket } from '../hooks/useWebSocket';
 import CommandPalette from './CommandPalette';
+import { assetPath } from '@/lib/utils';
 
 interface UserProfile {
   id: string;
@@ -401,10 +402,8 @@ export default function Layout({ children }: LayoutProps) {
       <div className="bg-black/70 border-b border-white/15">
         <div className="flex items-center justify-between px-6 py-4">
           <div className="flex items-center space-x-4">
-            <div className="flex items-end justify-end space-x-2">
-              <div className="w-7 h-7 border border-dashed border-white/20 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-md">⚡</span>
-              </div>
+            <div className="flex items-center justify-end space-x-2">
+              <img src={assetPath('/logo.png')} alt="Logo" className="w-10 h-10 object-contain" />
               <div className="mb-0 cursor-pointer" onClick={() => navigate('/')}>
                 <h1 className="text-md inline-flex mb-0 items-start font-light font-mono uppercase text-white gap-2">
                   Better-Auth Studio
@@ -543,7 +542,7 @@ export default function Layout({ children }: LayoutProps) {
                       <hr className="w-full border-white/10 h-px" />
                     </div>
 
-                    <div className="py-2">
+                    <div className="">
                       <Link
                         to="/settings"
                         onClick={() => setIsProfileOpen(false)}
