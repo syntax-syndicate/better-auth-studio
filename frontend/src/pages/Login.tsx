@@ -51,14 +51,14 @@ export default function LoginPage() {
     }
   };
 
-  const handleOAuthLogin = async (provider: string) => {
-    const basePath = (window as any).__STUDIO_CONFIG__?.basePath || '';
-    const studioAuthPath = basePath ? `${basePath}/auth` : '/api/auth';
-    const callbackUrl = encodeURIComponent(
-      window.location.origin + basePath + '/?oauth_callback=true'
-    );
-    window.location.href = `${studioAuthPath}/oauth/${provider}?callbackURL=${callbackUrl}`;
-  };
+//   const handleOAuthLogin = async (provider: string) => {
+//     const basePath = (window as any).__STUDIO_CONFIG__?.basePath || '';
+//     const studioAuthPath = basePath ? `${basePath}/auth` : '/api/auth';
+//     const callbackUrl = encodeURIComponent(
+//       window.location.origin + basePath + '/?oauth_callback=true'
+//     );
+//     window.location.href = `${studioAuthPath}/oauth/${provider}?callbackURL=${callbackUrl}`;
+//   };
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">

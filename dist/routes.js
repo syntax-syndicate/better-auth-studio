@@ -381,7 +381,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 '/api/auth/oauth',
                 '/api/health',
             ];
-            const isPublic = publicPaths.some(p => path.startsWith(p));
+            const isPublic = publicPaths.some((p) => path.startsWith(p));
             if (isPublic) {
                 return next();
             }
@@ -420,7 +420,10 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
         });
     });
     const getSessionSecret = () => {
-        return accessConfig?.secret || preloadedAuthOptions?.secret || process.env.BETTER_AUTH_SECRET || 'studio-default-secret';
+        return (accessConfig?.secret ||
+            preloadedAuthOptions?.secret ||
+            process.env.BETTER_AUTH_SECRET ||
+            'studio-default-secret');
     };
     const getAllowedRoles = () => {
         return accessConfig?.roles || ['admin'];
@@ -430,7 +433,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
     };
     const getAllowedEmails = () => {
         return accessConfig?.allowEmails && accessConfig.allowEmails.length > 0
-            ? accessConfig.allowEmails.map(e => e.toLowerCase())
+            ? accessConfig.allowEmails.map((e) => e.toLowerCase())
             : null;
     };
     const isEmailAllowed = (email) => {
@@ -562,7 +565,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 const users = await adapter.findMany({
                     model: 'user',
                     where: [{ field: 'id', value: userId }],
-                    limit: 1
+                    limit: 1,
                 });
                 if (users && users.length > 0) {
                     userRole = users[0].role;

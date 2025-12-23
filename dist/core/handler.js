@@ -27,7 +27,10 @@ export async function handleStudioRequest(request, config) {
         if (path === '' || path === '/') {
             path = '/';
         }
-        if (path.startsWith('/assets/') || path === '/vite.svg' || path === '/favicon.svg' || path === '/logo.png') {
+        if (path.startsWith('/assets/') ||
+            path === '/vite.svg' ||
+            path === '/favicon.svg' ||
+            path === '/logo.png') {
             return handleStaticFile(path, config);
         }
         if (path === '/') {
@@ -80,13 +83,16 @@ export async function handleStudioRequest(request, config) {
     }
 }
 function getSessionSecret(config) {
-    return config.access?.secret || config.auth?.options?.secret || process.env.BETTER_AUTH_SECRET || 'studio-default-secret';
+    return (config.access?.secret ||
+        config.auth?.options?.secret ||
+        process.env.BETTER_AUTH_SECRET ||
+        'studio-default-secret');
 }
 function parseCookies(cookieHeader) {
     if (!cookieHeader)
         return {};
     const cookies = {};
-    cookieHeader.split(';').forEach(part => {
+    cookieHeader.split(';').forEach((part) => {
         const [name, ...rest] = part.trim().split('=');
         if (name) {
             cookies[name] = rest.join('=');
@@ -116,7 +122,7 @@ function isProtectedApiPath(path) {
         '/api/auth/oauth',
         '/api/health',
     ];
-    return !publicPaths.some(p => path.startsWith(p));
+    return !publicPaths.some((p) => path.startsWith(p));
 }
 async function handleApiRoute(request, path, config) {
     const { routeApiRequest } = await import('../routes/api-router.js');
