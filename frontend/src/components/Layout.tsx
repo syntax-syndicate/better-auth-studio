@@ -487,11 +487,11 @@ export default function Layout({ children }: LayoutProps) {
 
 
             {isSelfHosted && userProfile && (
-              <div className="relative" ref={profileRef}>
+              <div className="relative h-full" ref={profileRef}>
                 <button
                   type="button"
                   onClick={() => setIsProfileOpen(!isProfileOpen)}
-                  className="w-8 h-8 border border-dashed border-white/30 bg-black flex items-center justify-center hover:border-white/50 transition-colors overflow-hidden"
+                  className="w-10 h-10 border border-dashed border-white/30 bg-black flex items-center justify-center hover:border-white/50 transition-colors overflow-hidden"
                 >
                   {userProfile.image ? (
                     <img
@@ -522,17 +522,17 @@ export default function Layout({ children }: LayoutProps) {
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className="text-white text-[10px] font-mono uppercase truncate">
+                          <p className="text-white text-[11px] font-mono uppercase truncate">
                             {userProfile.name || 'User'}
+                            {userProfile.role && (
+                              <span className="inline-flex ml-2 mt-1 text-[9px] tracking-wider font-mono uppercase text-white/60 border border-dashed border-white/20 px-1.5 py-0.5">
+                                {userProfile.role}
+                              </span>
+                            )}
                           </p>
                           <p className="text-white/40 text-xs font-mono truncate">
                             {userProfile.email}
                           </p>
-                          {userProfile.role && (
-                            <span className="inline-block mt-1 text-[9px] tracking-wider font-mono uppercase text-white/60 border border-dashed border-white/20 px-1.5 py-0.5">
-                              {userProfile.role}
-                            </span>
-                          )}
                         </div>
                       </div>
                     </div>
