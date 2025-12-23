@@ -13,10 +13,10 @@ import {
 } from 'lucide-react';
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { assetPath } from '@/lib/utils';
 import { useCounts } from '../contexts/CountsContext';
 import { useWebSocket } from '../hooks/useWebSocket';
 import CommandPalette from './CommandPalette';
-import { assetPath } from '@/lib/utils';
 
 interface UserProfile {
   id: string;
@@ -214,7 +214,12 @@ export default function Layout({ children }: LayoutProps) {
 
   const getInitials = (name?: string, email?: string): string => {
     if (name) {
-      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+      return name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
     }
     if (email) {
       return email[0].toUpperCase();
@@ -230,7 +235,7 @@ export default function Layout({ children }: LayoutProps) {
         if (data.studio?.version) {
           setStudioVersion(`v${data.studio.version}`);
         }
-      } catch (_error) { }
+      } catch (_error) {}
     };
 
     const fetchSchemaCount = async () => {
@@ -484,7 +489,6 @@ export default function Layout({ children }: LayoutProps) {
               </kbd>
             </div>
 
-
             {isSelfHosted && userProfile && (
               <div className="relative h-full" ref={profileRef}>
                 <button
@@ -579,10 +583,11 @@ export default function Layout({ children }: LayoutProps) {
                   )}
                   <Link
                     to={item.href}
-                    className={`flex items-center space-x-2 border-x-0 px-8 py-4 text-sm font-medium border-b-2 transition-all duration-200 relative ${isActive
-                      ? 'border-white text-white'
-                      : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500/50'
-                      }`}
+                    className={`flex items-center space-x-2 border-x-0 px-8 py-4 text-sm font-medium border-b-2 transition-all duration-200 relative ${
+                      isActive
+                        ? 'border-white text-white'
+                        : 'border-transparent text-gray-400 hover:text-white hover:border-gray-500/50'
+                    }`}
                   >
                     <item.icon className="w-4 h-4" />
                     <span className="inline-flex font-mono uppercase border-x-0 font-light text-xs items-start">

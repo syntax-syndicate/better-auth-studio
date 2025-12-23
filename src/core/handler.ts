@@ -41,7 +41,12 @@ export async function handleStudioRequest(
       path = '/';
     }
 
-    if (path.startsWith('/assets/') || path === '/vite.svg' || path === '/favicon.svg' || path === '/logo.png') {
+    if (
+      path.startsWith('/assets/') ||
+      path === '/vite.svg' ||
+      path === '/favicon.svg' ||
+      path === '/logo.png'
+    ) {
       return handleStaticFile(path, config);
     }
 
@@ -102,13 +107,18 @@ export async function handleStudioRequest(
 }
 
 function getSessionSecret(config: StudioConfig): string {
-  return config.access?.secret || config.auth?.options?.secret || process.env.BETTER_AUTH_SECRET || 'studio-default-secret';
+  return (
+    config.access?.secret ||
+    config.auth?.options?.secret ||
+    process.env.BETTER_AUTH_SECRET ||
+    'studio-default-secret'
+  );
 }
 
 function parseCookies(cookieHeader: string | undefined): Record<string, string> {
   if (!cookieHeader) return {};
   const cookies: Record<string, string> = {};
-  cookieHeader.split(';').forEach(part => {
+  cookieHeader.split(';').forEach((part) => {
     const [name, ...rest] = part.trim().split('=');
     if (name) {
       cookies[name] = rest.join('=');
@@ -117,11 +127,14 @@ function parseCookies(cookieHeader: string | undefined): Record<string, string> 
   return cookies;
 }
 
-function verifyStudioSession(request: UniversalRequest, config: StudioConfig): { valid: boolean; session?: any; error?: string } {
+function verifyStudioSession(
+  request: UniversalRequest,
+  config: StudioConfig
+): { valid: boolean; session?: any; error?: string } {
   const cookieHeader = request.headers['cookie'] || request.headers['Cookie'];
   const cookies = parseCookies(cookieHeader as string);
   const sessionCookie = cookies[STUDIO_COOKIE_NAME];
-  
+
   if (!sessionCookie) {
     return { valid: false, error: 'No session cookie' };
   }
@@ -143,7 +156,7 @@ function isProtectedApiPath(path: string): boolean {
     '/api/auth/oauth',
     '/api/health',
   ];
-  return !publicPaths.some(p => path.startsWith(p));
+  return !publicPaths.some((p) => path.startsWith(p));
 }
 
 async function handleApiRoute(
@@ -165,14 +178,15 @@ async function handleApiRoute(
     });
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    
+
     if (result.cookies && result.cookies.length > 0) {
       const cookieStrings = result.cookies.map((c) => {
         let cookie = `${c.name}=${c.value}`;
         if (c.options.httpOnly) cookie += '; HttpOnly';
         if (c.options.secure) cookie += '; Secure';
         if (c.options.sameSite) cookie += `; SameSite=${c.options.sameSite}`;
-        if (c.options.maxAge !== undefined) cookie += `; Max-Age=${Math.floor(c.options.maxAge / 1000)}`;
+        if (c.options.maxAge !== undefined)
+          cookie += `; Max-Age=${Math.floor(c.options.maxAge / 1000)}`;
         if (c.options.path) cookie += `; Path=${c.options.path}`;
         return cookie;
       });

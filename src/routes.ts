@@ -27,6 +27,7 @@ import { possiblePaths } from './config.js';
 import { getAuthData } from './data.js';
 import { initializeGeoService, resolveIPLocation, setGeoDbPath } from './geo-service.js';
 import { detectDatabaseWithDialect } from './utils/database-detection.js';
+import type { StudioAccessConfig } from './utils/html-injector.js';
 import {
   createStudioSession,
   decryptSession,
@@ -35,7 +36,6 @@ import {
   STUDIO_COOKIE_NAME,
   type StudioSession,
 } from './utils/session.js';
-import type { StudioAccessConfig } from './utils/html-injector.js';
 
 const config = {
   N: 16384,
@@ -57,17 +57,17 @@ async function verifyPassword(password: string, storedHash: string): Promise<boo
   if (!storedHash || typeof storedHash !== 'string') {
     return false;
   }
-  
+
   const parts = storedHash.split(':');
   if (parts.length !== 2) {
     return false;
   }
-  
+
   const [salt, storedKey] = parts;
   if (!salt || !storedKey) {
     return false;
   }
-  
+
   try {
     const key = await generateKey(password, salt);
     const keyHex = hex.encode(key);
@@ -459,7 +459,7 @@ export function createRoutes(
         '/api/health',
       ];
 
-      const isPublic = publicPaths.some(p => path.startsWith(p));
+      const isPublic = publicPaths.some((p) => path.startsWith(p));
       if (isPublic) {
         return next();
       }
@@ -503,7 +503,12 @@ export function createRoutes(
   });
 
   const getSessionSecret = (): string => {
-    return accessConfig?.secret || preloadedAuthOptions?.secret || process.env.BETTER_AUTH_SECRET || 'studio-default-secret';
+    return (
+      accessConfig?.secret ||
+      preloadedAuthOptions?.secret ||
+      process.env.BETTER_AUTH_SECRET ||
+      'studio-default-secret'
+    );
   };
 
   const getAllowedRoles = (): string[] => {
@@ -515,8 +520,8 @@ export function createRoutes(
   };
 
   const getAllowedEmails = (): string[] | null => {
-    return accessConfig?.allowEmails && accessConfig.allowEmails.length > 0 
-      ? accessConfig.allowEmails.map(e => e.toLowerCase()) 
+    return accessConfig?.allowEmails && accessConfig.allowEmails.length > 0
+      ? accessConfig.allowEmails.map((e) => e.toLowerCase())
       : null;
   };
 
@@ -571,7 +576,7 @@ export function createRoutes(
       }
 
       const adapter = await getAuthAdapter();
-      
+
       let signInResult: any = null;
       let signInError: string | null = null;
 
@@ -585,14 +590,14 @@ export function createRoutes(
 
       if (!signInResult || signInResult.error || signInError) {
         const errorMessage = signInError || signInResult?.error?.message || 'Invalid credentials';
-        
+
         if (errorMessage.includes('Invalid password hash') && adapter?.findMany) {
           const users = await adapter.findMany({
             model: 'user',
             where: [{ field: 'email', value: email }],
             limit: 1,
           });
-          
+
           if (!users || users.length === 0) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
           }
@@ -611,7 +616,8 @@ export function createRoutes(
           if (!credentialAccount) {
             return res.status(401).json({
               success: false,
-              message: 'No password set for this account. Please use social login or reset your password.',
+              message:
+                'No password set for this account. Please use social login or reset your password.',
             });
           }
 
@@ -676,10 +682,10 @@ export function createRoutes(
 
       let userRole: string | null = null;
       if (adapter?.findMany) {
-        const users = await adapter.findMany({ 
-          model: 'user', 
-          where: [{ field: 'id', value: userId }], 
-          limit: 1 
+        const users = await adapter.findMany({
+          model: 'user',
+          where: [{ field: 'id', value: userId }],
+          limit: 1,
         });
         if (users && users.length > 0) {
           userRole = users[0].role;
@@ -4041,7 +4047,7 @@ export function createRoutes(
     try {
       const effectiveConfig = preloadedAuthOptions || authConfig || {};
       const socialProviders = effectiveConfig.socialProviders || {};
-      
+
       const providers = Array.isArray(socialProviders)
         ? socialProviders
         : Object.entries(socialProviders).map(([id, provider]: [string, any]) => ({
@@ -4051,7 +4057,7 @@ export function createRoutes(
             enabled: !!(provider.clientId && provider.clientSecret),
             ...provider,
           }));
-      
+
       res.json({
         success: true,
         providers: providers.map((provider: any) => ({
@@ -4076,7 +4082,7 @@ export function createRoutes(
 
       const effectiveConfig = preloadedAuthOptions || authConfig || {};
       const socialProviders = effectiveConfig.socialProviders || {};
-      
+
       const providers = Array.isArray(socialProviders)
         ? socialProviders
         : Object.entries(socialProviders).map(([id, p]: [string, any]) => ({
@@ -4084,7 +4090,7 @@ export function createRoutes(
             type: id,
             ...p,
           }));
-      
+
       const selectedProvider = providers.find((p: any) => (p.id || p.type) === provider);
 
       if (!selectedProvider) {
@@ -6211,7 +6217,11 @@ export async function handleStudioApiRequest(ctx: {
   basePath?: string;
   configPath?: string;
   accessConfig?: StudioAccessConfig;
-}): Promise<{ status: number; data: any; cookies?: Array<{ name: string; value: string; options: any }> }> {
+}): Promise<{
+  status: number;
+  data: any;
+  cookies?: Array<{ name: string; value: string; options: any }>;
+}> {
   let preloadedAdapter: any = null;
   if (ctx.auth) {
     try {
@@ -6249,7 +6259,7 @@ export async function handleStudioApiRequest(ctx: {
     }
 
     const cookies: Array<{ name: string; value: string; options: any }> = [];
-    
+
     const parseCookies = (cookieHeader: string): Record<string, string> => {
       const result: Record<string, string> = {};
       if (cookieHeader) {

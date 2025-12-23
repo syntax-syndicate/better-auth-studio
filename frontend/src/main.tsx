@@ -18,9 +18,10 @@ window.fetch = (input: RequestInfo | URL, init?: RequestInit): Promise<Response>
     url = '';
   }
 
-  const isStudioApiCall = url.startsWith('/api/') && 
-    !url.startsWith('/api/auth/') && 
-    basePath && 
+  const isStudioApiCall =
+    url.startsWith('/api/') &&
+    !url.startsWith('/api/auth/') &&
+    basePath &&
     !url.startsWith(basePath);
 
   if (isStudioApiCall) {

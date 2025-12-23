@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Route, BrowserRouter as Router, Routes, Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import DatabaseSchemaNodeDemo from './components/DatabaseSchemaNodeDemo';
 import Layout from './components/Layout';
@@ -95,7 +95,14 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/access-denied" element={<AccessDenied />} />
-          <Route path="/*" element={<AuthGuard><MainRoutes /></AuthGuard>} />
+          <Route
+            path="/*"
+            element={
+              <AuthGuard>
+                <MainRoutes />
+              </AuthGuard>
+            }
+          />
         </Routes>
       ) : (
         <Routes>

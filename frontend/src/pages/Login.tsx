@@ -1,152 +1,150 @@
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { AlertCircle, Loader2 } from 'lucide-react';
 import { assetPath } from '@/lib/utils';
 
 export default function LoginPage() {
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
-    const redirect = searchParams.get('redirect') || '/';
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect') || '/';
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-        try {
-            const basePath = (window as any).__STUDIO_CONFIG__?.basePath || '';
-            const studioAuthPath = basePath ? `${basePath}/auth` : '/api/auth';
+    try {
+      const basePath = (window as any).__STUDIO_CONFIG__?.basePath || '';
+      const studioAuthPath = basePath ? `${basePath}/auth` : '/api/auth';
 
-            const signInResponse = await fetch(`${studioAuthPath}/sign-in`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password }),
-                credentials: 'include',
-            });
+      const signInResponse = await fetch(`${studioAuthPath}/sign-in`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+        credentials: 'include',
+      });
 
-            const result = await signInResponse.json();
+      const result = await signInResponse.json();
 
-            if (!signInResponse.ok) {
-                if (signInResponse.status === 403) {
-                    navigate('/access-denied');
-                    return;
-                }
-                throw new Error(result.message || 'Invalid credentials');
-            }
-
-            if (result.success) {
-                navigate(redirect);
-            } else {
-                throw new Error(result.message || 'Login failed');
-            }
-        } catch (err: any) {
-            setError(err.message || 'Login failed');
-        } finally {
-            setLoading(false);
+      if (!signInResponse.ok) {
+        if (signInResponse.status === 403) {
+          navigate('/access-denied');
+          return;
         }
-    };
+        throw new Error(result.message || 'Invalid credentials');
+      }
 
-    const handleOAuthLogin = async (provider: string) => {
-        const basePath = (window as any).__STUDIO_CONFIG__?.basePath || '';
-        const studioAuthPath = basePath ? `${basePath}/auth` : '/api/auth';
-        const callbackUrl = encodeURIComponent(window.location.origin + basePath + '/?oauth_callback=true');
-        window.location.href = `${studioAuthPath}/oauth/${provider}?callbackURL=${callbackUrl}`;
-    };
+      if (result.success) {
+        navigate(redirect);
+      } else {
+        throw new Error(result.message || 'Login failed');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    return (
-        <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-            <div className="absolute inset-0 opacity-[3%]">
-                <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_8px)]" />
+  const handleOAuthLogin = async (provider: string) => {
+    const basePath = (window as any).__STUDIO_CONFIG__?.basePath || '';
+    const studioAuthPath = basePath ? `${basePath}/auth` : '/api/auth';
+    const callbackUrl = encodeURIComponent(
+      window.location.origin + basePath + '/?oauth_callback=true'
+    );
+    window.location.href = `${studioAuthPath}/oauth/${provider}?callbackURL=${callbackUrl}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[3%]">
+        <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_8px)]" />
+      </div>
+
+      <div className="w-full max-w-md relative z-10">
+        <div className="border border-dashed border-white/20 bg-black p-6">
+          <div className="mb-6">
+            <div className="flex items-center gap-2 mb-4">
+              <img src={assetPath('/logo.png')} alt="Logo" className="w-10 h-10 object-contain" />
+              <span className="text-white text-xs font-mono uppercase tracking-wider">
+                better auth studio
+              </span>
+            </div>
+            <div className="flex flex-col items-center justify-center mt-2">
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+              <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+            </div>
+          </div>
+
+          <div className="mb-6">
+            <h1 className="text-white text-lg font-mono uppercase tracking-wide mb-1">
+              Admin Access
+            </h1>
+            <p className="text-white/40 text-xs font-mono">Sign in with your admin account</p>
+          </div>
+
+          {error && (
+            <div className="mb-4 p-3 border border-dashed border-red-500/30 bg-red-500/5">
+              <div className="flex items-start gap-2">
+                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
+                <p className="text-red-400 text-xs font-mono">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-white/50 text-[10px] font-mono uppercase tracking-wider block mb-1.5">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@example.com"
+                className="w-full h-10 px-3 bg-black border border-dashed border-white/20 text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-white/40 transition-colors"
+                required
+              />
             </div>
 
-            <div className="w-full max-w-md relative z-10">
-                <div className="border border-dashed border-white/20 bg-black p-6">
-                    <div className="mb-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <img src={assetPath('/logo.png')} alt="Logo" className="w-10 h-10 object-contain" />
-                            <span className="text-white text-xs font-mono uppercase tracking-wider">better auth studio</span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center mt-2">
-                            <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
-                            <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
-                            <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
-                        </div>
-                    </div>
+            <div>
+              <label className="text-white/50 text-[10px] font-mono uppercase tracking-wider block mb-1.5">
+                Password
+              </label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full h-10 px-3 bg-black border border-dashed border-white/20 text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-white/40 transition-colors"
+                required
+              />
+            </div>
 
-                    <div className="mb-6">
-                        <h1 className="text-white text-lg font-mono uppercase tracking-wide mb-1">
-                            Admin Access
-                        </h1>
-                        <p className="text-white/40 text-xs font-mono">
-                            Sign in with your admin account
-                        </p>
-                    </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-10 bg-white text-black text-xs font-mono uppercase tracking-wider hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+            >
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : 'Sign In'}
+            </button>
+          </form>
 
-                    {error && (
-                        <div className="mb-4 p-3 border border-dashed border-red-500/30 bg-red-500/5">
-                            <div className="flex items-start gap-2">
-                                <AlertCircle className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" />
-                                <p className="text-red-400 text-xs font-mono">{error}</p>
-                            </div>
-                        </div>
-                    )}
+          <div className="mt-6">
+            <div className="flex items-center gap-3">
+              <div className="flex-1 h-px bg-[repeating-linear-gradient(90deg,#ffffff10,#ffffff10_4px,transparent_4px,transparent_8px)]" />
+              <span className="text-white/30 text-[10px] font-mono uppercase">or</span>
+              <div className="flex-1 h-px bg-[repeating-linear-gradient(90deg,#ffffff10,#ffffff10_4px,transparent_4px,transparent_8px)]" />
+            </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                            <label className="text-white/50 text-[10px] font-mono uppercase tracking-wider block mb-1.5">
-                                Email
-                            </label>
-                            <input
-                                type="email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="admin@example.com"
-                                className="w-full h-10 px-3 bg-black border border-dashed border-white/20 text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-white/40 transition-colors"
-                                required
-                            />
-                        </div>
-
-                        <div>
-                            <label className="text-white/50 text-[10px] font-mono uppercase tracking-wider block mb-1.5">
-                                Password
-                            </label>
-                            <input
-                                type="password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                placeholder="••••••••"
-                                className="w-full h-10 px-3 bg-black border border-dashed border-white/20 text-white text-sm font-mono placeholder:text-white/20 focus:outline-none focus:border-white/40 transition-colors"
-                                required
-                            />
-                        </div>
-
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className="w-full h-10 bg-white text-black text-xs font-mono uppercase tracking-wider hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
-                        >
-                            {loading ? (
-                                <Loader2 className="w-3 h-3 animate-spin" />
-                            ) : (
-                                'Sign In'
-                            )}
-                        </button>
-                    </form>
-
-                    <div className="mt-6">
-                        <div className="flex items-center gap-3">
-                            <div className="flex-1 h-px bg-[repeating-linear-gradient(90deg,#ffffff10,#ffffff10_4px,transparent_4px,transparent_8px)]" />
-                            <span className="text-white/30 text-[10px] font-mono uppercase">or</span>
-                            <div className="flex-1 h-px bg-[repeating-linear-gradient(90deg,#ffffff10,#ffffff10_4px,transparent_4px,transparent_8px)]" />
-                        </div>
-
-                        <div className="mt-4 grid grid-cols-2 gap-2">
-                            {/* <button
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              {/* <button
                                 type="button"
                                 onClick={() => handleOAuthLogin('github')}
                                 className="h-10 border border-dashed border-white/20 text-white text-xs font-mono uppercase tracking-wider hover:bg-white/5 hover:border-white/30 transition-colors flex items-center justify-center gap-2"
@@ -169,16 +167,16 @@ export default function LoginPage() {
                                 </svg>
                                 Google
                             </button> */}
-                        </div>
-                    </div>
-
-                    <div className="mt-6 pt-4 border-t border-dashed border-white/10">
-                        <p className="text-white/30 uppercase tracking-wider text-[10px] font-mono text-center">
-                            admin role required for access
-                        </p>
-                    </div>
-                </div>
             </div>
+          </div>
+
+          <div className="mt-6 pt-4 border-t border-dashed border-white/10">
+            <p className="text-white/30 uppercase tracking-wider text-[10px] font-mono text-center">
+              admin role required for access
+            </p>
+          </div>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
