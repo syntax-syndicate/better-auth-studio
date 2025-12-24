@@ -226,16 +226,13 @@ function findPublicDir(): string | null {
   }
   
   // For pnpm on Vercel, also check the actual package location in the store
-  // Path is like: /vercel/path0/node_modules/.pnpm/better-auth-studio@version_hash/node_modules/better-auth-studio/
   const pnpmMatch = __dirname.match(/(.+\/.pnpm\/[^/]+\/node_modules\/better-auth-studio)\//);
   if (pnpmMatch) {
     const pnpmPackageRoot = pnpmMatch[1];
-    console.log(`[Studio Debug] Detected pnpm package root: ${pnpmPackageRoot}`);
-    // Check both with and without dist, as pnpm might flatten differently
     candidates.unshift(
       join(pnpmPackageRoot, 'dist', 'public'),
       join(pnpmPackageRoot, 'public'),
-      join(pnpmPackageRoot, '..', 'dist', 'public'), // One level up
+      join(pnpmPackageRoot, '..', 'dist', 'public'),
     );
   }
   
@@ -247,7 +244,6 @@ function findPublicDir(): string | null {
       if (existsSync(pkgPath)) {
         const pkgContent = readFileSync(pkgPath, 'utf-8');
         if (pkgContent.includes('"name": "better-auth-studio"')) {
-          console.log(`[Studio Debug] Found package.json at: ${searchDir}`);
           candidates.unshift(
             join(searchDir, 'dist', 'public'),
             join(searchDir, 'public')
@@ -258,42 +254,22 @@ function findPublicDir(): string | null {
       searchDir = resolve(searchDir, '..');
     }
   } catch (err) {
-    console.log(`[Studio Debug] Error searching for package.json:`, err);
+    // Silent failure
   }
-
-  console.log(`[Studio Debug] Searching for public directory, ${candidates.length} candidates`);
 
   // First, try to find a directory with index.html
   for (const candidate of candidates) {
     try {
-      const dirExists = existsSync(candidate);
-      console.log(`[Studio Debug] Checking: ${candidate} - exists: ${dirExists}`);
-      
-      if (dirExists) {
-        // Check if it's actually a directory
-        try {
-          const stats = statSync(candidate);
-          console.log(`[Studio Debug] ${candidate} - isDirectory: ${stats.isDirectory()}`);
-          
-          if (!stats.isDirectory()) {
-            continue;
+      if (existsSync(candidate)) {
+        const stats = statSync(candidate);
+        if (stats.isDirectory()) {
+          const indexPath = join(candidate, 'index.html');
+          if (existsSync(indexPath)) {
+            return candidate;
           }
-        } catch (statError) {
-          console.error(`[Studio Debug] Error stat-ing ${candidate}:`, statError);
-          continue;
-        }
-        
-        const indexPath = join(candidate, 'index.html');
-        const indexExists = existsSync(indexPath);
-        console.log(`[Studio Debug] Index.html at ${indexPath} - exists: ${indexExists}`);
-        
-        if (indexExists) {
-          console.log(`[Studio] ✓ Found public directory at: ${candidate}`);
-          return candidate;
         }
       }
     } catch (error) {
-      console.error(`[Studio Debug] Error checking ${candidate}:`, error);
       continue;
     }
   }
@@ -302,7 +278,6 @@ function findPublicDir(): string | null {
   for (const candidate of candidates) {
     try {
       if (existsSync(candidate) && statSync(candidate).isDirectory()) {
-        console.warn(`[Studio] Found public directory without index.html at: ${candidate}`);
         return candidate;
       }
     } catch (error) {
@@ -310,30 +285,9 @@ function findPublicDir(): string | null {
     }
   }
 
+  // Log error details for debugging
   console.error('[Studio] Could not find public directory');
-  console.error('[Studio] __dirname:', __dirname);
-  console.error('[Studio] __realdir:', __realdir);
-  console.error('[Studio] Tried candidates:', candidates);
-  
-  // Try to list what's actually in the dist directory
-  try {
-    const distDir = resolve(__dirname, '..');
-    console.error('[Studio] Checking dist directory:', distDir);
-    if (existsSync(distDir)) {
-      const contents = readdirSync(distDir);
-      console.error('[Studio] Contents of dist directory:', contents);
-    }
-    
-    // Also check the package root
-    const packageRoot = resolve(__dirname, '../..');
-    console.error('[Studio] Checking package root:', packageRoot);
-    if (existsSync(packageRoot)) {
-      const rootContents = readdirSync(packageRoot);
-      console.error('[Studio] Contents of package root:', rootContents);
-    }
-  } catch (err) {
-    console.error('[Studio] Could not read directories:', err);
-  }
+  console.error('[Studio] Tried paths:', candidates.slice(0, 5).join(', '), '...');
   
   return null;
 }
@@ -346,34 +300,10 @@ function handleStaticFile(path: string, config: StudioConfig): UniversalResponse
   }
 
   if (!cachedPublicDir) {
-    const baseDirs = [__dirname, __realdir];
-    const candidates: string[] = [];
-    
-    for (const baseDir of baseDirs) {
-      candidates.push(
-        resolve(baseDir, '../public'),
-        resolve(baseDir, '../../public'),
-        resolve(baseDir, '../../../public'),
-        resolve(baseDir, '../../dist/public'),
-        resolve(baseDir, '../../../dist/public')
-      );
-    }
-    
-    // Check which paths exist and which have index.html
-    const diagnostics = candidates.map(candidate => ({
-      path: candidate,
-      exists: existsSync(candidate),
-      hasIndex: existsSync(candidate) ? existsSync(join(candidate, 'index.html')) : false,
-    }));
-    
     return jsonResponse(500, {
       error: 'Public directory not found',
-      paths: {
-        tried: candidates,
-        dirname: __dirname,
-        realdir: __realdir,
-        diagnostics,
-      },
+      message: 'Studio UI assets could not be located. This may be a deployment issue.',
+      suggestion: 'Try reinstalling the package or check deployment logs for errors.',
     });
   }
 
