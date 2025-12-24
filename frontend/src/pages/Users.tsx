@@ -15,6 +15,7 @@ import {
   Search,
   Shield,
   Trash2,
+  User,
   UserPlus,
   Users as UsersIcon,
   X,
@@ -103,6 +104,7 @@ export default function Users() {
     }>
   >([]);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -297,6 +299,7 @@ export default function Users() {
       return;
     }
 
+    setIsUpdating(true);
     const toastId = toast.loading('Updating user...');
 
     try {
@@ -319,6 +322,8 @@ export default function Users() {
       }
     } catch (_error) {
       toast.error('Error updating user', { id: toastId });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -1288,10 +1293,10 @@ export default function Users() {
 
       {/* Edit User Modal */}
       {showEditModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-md rounded-none">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-black border border-white/15 p-6 w-full max-w-lg rounded-none shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Edit User</h3>
+              <h3 className="text-lg text-white font-light uppercase font-mono">Edit User</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1299,23 +1304,32 @@ export default function Users() {
                   setShowEditModal(false);
                   setEditRole('');
                 }}
-                className="text-gray-400 hover:text-white rounded-none"
+                className="text-gray-400 -mt-2 hover:text-white rounded-none"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="space-y-4">
+
+            <div className="flex flex-col items-center justify-center mt-2">
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+              <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+            </div>
+
+            <div className="space-y-4 mt-4">
               <div className="flex items-center space-x-3">
-                <img
-                  src={
-                    selectedUser.image ||
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${selectedUser.id}`
-                  }
-                  alt={selectedUser.name}
-                  className="w-16 h-16 rounded-none border border-dashed border-white/20"
-                />
-                <div>
-                  <div className="text-white font-light">{selectedUser.name}</div>
+                <div className="w-14 h-14 rounded-none border border-dashed border-white/15 bg-white/10 flex items-center justify-center overflow-hidden">
+                  {selectedUser.image ? (
+                    <img src={selectedUser.image} alt={selectedUser.name} className="w-14 h-14 object-cover" />
+                  ) : (
+                    <User className="w-7 h-7 text-white" />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <div className="text-white font-medium leading-tight flex items-center gap-2">
+                    <span>{selectedUser.name}</span>
+                    <CopyableId id={selectedUser.id} variant="subscript" nonSliced={true} />
+                  </div>
                   <div className="text-sm text-gray-400">{selectedUser.email}</div>
                 </div>
               </div>
@@ -1326,6 +1340,7 @@ export default function Users() {
                 <Input
                   id="edit-name"
                   defaultValue={selectedUser.name}
+                  placeholder="e.g. John Doe"
                   className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
@@ -1337,6 +1352,7 @@ export default function Users() {
                   id="edit-email"
                   type="email"
                   defaultValue={selectedUser.email}
+                  placeholder="e.g. john@example.com"
                   className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
@@ -1366,15 +1382,17 @@ export default function Users() {
                   setShowEditModal(false);
                   setEditRole('');
                 }}
+                disabled={isUpdating}
                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleUpdateUser}
-                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                disabled={isUpdating}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
               >
-                Update
+                {isUpdating ? 'Updating...' : 'Update'}
               </Button>
             </div>
           </div>

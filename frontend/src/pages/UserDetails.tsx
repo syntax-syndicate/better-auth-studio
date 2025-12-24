@@ -147,6 +147,7 @@ export default function UserDetails() {
     }>
   >([]);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [sessionLocations, setSessionLocations] = useState<Record<string, LocationData>>({});
   const sessionLocationsRef = useRef<Record<string, LocationData>>({});
 
@@ -311,6 +312,7 @@ export default function UserDetails() {
       return;
     }
 
+    setIsUpdating(true);
     const toastId = toast.loading('Updating user...');
     try {
       const response = await fetch(`/api/users/${userId}`, {
@@ -331,6 +333,8 @@ export default function UserDetails() {
       }
     } catch (_error) {
       toast.error('Error updating user', { id: toastId });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -1449,10 +1453,10 @@ export default function UserDetails() {
       </div>
 
       {showEditModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-black/90 border border-dashed border-white/20 rounded-none p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+          <div className="bg-black border border-white/15 rounded-none p-6 w-full max-w-lg shadow-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Edit User</h3>
+              <h3 className="text-lg text-white font-light uppercase font-mono">Edit User</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1460,51 +1464,67 @@ export default function UserDetails() {
                   setShowEditModal(false);
                   setEditRole('');
                 }}
-                className="text-gray-400 hover:text-white rounded-none"
+                className="text-gray-400 -mt-2 hover:text-white rounded-none"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="space-y-4">
+
+            <div className="flex flex-col items-center justify-center mt-2">
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+              <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+            </div>
+
+            <div className="space-y-4 mt-4">
               <div className="flex items-center space-x-3">
-                <div className="w-16 h-16 bg-black/80 border border-dashed border-white/20 flex items-center justify-center">
+                <div className="w-14 h-14 rounded-none border border-dashed border-white/15 bg-white/10 flex items-center justify-center overflow-hidden">
                   {user?.image ? (
-                    <img src={user.image} alt={user.name} className="w-16 h-16 object-cover" />
+                    <img src={user.image} alt={user.name} className="w-14 h-14 object-cover" />
                   ) : (
-                    <User className="w-8 h-8 text-white" />
+                    <User className="w-7 h-7 text-white" />
                   )}
                 </div>
-                <div className="flex-1">
-                  <h4 className="text-white font-medium">{user?.name}</h4>
-                  <p className="text-gray-400 text-sm">{user?.email}</p>
+                <div className="space-y-1">
+                  <div className="text-white font-medium leading-tight flex items-center gap-2">
+                    <span>{user?.name}</span>
+                    <CopyableId id={user?.id || ''} variant="subscript" nonSliced={true} />
+                  </div>
+                  <div className="text-sm text-gray-400">{user?.email}</div>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Name</label>
-                <input
+                <Label htmlFor="edit-name" className="text-sm text-gray-400 font-light">
+                  Name
+                </Label>
+                <Input
                   id="edit-name"
-                  type="text"
                   defaultValue={user?.name || ''}
-                  className="w-full px-3 py-2 bg-gray-800 border border-dashed border-white/20 rounded-none text-white placeholder-gray-400 focus:outline-none focus:border-white/50"
+                  placeholder="e.g. John Doe"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Email</label>
-                <input
+                <Label htmlFor="edit-email" className="text-sm text-gray-400 font-light">
+                  Email
+                </Label>
+                <Input
                   id="edit-email"
                   type="email"
                   defaultValue={user?.email || ''}
-                  className="w-full px-3 py-2 bg-gray-800 border border-dashed border-white/20 rounded-none text-white placeholder-gray-400 focus:outline-none focus:border-white/50"
+                  placeholder="e.g. john@example.com"
+                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Role</label>
-                <Select
-                  className="bg-black text-white"
-                  value={editRole}
-                  onValueChange={setEditRole}
-                >
-                  <SelectTrigger className="w-full border border-dashed border-white/20 bg-black text-white rounded-none">
+                <Label htmlFor="edit-role" className="text-sm text-gray-400 font-light">
+                  Role
+                </Label>
+                <Select value={editRole} onValueChange={setEditRole}>
+                  <SelectTrigger
+                    id="edit-role"
+                    className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
+                  >
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
@@ -1515,22 +1535,24 @@ export default function UserDetails() {
                 </Select>
               </div>
             </div>
-            <div className="flex justify-end space-x-2 mt-6">
+            <div className="flex justify-end space-x-3 mt-6">
               <Button
                 variant="outline"
                 onClick={() => {
                   setShowEditModal(false);
                   setEditRole('');
                 }}
+                disabled={isUpdating}
                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleEditUser}
-                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                disabled={isUpdating}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
               >
-                Update
+                {isUpdating ? 'Updating...' : 'Update'}
               </Button>
             </div>
           </div>

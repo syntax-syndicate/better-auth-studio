@@ -88,6 +88,7 @@ export default function Organizations() {
     }>
   >([]);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [createFormData, setCreateFormData] = useState({ name: '', slug: '' });
   const [editFormData, setEditFormData] = useState({ name: '', slug: '' });
 
@@ -315,6 +316,7 @@ export default function Organizations() {
       return;
     }
 
+    setIsUpdating(true);
     const toastId = toast.loading('Updating organization...');
 
     try {
@@ -343,6 +345,8 @@ export default function Organizations() {
     } catch (error) {
       console.error('Error updating organization:', error);
       toast.error('Error updating organization', { id: toastId });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -1050,7 +1054,7 @@ export default function Organizations() {
       {/* Edit Organization Modal */}
       {showEditModal && selectedOrganization && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowEditModal(false);
@@ -1060,11 +1064,11 @@ export default function Organizations() {
           }}
         >
           <div
-            className="bg-black/90 border border-dashed border-white/20 p-6 w-full max-w-xl rounded-none"
+            className="bg-black border border-white/15 p-6 w-full max-w-lg rounded-none shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light">Edit Organization</h3>
+              <h3 className="text-lg text-white font-light uppercase font-mono">Edit Organization</h3>
               <Button
                 variant="ghost"
                 size="sm"
@@ -1073,19 +1077,26 @@ export default function Organizations() {
                   setSelectedOrganization(null);
                   setEditFormData({ name: '', slug: '' });
                 }}
-                className="text-gray-400 hover:text-white rounded-none"
+                className="text-gray-400 -mt-2 hover:text-white rounded-none"
               >
                 <X className="w-4 h-4" />
               </Button>
             </div>
-            <div className="space-y-4">
+
+            <div className="flex flex-col items-center justify-center mt-2">
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+              <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
+            </div>
+
+            <div className="space-y-4 mt-4">
               <div className="flex items-center space-x-3">
-                <div className="w-16 h-16 rounded-none border border-dashed border-white/20 bg-white/10 flex items-center justify-center">
-                  <Building2 className="w-8 h-8 text-white" />
+                <div className="w-14 h-14 rounded-none border border-dashed border-white/15 bg-white/10 flex items-center justify-center">
+                  <Building2 className="w-7 h-7 text-white" />
                 </div>
-                <div>
-                  <div className="text-white inline-flex font-light">
-                    {selectedOrganization.name}
+                <div className="space-y-1">
+                  <div className="text-white font-medium leading-tight flex items-center gap-2">
+                    <span>{selectedOrganization.name}</span>
                     <CopyableId id={selectedOrganization.id} variant="subscript" nonSliced={true} />
                   </div>
                   <div className="text-sm text-gray-400">{selectedOrganization.slug}</div>
@@ -1126,15 +1137,17 @@ export default function Organizations() {
                   setShowEditModal(false);
                   setEditFormData({ name: '', slug: '' });
                 }}
+                disabled={isUpdating}
                 className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleUpdateOrganization}
-                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                disabled={isUpdating}
+                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
               >
-                Update
+                {isUpdating ? 'Updating...' : 'Update'}
               </Button>
             </div>
           </div>
