@@ -165,29 +165,46 @@ async function handleApiRoute(request, path, config) {
         return jsonResponse(500, { error: 'Internal server error' });
     }
 }
+function findPublicDir() {
+    const candidates = [
+        resolve(__dirname, '../public'),
+        resolve(__dirname, '../../public'),
+        resolve(__dirname, '../../dist/public'),
+        resolve(__dirname, '../../../public'),
+        resolve(__dirname, '../../../dist/public'),
+    ];
+    for (const candidate of candidates) {
+        if (existsSync(candidate) && existsSync(join(candidate, 'index.html'))) {
+            return candidate;
+        }
+    }
+    for (const candidate of candidates) {
+        if (existsSync(candidate)) {
+            return candidate;
+        }
+    }
+    return null;
+}
+let cachedPublicDir = null;
 function handleStaticFile(path, config) {
-    let publicDir;
-    const distPublic = resolve(__dirname, '../public');
-    if (existsSync(distPublic)) {
-        publicDir = distPublic;
+    if (!cachedPublicDir) {
+        cachedPublicDir = findPublicDir();
     }
-    else {
-        // Fallback to source location
-        const sourcePublic = resolve(__dirname, '../../public');
-        if (existsSync(sourcePublic)) {
-            publicDir = sourcePublic;
-        }
-        else {
-            return jsonResponse(500, {
-                error: 'Public directory not found',
-                paths: {
-                    tried: [distPublic, sourcePublic],
-                    dirname: __dirname,
-                },
-            });
-        }
+    if (!cachedPublicDir) {
+        const candidates = [
+            resolve(__dirname, '../public'),
+            resolve(__dirname, '../../public'),
+            resolve(__dirname, '../../dist/public'),
+        ];
+        return jsonResponse(500, {
+            error: 'Public directory not found',
+            paths: {
+                tried: candidates,
+                dirname: __dirname,
+            },
+        });
     }
-    return handleStaticFileFromDir(path, publicDir, config);
+    return handleStaticFileFromDir(path, cachedPublicDir, config);
 }
 function handleStaticFileFromDir(path, publicDir, config) {
     if (path === '/' || path === '') {

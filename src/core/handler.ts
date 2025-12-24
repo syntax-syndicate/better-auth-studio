@@ -204,29 +204,53 @@ async function handleApiRoute(
   }
 }
 
-function handleStaticFile(path: string, config: StudioConfig): UniversalResponse {
-  let publicDir: string;
+function findPublicDir(): string | null {
+  const candidates = [
+    resolve(__dirname, '../public'),
+    resolve(__dirname, '../../public'),
+    resolve(__dirname, '../../dist/public'),
+    resolve(__dirname, '../../../public'),
+    resolve(__dirname, '../../../dist/public'),
+  ];
 
-  const distPublic = resolve(__dirname, '../public');
-  if (existsSync(distPublic)) {
-    publicDir = distPublic;
-  } else {
-    // Fallback to source location
-    const sourcePublic = resolve(__dirname, '../../public');
-    if (existsSync(sourcePublic)) {
-      publicDir = sourcePublic;
-    } else {
-      return jsonResponse(500, {
-        error: 'Public directory not found',
-        paths: {
-          tried: [distPublic, sourcePublic],
-          dirname: __dirname,
-        },
-      });
+  for (const candidate of candidates) {
+    if (existsSync(candidate) && existsSync(join(candidate, 'index.html'))) {
+      return candidate;
     }
   }
 
-  return handleStaticFileFromDir(path, publicDir, config);
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+let cachedPublicDir: string | null = null;
+
+function handleStaticFile(path: string, config: StudioConfig): UniversalResponse {
+  if (!cachedPublicDir) {
+    cachedPublicDir = findPublicDir();
+  }
+
+  if (!cachedPublicDir) {
+    const candidates = [
+      resolve(__dirname, '../public'),
+      resolve(__dirname, '../../public'),
+      resolve(__dirname, '../../dist/public'),
+    ];
+    return jsonResponse(500, {
+      error: 'Public directory not found',
+      paths: {
+        tried: candidates,
+        dirname: __dirname,
+      },
+    });
+  }
+
+  return handleStaticFileFromDir(path, cachedPublicDir, config);
 }
 
 function handleStaticFileFromDir(
