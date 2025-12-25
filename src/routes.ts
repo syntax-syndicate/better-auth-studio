@@ -1083,20 +1083,7 @@ export function createRoutes(
       let teamsPluginEnabled = false;
 
       try {
-        let betterAuthConfig = preloadedAuthOptions;
-
-        if (!betterAuthConfig && !isSelfHosted) {
-          const authConfigPath = configPath || (await findAuthConfigPath());
-          if (authConfigPath) {
-            const { getConfig } = await import('./config.js');
-            betterAuthConfig = await getConfig({
-              cwd: process.cwd(),
-              configPath: authConfigPath,
-              shouldThrowOnError: false,
-              noCache: true, // Disable cache for real-time plugin checks
-            });
-          }
-        }
+        const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
 
         if (betterAuthConfig) {
           const plugins = betterAuthConfig.plugins || [];
@@ -1731,43 +1718,10 @@ export function createRoutes(
 
   router.get('/api/plugins', async (_req: Request, res: Response) => {
     try {
-      const authConfigPath = configPath
-        ? join(process.cwd(), configPath)
-        : await findAuthConfigPath();
-      if (!authConfigPath) {
-        return res.json({
-          plugins: [],
-          error: 'No auth config found',
-          configPath: null,
-        });
-      }
-
-      try {
-        let authModule;
-        try {
-          authModule = await safeImportAuthConfig(authConfigPath, true); // Disable cache for real-time plugin checks
-        } catch (_importError) {
-          const content = readFileSync(authConfigPath, 'utf-8');
-
-          authModule = {
-            auth: {
-              options: {
-                _content: content,
-                plugins: [],
-              },
-            },
-          };
-        }
-        const auth = authModule.auth || authModule.default;
-
-        if (!auth) {
-          return res.json({
-            plugins: [],
-            error: 'No auth export found',
-            configPath: authConfigPath,
-          });
-        }
-        const plugins = auth.options?.plugins || [];
+      const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
+      
+      if (betterAuthConfig) {
+        const plugins = betterAuthConfig.plugins || [];
         const pluginInfo = plugins.map((plugin: any) => ({
           id: plugin.id,
           name: plugin.name || plugin.id,
@@ -1775,18 +1729,77 @@ export function createRoutes(
           enabled: true,
         }));
 
-        res.json({
+        return res.json({
           plugins: pluginInfo,
-          configPath: authConfigPath,
+          configPath: isSelfHosted ? null : configPath || null,
           totalPlugins: pluginInfo.length,
         });
-      } catch (_error) {
-        res.json({
-          plugins: [],
-          error: 'Failed to load auth config - import failed and regex extraction unavailable',
-          configPath: authConfigPath,
-        });
       }
+
+      if (!isSelfHosted) {
+        const authConfigPath = configPath
+          ? join(process.cwd(), configPath)
+          : await findAuthConfigPath();
+        if (!authConfigPath) {
+          return res.json({
+            plugins: [],
+            error: 'No auth config found',
+            configPath: null,
+          });
+        }
+
+        try {
+          let authModule;
+          try {
+            authModule = await safeImportAuthConfig(authConfigPath, true); // Disable cache for real-time plugin checks
+          } catch (_importError) {
+            const content = readFileSync(authConfigPath, 'utf-8');
+
+            authModule = {
+              auth: {
+                options: {
+                  _content: content,
+                  plugins: [],
+                },
+              },
+            };
+          }
+          const auth = authModule.auth || authModule.default;
+
+          if (!auth) {
+            return res.json({
+              plugins: [],
+              error: 'No auth export found',
+              configPath: authConfigPath,
+            });
+          }
+          const plugins = auth.options?.plugins || [];
+          const pluginInfo = plugins.map((plugin: any) => ({
+            id: plugin.id,
+            name: plugin.name || plugin.id,
+            description: plugin.description || `${plugin.id} plugin for Better Auth`,
+            enabled: true,
+          }));
+
+          return res.json({
+            plugins: pluginInfo,
+            configPath: authConfigPath,
+            totalPlugins: pluginInfo.length,
+          });
+        } catch (_error) {
+          return res.json({
+            plugins: [],
+            error: 'Failed to load auth config - import failed and regex extraction unavailable',
+            configPath: authConfigPath,
+          });
+        }
+      }
+
+      return res.json({
+        plugins: [],
+        error: 'No auth config found',
+        configPath: null,
+      });
     } catch (_error) {
       res.status(500).json({ error: 'Failed to fetch plugins' });
     }
@@ -1794,6 +1807,14 @@ export function createRoutes(
 
   router.get('/api/database/info', async (_req: Request, res: Response) => {
     try {
+      if (isSelfHosted && preloadedAuthOptions) {
+        const database = preloadedAuthOptions.database;
+        return res.json({
+          database: database,
+          configPath: null,
+        });
+      }
+
       const authConfigPath = configPath || (await findAuthConfigPath());
       if (!authConfigPath) {
         return res.json({
@@ -2415,7 +2436,6 @@ export function createRoutes(
     }
   });
 
-  // Database Detection endpoint - Auto-detect database from installed packages
   router.get('/api/database/detect', async (_req: Request, res: Response) => {
     try {
       const detectedDb = await detectDatabaseWithDialect();
@@ -2484,10 +2504,7 @@ export function createRoutes(
 
   router.post('/api/admin/ban-user', async (req: Request, res: Response) => {
     try {
-      let auth = preloadedAuthOptions;
-      if (!auth && !isSelfHosted) {
-        auth = await getAuthConfigSafe();
-      }
+      const auth = preloadedAuthOptions || (await getAuthConfigSafe());
       if (!auth) {
         return res.status(400).json({
           success: false,
@@ -2530,10 +2547,7 @@ export function createRoutes(
 
   router.post('/api/admin/unban-user', async (req: Request, res: Response) => {
     try {
-      let auth = preloadedAuthOptions;
-      if (!auth && !isSelfHosted) {
-        auth = await getAuthConfigSafe();
-      }
+      const auth = preloadedAuthOptions || (await getAuthConfigSafe());
       if (!auth) {
         return res.status(400).json({
           success: false,
@@ -2575,10 +2589,7 @@ export function createRoutes(
 
   router.get('/api/admin/status', async (_req: Request, res: Response) => {
     try {
-      let betterAuthConfig = preloadedAuthOptions;
-      if (!betterAuthConfig && !isSelfHosted) {
-        betterAuthConfig = await getAuthConfigSafe();
-      }
+      const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
       if (!betterAuthConfig) {
         return res.json({
           enabled: false,
@@ -2604,9 +2615,6 @@ export function createRoutes(
     }
   });
 
-  // Database Schema Visualization endpoint
-  // Now uses loadContextTables to dynamically load schema from Better Auth context
-
   const CONTEXT_CORE_TABLES = new Set(['user', 'session', 'account', 'verification']);
 
   async function resolveSchemaConfigPath(): Promise<string | null> {
@@ -2618,16 +2626,24 @@ export function createRoutes(
 
   async function loadContextTables() {
     try {
+      if (isSelfHosted && authInstance?.$context) {
+        try {
+          const context = await authInstance.$context;
+          return context?.tables || null;
+        } catch (_error) {
+        }
+      }
+      
       const authConfigPath = await resolveSchemaConfigPath();
       if (!authConfigPath) {
         return null;
       }
       const authModule = await safeImportAuthConfig(authConfigPath);
-      const authInstance = authModule?.auth || authModule?.default;
-      if (!authInstance?.$context) {
+      const fileAuthInstance = authModule?.auth || authModule?.default;
+      if (!fileAuthInstance?.$context) {
         return null;
       }
-      const context = await authInstance.$context;
+      const context = await fileAuthInstance.$context;
       return context?.tables || null;
     } catch (_error) {
       return null;
@@ -2768,14 +2784,11 @@ export function createRoutes(
       if (!schema) {
         return null;
       }
-      // Filter by plugin origin if plugins are specified
       if (selectedPlugins && selectedPlugins.length > 0) {
         schema.tables = schema.tables.filter((table) => {
-          // Include core tables
           if (CONTEXT_CORE_TABLES.has(table.name)) {
             return true;
           }
-          // Include tables from selected plugins
           return selectedPlugins.includes(table.origin);
         });
       }
@@ -2838,10 +2851,7 @@ export function createRoutes(
 
   router.get('/api/plugins/teams/status', async (_req: Request, res: Response) => {
     try {
-      let betterAuthConfig = preloadedAuthOptions;
-      if (!betterAuthConfig && !isSelfHosted) {
-        betterAuthConfig = await getAuthConfigSafe();
-      }
+      const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
       if (!betterAuthConfig) {
         return res.json({
           enabled: false,
@@ -3528,10 +3538,7 @@ export function createRoutes(
 
   router.get('/api/plugins/organization/status', async (_req: Request, res: Response) => {
     try {
-      let betterAuthConfig = preloadedAuthOptions;
-      if (!betterAuthConfig && !isSelfHosted) {
-        betterAuthConfig = await getAuthConfigSafe();
-      }
+      const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
       if (!betterAuthConfig) {
         return res.json({
           enabled: false,

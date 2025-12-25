@@ -262,7 +262,7 @@ function handleStaticFile(path, config) {
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: 'Geist Sans', monospace; 
+      font-family: 'Geist Mono', monospace; 
       background: #000000; 
       color: #e5e5e5; 
       max-width: 700px; 
