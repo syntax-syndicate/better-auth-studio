@@ -96,6 +96,7 @@ const ChevronIcon = () => (
 );
 
 const versionHistory = [
+  { version: "v1.0.79-beta.19", date: "2025-12-25", description: "Beta release with self-hosting support. Better Auth Studio can now be embedded directly into your application for production use. Full support for Next.js App Router and Express.js integration. Fixed adapter resolution, auth config loading, and database schema loading for all endpoints in production deployments." },
   { version: "v1.0.31", date: "2025-01-31", description: "Enhanced email editor with code export, field simulator, and alignment icons. Added Password Strength Checker tool with comprehensive validation. Improved navigation with dynamic count badges." },
   { version: "v1.0.30", date: "2025-11-08", description: "Released the refreshed analytics dashboard, Tools workspace with OAuth testing/migration/database utilities, Geist typography polish, and widespread UI clean-up." },
   { version: "v1.0.26", date: "2025-01-09", description: "Major release with Shadcn UI components, admin functionality for user banning/unbanning, advanced filtering system with date range picker, and pure black & white theme overhaul." },
@@ -167,6 +168,130 @@ export default function Changelog() {
 
         <section>
           <h2 className="text-2xl font-light tracking-tight mb-6 text-white">RECENT UPDATES</h2>
+          <PixelCard className="mb-6 relative">
+            <div className="absolute -top-10 left-0">
+              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
+                <span className="relative z-10 inline-flex gap-[2px] items-center">
+                  <svg
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    className="w-3 h-3 inline-flex mr-1 text-white/50"
+                  >
+                    <path
+                      d="M15 2h2v2h4v18H3V4h4V2h2v2h6V2zM9 6H5v2h14V6H9zm-4 4v10h14V10H5zm2 2h8v2H7v-2zm4 6v-2H7v2h4z"
+                      fill="currentColor"
+                    />
+                  </svg>
+                  Self-Hosting Support (Beta) <span className="text-white/50 ml-2">/ 2024-12-24</span>
+                </span>
+              </h3>
+            </div>
+            <div className="space-y-4 pt-4">
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white flex items-center"><RocketIcon />Self-Hosting Feature</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Better Auth Studio can now be embedded directly into your application for production use
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Full support for Next.js App Router with automatic route generation
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Easy integration with Express.js applications
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Role-based and email-based access control for secure studio access
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Optimized for deployment on Vercel, AWS, and other serverless platforms
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white flex items-center"><ShieldIcon />Production Fixes</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Fixed adapter resolution in self-hosted mode for sign-in and user management endpoints
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Fixed auth config loading for all endpoints in production deployments
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Fixed database schema loading from Better Auth context in self-hosted mode
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Fixed plugin detection and status endpoints in production
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Updated analytics, stats, users, sessions, and providers endpoints for self-hosted compatibility
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Improved error handling and fallback mechanisms for missing configurations
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white flex items-center"><GlobeIcon />Next.js Configuration</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Added required <code className="text-yellow-400">outputFileTracingIncludes</code> configuration for Vercel deployments
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Fixed public directory resolution for serverless function bundling
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Enhanced path resolution for static assets in serverless environments
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-light tracking-tight mb-2 text-white flex items-center"><SettingsIcon />Technical Improvements</h4>
+                <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    All endpoints now properly use <code className="text-yellow-400">preloadedAuthOptions</code> in self-hosted mode
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Enhanced <code className="text-yellow-400">getAuthData</code> function to support preloaded adapters
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Improved path resolution for static assets in serverless environments
+                  </li>
+                  <li className="flex items-center">
+                    <ChevronIcon />
+                    Better error messages for debugging in production
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-yellow-900/20 border border-yellow-500/30 p-3 mt-4">
+                <p className="text-xs font-light tracking-tight text-yellow-400">
+                  <strong>Note:</strong> Self-hosting is currently in beta. Please report any issues on GitHub. For Next.js deployments, ensure you add the <code className="text-yellow-300">outputFileTracingIncludes</code> configuration to your <code className="text-yellow-300">next.config.ts</code>.
+                </p>
+              </div>
+            </div>
+          </PixelCard>
           <PixelCard className="mb-6 relative">
             <div className="absolute -top-10 left-0">
               <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
