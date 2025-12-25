@@ -314,7 +314,7 @@ function handleStaticFile(path: string, config: StudioConfig): UniversalResponse
           'Content-Type': 'text/html',
           'Cache-Control': 'no-cache',
         },
-        body: `<<!DOCTYPE html>
+        body: `<!DOCTYPE html>
 <html>
 <head>
   <title>Better Auth Studio - Setup Required</title>
@@ -324,7 +324,7 @@ function handleStaticFile(path: string, config: StudioConfig): UniversalResponse
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { 
-      font-family: 'Geist Sans', monospace; 
+      font-family: 'Geist Mono', monospace; 
       background: #000000; 
       color: #e5e5e5; 
       max-width: 700px; 

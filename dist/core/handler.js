@@ -185,12 +185,10 @@ function findPublicDir() {
                     }
                 }
             }
-            catch (err) {
-            }
+            catch (err) { }
         }
     }
-    catch (err) {
-    }
+    catch (err) { }
     const baseDirs = [__dirname, __realdir];
     for (const baseDir of baseDirs) {
         candidates.push(resolve(baseDir, '../public'), resolve(baseDir, '../../public'), resolve(baseDir, '../../../public'), resolve(baseDir, '../../dist/public'), resolve(baseDir, '../../../dist/public'));
@@ -214,8 +212,7 @@ function findPublicDir() {
             searchDir = resolve(searchDir, '..');
         }
     }
-    catch (err) {
-    }
+    catch (err) { }
     for (const candidate of candidates) {
         try {
             if (existsSync(candidate)) {
@@ -255,7 +252,7 @@ function handleStaticFile(path, config) {
                     'Content-Type': 'text/html',
                     'Cache-Control': 'no-cache',
                 },
-                body: `<<!DOCTYPE html>
+                body: `<!DOCTYPE html>
 <html>
 <head>
   <title>Better Auth Studio - Setup Required</title>

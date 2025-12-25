@@ -476,7 +476,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             if (!email || !password) {
                 return res.status(400).json({ success: false, message: 'Email and password required' });
             }
-            const adapter = await getAuthAdapter();
+            const adapter = await getAuthAdapterWithConfig();
             let signInResult = null;
             let signInError = null;
             try {
@@ -517,7 +517,6 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                             message: 'Password not configured. Please reset your password.',
                         });
                     }
-                    console.log({ users, credentialAccount });
                     const isValidPassword = await verifyPassword(password, credentialAccount.password);
                     if (!isValidPassword) {
                         return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -525,11 +524,10 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     const userRole = users[0].role;
                     const user = { id: userId, email: users[0].email, name: users[0].name, role: userRole };
                     const allowedRoles = getAllowedRoles();
-                    console.log({ user, allowedRoles, credentialAccount });
                     if (!allowedRoles.includes(user.role)) {
                         return res.status(403).json({
                             success: false,
-                            message: `Access denied. Required role: ${allowedRoles.join(' or ')}`,
+                            message: `Access denied.`,
                             userRole: user.role || 'none',
                         });
                     }
@@ -578,7 +576,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             if (!allowedRoles.includes(user.role)) {
                 return res.status(403).json({
                     success: false,
-                    message: `Access denied. Required role: ${allowedRoles.join(' or ')}`,
+                    message: `Access denied.`,
                     userRole: user.role || 'none',
                 });
             }

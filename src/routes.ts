@@ -575,7 +575,7 @@ export function createRoutes(
         return res.status(400).json({ success: false, message: 'Email and password required' });
       }
 
-      const adapter = await getAuthAdapter();
+      const adapter = await getAuthAdapterWithConfig();
 
       let signInResult: any = null;
       let signInError: string | null = null;
@@ -627,7 +627,6 @@ export function createRoutes(
               message: 'Password not configured. Please reset your password.',
             });
           }
-          console.log({ users, credentialAccount });
           const isValidPassword = await verifyPassword(password, credentialAccount.password);
           if (!isValidPassword) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
@@ -636,7 +635,6 @@ export function createRoutes(
           const userRole = users[0].role;
           const user = { id: userId, email: users[0].email, name: users[0].name, role: userRole };
           const allowedRoles = getAllowedRoles();
-          console.log({ user, allowedRoles, credentialAccount });
           if (!allowedRoles.includes(user.role)) {
             return res.status(403).json({
               success: false,
@@ -679,7 +677,6 @@ export function createRoutes(
       if (!userId) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' });
       }
-
       let userRole: string | null = null;
       if (adapter?.findMany) {
         const users = await adapter.findMany({
@@ -698,7 +695,7 @@ export function createRoutes(
       if (!allowedRoles.includes(user.role)) {
         return res.status(403).json({
           success: false,
-          message: `Access denied. Required role: ${allowedRoles.join(' or ')}`,
+          message: `Access denied.`,
           userRole: user.role || 'none',
         });
       }
