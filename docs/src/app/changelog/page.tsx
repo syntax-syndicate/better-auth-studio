@@ -300,12 +300,6 @@ export default function Changelog() {
                   </li>
                 </ul>
               </div>
-
-              <div className="bg-black/50 border border-white/10 p-3 mt-4">
-                <p className="text-xs font-light tracking-tight text-white/70">
-                  <strong className="text-white/90">Note:</strong> Self-hosting is currently in beta. Please report any issues on GitHub. For Next.js deployments, ensure you add the <code className="text-white/80">outputFileTracingIncludes</code> configuration to your <code className="text-white/80">next.config.ts</code>.
-                </p>
-              </div>
             </div>
           </PixelCard>
           <PixelCard className="mb-6 relative">
