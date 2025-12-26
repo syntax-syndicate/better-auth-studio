@@ -839,11 +839,10 @@ export default function OrganizationDetails() {
           <nav className="flex space-x-8 px-6">
             <button
               onClick={() => setActiveTab('details')}
-              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
-                activeTab === 'details'
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === 'details'
                   ? 'border-white text-white'
                   : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-              }`}
+                }`}
             >
               <Building2 className="w-4 h-4 text-white/90" />
               <span className="inline-flex items-start font-mono uppercase text-xs font-normal">
@@ -861,11 +860,10 @@ export default function OrganizationDetails() {
             </button>
             <button
               onClick={() => setActiveTab('members')}
-              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
-                activeTab === 'members'
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === 'members'
                   ? 'border-white text-white'
                   : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-              }`}
+                }`}
             >
               <Users className="w-4 h-4 text-white/90" />
               <span className="inline-flex items-start font-mono uppercase text-xs font-normal">
@@ -883,11 +881,10 @@ export default function OrganizationDetails() {
             </button>
             <button
               onClick={() => setActiveTab('invitations')}
-              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
-                activeTab === 'invitations'
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === 'invitations'
                   ? 'border-white text-white'
                   : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-              }`}
+                }`}
             >
               <Mail className="w-4 h-4 text-white/90" />
               <span className="inline-flex items-start font-mono uppercase text-xs font-normal">
@@ -905,11 +902,10 @@ export default function OrganizationDetails() {
             </button>
             <button
               onClick={() => setActiveTab('teams')}
-              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
-                activeTab === 'teams'
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === 'teams'
                   ? 'border-white text-white'
                   : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-              }`}
+                }`}
             >
               <Users className="w-4 h-4 text-white/90" />
               <span className="inline-flex items-start font-mono uppercase text-xs font-normal">
@@ -1010,7 +1006,7 @@ export default function OrganizationDetails() {
                         <AnimatedNumber
                           value={Math.ceil(
                             (new Date().getTime() - new Date(organization.createdAt).getTime()) /
-                              (1000 * 60 * 60 * 24)
+                            (1000 * 60 * 60 * 24)
                           )}
                           format={{ notation: 'standard', maximumFractionDigits: 0 }}
                         />
@@ -1040,33 +1036,34 @@ export default function OrganizationDetails() {
                     Manage teams within this organization
                   </p>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <Button
-                    onClick={() => setShowSeedTeamsModal(true)}
-                    className="border border-dashed border-white/20 text-white hover:bg-white/10 bg-transparent rounded-none"
-                  >
-                    <Database className="w-4 h-4 mr-2" />
-                    Seed Teams
-                  </Button>
-                  <Button
-                    onClick={() => setShowCreateTeamModal(true)}
-                    className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Create Team
-                  </Button>
-                </div>
+                {teamsEnabled && (
+                  <div className="flex items-center space-x-3">
+                    <Button
+                      onClick={() => setShowSeedTeamsModal(true)}
+                      className="border border-dashed border-white/20 text-white hover:bg-white/10 bg-transparent rounded-none"
+                    >
+                      <Database className="w-4 h-4 mr-2" />
+                      Seed Teams
+                    </Button>
+                    <Button
+                      onClick={() => setShowCreateTeamModal(true)}
+                      className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
+                    >
+                      <UserPlus className="w-4 h-4 mr-2" />
+                      Create Team
+                    </Button>
+                  </div>
+                )}
               </div>
-
               {!teamsEnabled ? (
                 <div className="bg-black/30 border border-dashed border-white/20 rounded-none p-8">
                   <div className="flex items-start space-x-4">
                     <div className="flex-shrink-0">
-                      <Users className="w-12 h-12 text-white" />
+                      <Users className="w-8 h-8 text-white" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="text-xl text-white font-light mb-2">Teams Feature Required</h3>
-                      <p className="text-gray-300 mb-6">
+                      <h3 className="text-xl text-white font-light font-mono uppercase mb-2">Teams Feature Required</h3>
+                      <p className="text-gray-300 mb-6 text-sm">
                         To use Teams in Better Auth Studio, you need to enable the teams feature in
                         your organization plugin configuration.
                       </p>
@@ -1415,13 +1412,12 @@ export default function OrganizationDetails() {
                             <td className="py-4 px-4">
                               <Badge
                                 variant="secondary"
-                                className={`text-xs font-normal font-mono uppercase rounded-none border-dashed flex items-center gap-1 w-fit ${
-                                  invitation.status === 'pending'
+                                className={`text-xs font-normal font-mono uppercase rounded-none border-dashed flex items-center gap-1 w-fit ${invitation.status === 'pending'
                                     ? 'bg-yellow-900/10 border border-yellow-500/30 text-yellow-400/70'
                                     : invitation.status === 'accepted'
                                       ? 'bg-green-900/10 border border-green-500/30 text-green-400/70'
                                       : 'bg-red-900/10 border border-red-500/30 text-red-400/70'
-                                }`}
+                                  }`}
                               >
                                 {invitation.status === 'pending' && <Clock className="w-2 h-2" />}
                                 {invitation.status === 'accepted' && (
