@@ -1312,7 +1312,7 @@ export default function UserDetails() {
                           </div>
                           <div className="flex flex-col items-end space-y-2 text-right">
                             <div className="flex items-center space-x-2 text-xs font-mono text-gray-400">
-                              <span>Linked:</span>
+                              <span className='uppercase'>Linked:</span>
                               <span className="text-white">
                                 {formatDateTime(account.createdAt || account.updatedAt)}
                               </span>

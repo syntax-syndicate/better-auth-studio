@@ -1570,11 +1570,7 @@ export default function OrganizationDetails() {
                 disabled={inviting}
                 className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
               >
-                {inviting ? (
-                  <Loader className="w-3 h-3 mr-2 animate-spin" />
-                ) : (
                   <Send className="w-4 h-4 mr-2" />
-                )}
                 {inviting ? 'Sending...' : 'Send Invitation'}
               </Button>
             </div>

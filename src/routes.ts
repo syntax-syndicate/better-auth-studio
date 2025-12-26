@@ -2874,7 +2874,7 @@ export function createRoutes(
         return res.json({
           enabled: false,
           error: 'No auth config found',
-          configPath: null,
+          configPath: isSelfHosted ? null : configPath || null,
         });
       }
 
@@ -2885,13 +2885,13 @@ export function createRoutes(
         const teamsEnabled = organizationPlugin.options?.teams?.enabled === true;
         return res.json({
           enabled: teamsEnabled,
-          configPath: configPath || null,
+          configPath: isSelfHosted ? null : configPath || null,
           organizationPlugin: organizationPlugin || null,
         });
       } else {
         return res.json({
           enabled: false,
-          configPath: configPath || null,
+          configPath: isSelfHosted ? null : configPath || null,
           organizationPlugin: null,
           error: 'Organization plugin not found',
         });
@@ -3288,6 +3288,75 @@ export function createRoutes(
       res.json({ success: true, invitation });
     } catch (_error) {
       res.status(500).json({ error: 'Failed to create invitation' });
+    }
+  });
+
+  router.get('/api/teams', async (req: Request, res: Response) => {
+    try {
+      const adapter = await getAuthAdapterWithConfig();
+
+      if (adapter && typeof adapter.findMany === 'function') {
+        try {
+          const teams = await adapter.findMany({
+            model: 'team',
+            limit: 10000,
+          });
+
+          const transformedTeams = await Promise.all(
+            (teams || []).map(async (team: any) => {
+              if (!adapter.findMany) {
+                return null;
+              }
+              
+              // Fetch organization details
+              let organization = null;
+              try {
+                if (team.organizationId) {
+                  const orgs = await adapter.findMany({
+                    model: 'organization',
+                    where: [{ field: 'id', value: team.organizationId }],
+                    limit: 1,
+                  });
+                  organization = orgs && orgs.length > 0 ? orgs[0] : null;
+                }
+              } catch (_error) {}
+
+              // Fetch team members count
+              const teamMembers = await adapter.findMany({
+                model: 'teamMember',
+                where: [{ field: 'teamId', value: team.id }],
+                limit: 10000,
+              });
+
+              return {
+                id: team.id,
+                name: team.name,
+                organizationId: team.organizationId,
+                metadata: team.metadata,
+                createdAt: team.createdAt,
+                updatedAt: team.updatedAt,
+                memberCount: teamMembers ? teamMembers.length : 0,
+                organization: organization
+                  ? {
+                      id: organization.id,
+                      name: organization.name,
+                      slug: organization.slug,
+                    }
+                  : null,
+              };
+            })
+          );
+
+          const validTeams = transformedTeams.filter((team) => team !== null);
+
+          res.json({ success: true, teams: validTeams });
+          return;
+        } catch (_error) {}
+      }
+
+      res.json({ success: true, teams: [] });
+    } catch (_error) {
+      res.status(500).json({ error: 'Failed to fetch teams' });
     }
   });
 
