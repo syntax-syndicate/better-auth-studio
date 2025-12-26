@@ -392,13 +392,12 @@ export default function Organizations() {
       return;
     }
 
-    const csvHeaders = ['ID', 'Name', 'Slug', 'Created At', 'Updated At'];
+    const csvHeaders = ['ID', 'Name', 'Slug', 'Created At'];
     const csvData = organizations.map((organization) => [
       organization.id,
       organization.name || '',
       organization.slug || '',
       new Date(organization.createdAt).toLocaleString(),
-      new Date(organization.updatedAt).toLocaleString(),
     ]);
 
     const csvContent = [
@@ -1079,7 +1078,7 @@ export default function Organizations() {
           }}
         >
           <div
-            className="bg-black border border-white/15 p-6 w-full max-w-lg rounded-none shadow-2xl"
+            className="bg-black border border-white/15 p-6 w-full max-w-xl rounded-none shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
@@ -1265,7 +1264,6 @@ export default function Organizations() {
               <div className="space-y-2 text-sm">
                 {[
                   { label: 'Created', value: formatDateTime(selectedOrganization.createdAt) },
-                  { label: 'Updated', value: formatDateTime(selectedOrganization.updatedAt) },
                 ].map((item) => (
                   <div
                     key={item.label}
