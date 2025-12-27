@@ -427,9 +427,13 @@ program
 program
   .command('init')
   .description('Initialize Better Auth Studio for self-hosting')
-  .action(async () => {
+  .option(
+    '--api-dir <path>',
+    'Custom app directory path for Next.js (e.g., "app" or "src/app"). The command will auto-detect "app" or "src/app" if not provided.'
+  )
+  .action(async (options) => {
     try {
-      await initCommand();
+      await initCommand({ apiDir: options.apiDir });
     } catch (error) {
       console.error(chalk.red('Error initializing studio:'), error);
       process.exit(1);

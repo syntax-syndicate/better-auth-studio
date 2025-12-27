@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-export async function initCommand() {
+export async function initCommand(options?: { apiDir?: string }) {
   console.log('🚀 Initializing Better Auth Studio...\n');
 
   const framework = detectFramework();
@@ -13,7 +13,7 @@ export async function initCommand() {
   const basePath = '/api/studio';
 
   if (framework === 'nextjs') {
-    await setupNextJS(basePath);
+    await setupNextJS(basePath, options?.apiDir);
   } else {
     showManualInstructions(framework, basePath);
   }
@@ -48,9 +48,29 @@ export default config;
   return configPath;
 }
 
-async function setupNextJS(basePath: string) {
+function detectNextJSAppDir(): string {
+  if (existsSync(join(process.cwd(), 'src', 'app'))) {
+    return 'src/app';
+  }
+  if (existsSync(join(process.cwd(), 'app'))) {
+    return 'app';
+  }
+  return 'app';
+}
+
+async function setupNextJS(basePath: string, customApiDir?: string) {
   const segments = basePath.split('/').filter(Boolean);
-  const routeDir = join(process.cwd(), 'app', ...segments, '[[...path]]');
+  
+  let appDir: string;
+  if (customApiDir) {
+    appDir = customApiDir;
+    console.log(`📂 Using custom API directory: ${appDir}`);
+  } else {
+    appDir = detectNextJSAppDir();
+    console.log(`📂 Auto-detected app directory: ${appDir}`);
+  }
+  
+  const routeDir = join(process.cwd(), appDir, ...segments, '[[...path]]');
   const routeFile = join(routeDir, 'route.ts');
 
   if (existsSync(routeFile)) {
@@ -62,6 +82,8 @@ async function setupNextJS(basePath: string) {
     console.log('✅ Generated route file:', routeFile);
   }
 
+  const relativePath = `${appDir}${basePath}/[[...path]]/route.ts`;
+
   console.log(`
 ╔═══════════════════════════════════════════════════════════════╗
 ║                    ✅ Next.js Setup Complete!                  ║
@@ -69,7 +91,7 @@ async function setupNextJS(basePath: string) {
 ║                                                               ║
 ║  📁 Files created:                                            ║
 ║     • studio.config.ts                                        ║
-║     • app${basePath}/[[...path]]/route.ts                     ║
+║     • ${relativePath}                                        ║
 ║                                                               ║
 ║  🚀 Start your app:                                           ║
 ║     pnpm dev                                                  ║
