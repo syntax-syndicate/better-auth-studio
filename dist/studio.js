@@ -55,6 +55,15 @@ export async function startStudio(options) {
     const publicDir = existsSync(join(__dirname, '../public'))
         ? join(__dirname, '../public')
         : join(__dirname, '../../public');
+    let studioEnabled = false;
+    let possibleFiles = ['studio.config.ts', 'studio.config.js'];
+    for (const file of possibleFiles) {
+        const studioConfigPath = join(process.cwd(), file);
+        if (existsSync(studioConfigPath)) {
+            studioEnabled = true;
+            break;
+        }
+    }
     app.use('/assets', express.static(join(publicDir, 'assets'), {
         setHeaders: (res) => {
             res.setHeader('Cache-Control', 'public, max-age=31536000');
@@ -99,6 +108,10 @@ export async function startStudio(options) {
             const styledApiUrl = chalk.green(chalk.underline(apiUrl));
             process.stdout.write(createClickableLink(apiUrl, styledApiUrl));
             process.stdout.write('\n');
+            if (studioEnabled) {
+                process.stdout.write(chalk.white('📋 Studio config found: studio.config.ts\n'));
+                process.stdout.write('\n');
+            }
             if (watchMode) {
                 process.stdout.write(chalk.white('👀 Watch mode enabled - config changes will reload automatically\n'));
                 process.stdout.write('\n');
