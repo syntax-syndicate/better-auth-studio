@@ -1167,10 +1167,11 @@ export default function UserDetails() {
                   </div>
                 </div>
                 {organizations.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-12 border border-dashed border-white/10 rounded-none">
                     <Building2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No Organizations</h3>
-                    <p className="text-gray-400">This user is not a member of any organizations.</p>
+                    <p className="text-gray-400 font-mono text-xs uppercase">
+                      No organizations found
+                    </p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
@@ -1275,10 +1276,11 @@ export default function UserDetails() {
                   </div>
                 </div>
                 {teams.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-12 border border-dashed border-white/10 rounded-none">
                     <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No Teams</h3>
-                    <p className="text-gray-400">This user is not a member of any teams.</p>
+                    <p className="text-gray-400 font-mono text-xs uppercase">
+                      No teams found
+                    </p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
@@ -1400,10 +1402,11 @@ export default function UserDetails() {
                   </Button>
                 </div>
                 {accounts.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-12 border border-dashed border-white/10 rounded-none">
                     <Link2 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No Linked Accounts</h3>
-                    <p className="text-gray-400">This user has not connected any accounts yet.</p>
+                    <p className="text-gray-400 font-mono text-xs uppercase">
+                      No linked accounts found
+                    </p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
@@ -1489,10 +1492,11 @@ export default function UserDetails() {
                 </div>
 
                 {sessions.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-12 border border-dashed border-white/10 rounded-none">
                     <Clock1 className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-white mb-2">No Sessions</h3>
-                    <p className="text-gray-400">This user has no active sessions.</p>
+                    <p className="text-gray-400 font-mono text-xs uppercase">
+                      No sessions found
+                    </p>
                   </div>
                 ) : (
                   <div className="grid gap-4">
