@@ -4291,14 +4291,15 @@ export function createRoutes(
       // For now, we'll access it from a function that should be provided
       // This assumes getOAuthCredentials is available in the scope
       // You need to import it: import { getOAuthCredentials } from './your-oauth-config-file';
-      
+
       // Placeholder - replace this with actual import at top of file
       const getOAuthCredentials = (global as any).getOAuthCredentials;
-      
+
       if (typeof getOAuthCredentials !== 'function') {
         return res.status(500).json({
           success: false,
-          error: 'OAuth credentials function not configured. Please import getOAuthCredentials function.',
+          error:
+            'OAuth credentials function not configured. Please import getOAuthCredentials function.',
         });
       }
 

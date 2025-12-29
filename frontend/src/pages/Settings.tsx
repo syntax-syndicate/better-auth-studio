@@ -237,7 +237,6 @@ export default function Settings() {
     fetchDatabaseInfo();
   }, [fetchConfig, fetchDatabaseInfo, fetchPlugins, fetchSystemInfo]);
 
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -550,9 +549,7 @@ export default function Settings() {
             {config?.socialProviders && config.socialProviders.length > 0 ? (
               config.socialProviders.map((provider, index) => {
                 const clientId =
-                  typeof provider === 'object' && provider !== null
-                    ? provider.clientId
-                    : undefined;
+                  typeof provider === 'object' && provider !== null ? provider.clientId : undefined;
                 return (
                   <div
                     key={index}
@@ -564,7 +561,8 @@ export default function Settings() {
                       </div>
                       <div>
                         <p className="text-xs font-light text-white capitalize">
-                          {String(provider.name).charAt(0).toUpperCase() + String(provider.name).slice(1).toLowerCase()}
+                          {String(provider.name).charAt(0).toUpperCase() +
+                            String(provider.name).slice(1).toLowerCase()}
                         </p>
                         <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                           {clientId ? 'Configured' : 'Not configured'}
@@ -1319,4 +1317,3 @@ export default function Settings() {
     </div>
   );
 }
-
