@@ -96,8 +96,8 @@ export async function startStudio(options: StudioOptions) {
   const publicDir = existsSync(join(__dirname, '../public'))
     ? join(__dirname, '../public')
     : join(__dirname, '../../public');
-  let studioEnabled = false 
-  let possibleFiles = ['studio.config.ts', 'studio.config.js'];
+  let studioEnabled = false;
+  const possibleFiles = ['studio.config.ts', 'studio.config.js'];
   for (const file of possibleFiles) {
     const studioConfigPath = join(process.cwd(), file);
     if (existsSync(studioConfigPath)) {
