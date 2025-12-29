@@ -45,7 +45,9 @@ interface AuthConfig {
   emailVerification?: BetterAuthOptions['emailVerification'];
   emailAndPassword?: BetterAuthOptions['emailAndPassword'];
   socialProviders?: Array<{
-    type: string;
+    type?: string;
+    id?: string;
+    name?: string;
     clientId?: string;
     clientSecret?: string;
     redirectUri?: string;
@@ -248,7 +250,7 @@ export default function Settings() {
     <div className="space-y-8">
       <div className="flex items-center justify-between p-5 pt-7">
         <div>
-          <h1 className="text-3xl font-normal text-white tracking-tight">Settings</h1>
+          <h1 className="text-2xl font-normal text-white tracking-tight">Settings</h1>
           <p className="text-gray-300 mt-2 uppercase font-mono font-light text-xs">
             Configure your Better Auth application
           </p>
@@ -259,7 +261,7 @@ export default function Settings() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-5">
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <SettingsIcon className="w-4 h-4 text-white" />
               <span>Application</span>
             </CardTitle>
@@ -279,20 +281,24 @@ export default function Settings() {
               Basic application configuration
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="space-y-0 px-0 pb-0 border-b-none">
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Globe className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">App Name</p>
+                  <p className="text-xs font-light uppercase text-white">App Name</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Application display name
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">{config?.appName || 'Better Auth'}</p>
+                <p className="text-xs font-medium text-white">{config?.appName || 'Better Auth'}</p>
               </div>
             </div>
 
@@ -300,14 +306,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Key className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Base URL</p>
+                  <p className="text-xs font-light uppercase text-white">Base URL</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Application base URL
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono font-light text-white">
+                <p className="text-xs font-mono font-light text-white">
                   {config?.baseURL || 'http://localhost:3000'}
                 </p>
               </div>
@@ -317,14 +323,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Lock className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Base Path</p>
+                  <p className="text-xs font-light uppercase text-white">Base Path</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Auth API base path
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-mono font-light text-white">
+                <p className="text-xs font-mono font-light text-white">
                   {config?.basePath || '/api/auth'}
                 </p>
               </div>
@@ -334,14 +340,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Shield className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Secret</p>
+                  <p className="text-xs font-light uppercase text-white">Secret</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Encryption secret
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">
+                <p className="text-xs font-medium text-white">
                   {config?.secret === 'Configured' ? 'Configured' : 'Not set'}
                 </p>
               </div>
@@ -352,7 +358,7 @@ export default function Settings() {
         {/* Enhanced Database Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <Database className="w-4 h-4 text-white" />
               <span>Database</span>
             </CardTitle>
@@ -372,14 +378,18 @@ export default function Settings() {
               Database connection and configuration
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="space-y-0 px-0 pb-0 border-b-none">
             {/* Database Type */}
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Database className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">
+                  <p className="text-xs font-light uppercase text-white">
                     {databaseInfo?.displayName ||
                       (config?.database?.type &&
                         config?.database?.type.charAt(0).toUpperCase() +
@@ -401,14 +411,14 @@ export default function Settings() {
                   <div className="flex items-center space-x-3">
                     <Database className="w-5 h-5 text-white" />
                     <div>
-                      <p className="text-sm font-light uppercase text-white">Dialect</p>
+                      <p className="text-xs font-light uppercase text-white">Dialect</p>
                       <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                         Database dialect
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-xs font-medium text-white">
                       {config?.database?.dialect || databaseInfo?.dialect}
                     </p>
                   </div>
@@ -420,7 +430,7 @@ export default function Settings() {
                 <div className="flex items-center space-x-3">
                   <Key className="w-5 h-5 text-white" />
                   <div>
-                    <p className="text-sm font-light uppercase text-white">Connection URL</p>
+                    <p className="text-xs font-light uppercase text-white">Connection URL</p>
                     <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                       Database connection string
                     </p>
@@ -442,14 +452,14 @@ export default function Settings() {
                 <div className="flex items-center space-x-3">
                   <SettingsIcon className="w-5 h-5 text-white" />
                   <div>
-                    <p className="text-sm font-light uppercase text-white">Casing</p>
+                    <p className="text-xs font-light uppercase text-white">Casing</p>
                     <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                       Table name casing
                     </p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-white capitalize">
+                  <p className="text-xs font-medium text-white capitalize">
                     {config.database.casing}
                   </p>
                 </div>
@@ -462,7 +472,7 @@ export default function Settings() {
                 <div className="flex items-center space-x-3">
                   <RefreshCw className="w-5 h-5 text-white" />
                   <div>
-                    <p className="text-sm font-light uppercase text-white">Debug Logs</p>
+                    <p className="text-xs font-light uppercase text-white">Debug Logs</p>
                     <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                       Database debug logging
                     </p>
@@ -491,7 +501,7 @@ export default function Settings() {
                 <div className="flex items-center space-x-3">
                   <AlertTriangle className="w-5 h-5 text-yellow-400" />
                   <div>
-                    <p className="text-sm font-light uppercase text-white">No Database Detected</p>
+                    <p className="text-xs font-light uppercase text-white">No Database Detected</p>
                     <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                       {databaseInfo?.message || 'No supported database packages found'}
                     </p>
@@ -511,7 +521,7 @@ export default function Settings() {
         {/* Authentication Providers */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <Shield className="w-4 h-4 text-white" />
               <span>Providers</span>
             </CardTitle>
@@ -531,49 +541,59 @@ export default function Settings() {
               Configured authentication providers
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="p-0">
             {config?.socialProviders && config.socialProviders.length > 0 ? (
-              config.socialProviders.map((provider, index) => (
-                <div
-                  key={index}
-                  className="flex items-center justify-between p-3 px-5 border-b border-white/15 last:border-b-0"
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-black/80 border border-dashed border-white/20 flex items-center justify-center rounded-none">
-                      {getProviderIcon(provider.type)}
-                    </div>
-                    <div>
-                      <p className="text-sm font-light text-white capitalize">
-                        {provider.type}
-                      </p>
-                      <p className="text-[10px] font-light uppercase font-mono text-gray-400">
-                        {provider.clientId ? 'Configured' : 'Not configured'}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge
-                    variant="secondary"
-                    className="text-xs font-mono uppercase font-light text-gray-400 group-hover:bg-white group-hover:border-black group-hover:text-black bg-black/70 border border-white/15 rounded-none border-dashed flex items-center gap-1"
+              config.socialProviders.map((provider, index) => {
+                const clientId =
+                  typeof provider === 'object' && provider !== null
+                    ? provider.clientId
+                    : undefined;
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 px-5 border-b border-white/15 last:border-b-0"
                   >
-                    {provider.clientId ? (
-                      <>
-                        <CheckCircle className="w-3 h-3" />
-                        Active
-                      </>
-                    ) : (
-                      <>
-                        <AlertTriangle className="w-3 h-3" />
-                        Setup Required
-                      </>
-                    )}
-                  </Badge>
-                </div>
-              ))
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-black/80 border border-dashed border-white/20 flex items-center justify-center rounded-none">
+                        {getProviderIcon(provider.id)}
+                      </div>
+                      <div>
+                        <p className="text-xs font-light text-white capitalize">
+                          {String(provider.name).charAt(0).toUpperCase() + String(provider.name).slice(1).toLowerCase()}
+                        </p>
+                        <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                          {clientId ? 'Configured' : 'Not configured'}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge
+                      variant="secondary"
+                      className="text-xs font-mono uppercase font-light text-gray-400 group-hover:bg-white group-hover:border-black group-hover:text-black bg-black/70 border border-white/15 rounded-none border-dashed flex items-center gap-1"
+                    >
+                      {clientId ? (
+                        <>
+                          <CheckCircle className="w-3 h-3" />
+                          Active
+                        </>
+                      ) : (
+                        <>
+                          <AlertTriangle className="w-3 h-3" />
+                          Setup Required
+                        </>
+                      )}
+                    </Badge>
+                  </div>
+                );
+              })
             ) : (
               <div className="text-center py-8">
                 <Shield className="w-8 h-8 text-white mx-auto mb-2" />
-                <p className="text-sm text-gray-400">No providers configured</p>
+                <p className="text-xs text-gray-400">No providers configured</p>
               </div>
             )}
           </CardContent>
@@ -582,7 +602,7 @@ export default function Settings() {
         {/* Email & Password */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <Mail className="w-4 h-4 text-white" />
               <span>Email & Password</span>
             </CardTitle>
@@ -602,13 +622,17 @@ export default function Settings() {
               Email authentication settings
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="p-0">
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Email Authentication</p>
+                  <p className="text-xs font-light uppercase text-white">Email Authentication</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Allow users to sign up with email
                   </p>
@@ -638,7 +662,7 @@ export default function Settings() {
                   <div className="flex items-center space-x-3">
                     <Users className="w-5 h-5 text-white" />
                     <div>
-                      <p className="text-sm font-light uppercase text-white">Sign Up</p>
+                      <p className="text-xs font-light uppercase text-white">Sign Up</p>
                       <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                         Allow new user registration
                       </p>
@@ -666,7 +690,7 @@ export default function Settings() {
                   <div className="flex items-center space-x-3">
                     <Shield className="w-5 h-5 text-white" />
                     <div>
-                      <p className="text-sm font-light uppercase text-white">Email Verification</p>
+                      <p className="text-xs font-light uppercase text-white">Email Verification</p>
                       <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                         Require email verification
                       </p>
@@ -694,14 +718,14 @@ export default function Settings() {
                   <div className="flex items-center space-x-3">
                     <Lock className="w-5 h-5 text-white" />
                     <div>
-                      <p className="text-sm font-light uppercase text-white">Password Length</p>
+                      <p className="text-xs font-light uppercase text-white">Password Length</p>
                       <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                         Min/Max password length
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-xs font-medium text-white">
                       {config?.emailAndPassword?.minPasswordLength || 8} -{' '}
                       {config?.emailAndPassword?.maxPasswordLength || 128}
                     </p>
@@ -712,7 +736,7 @@ export default function Settings() {
                   <div className="flex items-center space-x-3">
                     <Zap className="w-5 h-5 text-white" />
                     <div>
-                      <p className="text-sm font-light uppercase text-white">Auto Sign In</p>
+                      <p className="text-xs font-light uppercase text-white">Auto Sign In</p>
                       <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                         Auto sign in after registration
                       </p>
@@ -743,7 +767,7 @@ export default function Settings() {
         {/* Session Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <Clock className="w-4 h-4 text-white" />
               <span>Session</span>
             </CardTitle>
@@ -763,20 +787,24 @@ export default function Settings() {
               Session management settings
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="p-0">
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Clock className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Session Duration</p>
+                  <p className="text-xs font-light uppercase text-white">Session Duration</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     How long sessions last
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">
+                <p className="text-xs font-medium text-white">
                   {config?.session?.expiresIn
                     ? `${Math.floor(config.session.expiresIn / (60 * 60 * 24))} days`
                     : '7 days'}
@@ -789,14 +817,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <RefreshCw className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Update Age</p>
+                  <p className="text-xs font-light uppercase text-white">Update Age</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Session refresh interval
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">
+                <p className="text-xs font-medium text-white">
                   {config?.session?.updateAge
                     ? `${Math.floor(config.session.updateAge / (60 * 60))} hours`
                     : '24 hours'}
@@ -808,7 +836,7 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Zap className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Session Refresh</p>
+                  <p className="text-xs font-light uppercase text-white">Session Refresh</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Auto refresh sessions
                   </p>
@@ -836,7 +864,7 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Database className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Store in Database</p>
+                  <p className="text-xs font-light uppercase text-white">Store in Database</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Store sessions in database
                   </p>
@@ -865,7 +893,7 @@ export default function Settings() {
         {/* Rate Limiting */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <Shield className="w-4 h-4 text-white" />
               <span>Rate Limiting</span>
             </CardTitle>
@@ -885,13 +913,17 @@ export default function Settings() {
               API rate limiting configuration
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="p-0">
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Shield className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Rate Limiting</p>
+                  <p className="text-xs font-light uppercase text-white">Rate Limiting</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Enable rate limiting
                   </p>
@@ -919,14 +951,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Clock className="w-5 h-5 text-red-400" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Rate Limit Window</p>
+                  <p className="text-xs font-light uppercase text-white">Rate Limit Window</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Time window for rate limiting
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">
+                <p className="text-xs font-medium text-white">
                   {config?.rateLimit?.window ? `${config.rateLimit.window} seconds` : '10 seconds'}
                 </p>
                 <p className="text-[10px] font-light uppercase font-mono text-gray-400">Window</p>
@@ -937,14 +969,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Shield className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Max Requests</p>
+                  <p className="text-xs font-light uppercase text-white">Max Requests</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Maximum requests per window
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">{config?.rateLimit?.max || 100}</p>
+                <p className="text-xs font-medium text-white">{config?.rateLimit?.max || 100}</p>
                 <p className="text-[10px] font-light uppercase font-mono text-gray-400">Requests</p>
               </div>
             </div>
@@ -953,14 +985,14 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Database className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Storage</p>
+                  <p className="text-xs font-light uppercase text-white">Storage</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Rate limit storage type
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white capitalize">
+                <p className="text-xs font-medium text-white capitalize">
                   {config?.rateLimit?.storage || 'memory'}
                 </p>
               </div>
@@ -971,7 +1003,7 @@ export default function Settings() {
         {/* Advanced Configuration */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <SettingsIcon className="w-4 h-4 text-white" />
               <span>Advanced</span>
             </CardTitle>
@@ -991,13 +1023,17 @@ export default function Settings() {
               Advanced configuration options
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="p-0">
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Lock className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Secure Cookies</p>
+                  <p className="text-xs font-light uppercase text-white">Secure Cookies</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Use secure cookies
                   </p>
@@ -1025,7 +1061,7 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Shield className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">CSRF Check</p>
+                  <p className="text-xs font-light uppercase text-white">CSRF Check</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     CSRF protection
                   </p>
@@ -1053,7 +1089,7 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Eye className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">IP Tracking</p>
+                  <p className="text-xs font-light uppercase text-white">IP Tracking</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Track IP addresses
                   </p>
@@ -1081,7 +1117,7 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Bell className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Telemetry</p>
+                  <p className="text-xs font-light uppercase text-white">Telemetry</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Usage analytics
                   </p>
@@ -1110,7 +1146,7 @@ export default function Settings() {
         {/* System Information */}
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none">
           <CardHeader className="space-y-0">
-            <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
+            <CardTitle className="text-white font-light uppercase text-base flex items-center space-x-2">
               <Info className="w-4 h-4 text-white" />
               <span>System Info</span>
             </CardTitle>
@@ -1130,20 +1166,24 @@ export default function Settings() {
               Better Auth Studio system information
             </CardDescription>
           </CardHeader>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center -mt-3 mb-1">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="p-0">
             <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
               <div className="flex items-center space-x-3">
                 <Zap className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Studio Version</p>
+                  <p className="text-xs font-light uppercase text-white">Studio Version</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Better Auth Studio
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">{studioVersion || 'v1.0.0'}</p>
+                <p className="text-xs font-medium text-white">{studioVersion || 'v1.0.0'}</p>
                 <p className="text-[10px] font-light uppercase font-mono text-gray-400">Latest</p>
               </div>
             </div>
@@ -1152,32 +1192,32 @@ export default function Settings() {
               <div className="flex items-center space-x-3">
                 <Info className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Node.js Version</p>
+                  <p className="text-xs font-light uppercase text-white">Node.js Version</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Runtime environment
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">
+                <p className="text-xs font-medium text-white">
                   {systemInfo?.nodeVersion || 'v18.0.0'}
                 </p>
                 <p className="text-[10px] font-light uppercase font-mono text-gray-400">Current</p>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 px-5 border-b border-white/15">
+            <div className="flex items-center justify-between p-4 px-5 border-b border-white/15 last:border-b-0">
               <div className="flex items-center space-x-3">
                 <Globe className="w-5 h-5 text-white" />
                 <div>
-                  <p className="text-sm font-light uppercase text-white">Platform</p>
+                  <p className="text-xs font-light uppercase text-white">Platform</p>
                   <p className="text-[10px] font-light uppercase font-mono text-gray-400">
                     Operating system
                   </p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-sm font-medium text-white">{systemInfo?.platform || 'macOS'}</p>
+                <p className="text-xs font-medium text-white">{systemInfo?.platform || 'macOS'}</p>
                 <p className="text-[10px] font-light uppercase font-mono text-gray-400">System</p>
               </div>
             </div>
@@ -1185,49 +1225,45 @@ export default function Settings() {
         </Card>
         <Card className="border-white/15 bg-black/70 px-0 sm:px-0 md:px-0 lg:px-0 xl:px-0 rounded-none lg:col-span-2">
           <div className="flex justify-between items-center">
-            <CardHeader className="space-y-0">
-              <CardTitle className="text-white font-light uppercase text-lg flex items-center space-x-2">
-                <Puzzle className="w-4 h-4 text-white" />
+            <CardHeader className="space-y-0 pb-3">
+              <CardTitle className="text-white font-light uppercase text-sm font-mono tracking-tight flex items-center space-x-2">
+                <Puzzle className="w-3.5 h-3.5 text-white/70" />
                 <span>Plugins</span>
               </CardTitle>
-              <CardDescription className="uppercase font-mono font-light flex items-center gap-2 text-gray-400 text-xs">
-                <svg
-                  className="w-3 h-3 inline-flex text-gray-400"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                >
-                  {' '}
-                  <path
-                    d="M8 5v2h2V5H8zm4 4V7h-2v2h2zm2 2V9h-2v2h2zm0 2h2v-2h-2v2zm-2 2v-2h2v2h-2zm0 0h-2v2h2v-2zm-4 4v-2h2v2H8z"
-                    fill="currentColor"
-                  />{' '}
-                </svg>
+              <CardDescription className="font-light text-xs text-gray-400 mt-1">
                 Better Auth plugins enabled in your configuration
               </CardDescription>
             </CardHeader>
             <div className="pr-6">
-              <p className="text-sm font-medium text-white">{plugins?.totalPlugins || 0}</p>
-              <p className="text-[10px] font-light uppercase font-mono text-gray-400">Active</p>
+              <p className="text-xs font-mono font-light text-white/90">
+                {plugins?.totalPlugins || 0}
+              </p>
+              <p className="text-[10px] font-light text-gray-500 mt-0.5">Active</p>
             </div>
           </div>
-          <hr className="w-full border-white/15 h-px -mt-3 mb-1" />
+          <div className="flex flex-col items-center justify-center mb-3">
+            <hr className="w-full border-white/10 h-px" />
+            <div className="relative z-20 h-3 w-full mx-auto bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+            <hr className="w-full border-white/10 h-px" />
+          </div>
           <CardContent className="space-y-0 px-0 pb-0 border-b-none">
             {plugins?.plugins && plugins.plugins.length > 0 ? (
               <>
                 {plugins.plugins.map((plugin, index) => (
                   <div
                     key={plugin.id}
-                    className={`flex items-center justify-between p-3 px-5 ${index < plugins.plugins.length - 1 ? 'border-b border-white/15' : ''}`}
+                    className={`flex items-center justify-between p-4 px-5 ${index < plugins.plugins.length - 1 ? 'border-b border-white/10' : ''}`}
                   >
                     <div className="flex items-center space-x-3">
-                      <Puzzle className="w-5 h-5 text-white" />
+                      <div className="w-8 h-8 bg-black/50 border border-dashed border-white/10 flex items-center justify-center rounded-none">
+                        <Puzzle className="w-4 h-4 text-white/70" />
+                      </div>
                       <div>
-                        <p className="text-sm font-light uppercase text-white">
+                        <p className="text-xs font-mono uppercase tracking-tight text-white/80">
                           {plugin.name.slice(0, 1).toUpperCase() +
                             plugin.name.slice(1).replace('-', ' ')}
                         </p>
-                        <p className="text-[10px] font-light uppercase font-mono text-gray-400">
+                        <p className="text-[10px] font-light text-gray-500 mt-0.5">
                           {plugin.description}
                         </p>
                       </div>
@@ -1256,10 +1292,14 @@ export default function Settings() {
             ) : (
               <div className="flex items-center justify-between p-4 px-5">
                 <div className="flex items-center space-x-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-400" />
+                  <div className="w-8 h-8 bg-black/50 border border-dashed border-yellow-500/20 flex items-center justify-center rounded-none">
+                    <AlertTriangle className="w-4 h-4 text-yellow-400" />
+                  </div>
                   <div>
-                    <p className="text-sm font-medium text-white">No Plugins Enabled</p>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs font-mono uppercase tracking-tight text-white/80">
+                      No Plugins Enabled
+                    </p>
+                    <p className="text-[10px] font-light text-gray-500 mt-0.5">
                       {plugins?.error ||
                         'No plugins are currently configured in your Better Auth setup'}
                     </p>
@@ -1279,3 +1319,4 @@ export default function Settings() {
     </div>
   );
 }
+

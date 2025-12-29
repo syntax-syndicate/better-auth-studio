@@ -3661,6 +3661,92 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             res.status(500).json({ success: false, error: 'Failed to fetch OAuth providers' });
         }
     });
+    router.get('/api/tools/oauth/credentials', async (req, res) => {
+        try {
+            const { provider, origin } = req.query;
+            if (!provider || typeof provider !== 'string') {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Provider is required',
+                });
+            }
+            if (!origin || typeof origin !== 'string') {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Origin is required',
+                });
+            }
+            // TODO: Import getOAuthCredentials at the top of this file:
+            // import { getOAuthCredentials } from './path/to/your/oauth-config';
+            // For now, we'll access it from a function that should be provided
+            // This assumes getOAuthCredentials is available in the scope
+            // You need to import it: import { getOAuthCredentials } from './your-oauth-config-file';
+            // Placeholder - replace this with actual import at top of file
+            const getOAuthCredentials = global.getOAuthCredentials;
+            if (typeof getOAuthCredentials !== 'function') {
+                return res.status(500).json({
+                    success: false,
+                    error: 'OAuth credentials function not configured. Please import getOAuthCredentials function.',
+                });
+            }
+            const credentialsResult = getOAuthCredentials(provider, origin);
+            // Handle null return (provider not found)
+            if (credentialsResult === null) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'No credential found',
+                });
+            }
+            // Handle error cases with proper messages as requested
+            if (credentialsResult.error) {
+                if (credentialsResult.error === 'NO_CREDENTIALS_FOUND') {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'No credential found',
+                    });
+                }
+                else if (credentialsResult.error === 'INVALID_ORIGIN') {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Invalid origin. OAuth credentials are only available for localhost origins.',
+                    });
+                }
+                else {
+                    return res.status(400).json({
+                        success: false,
+                        error: credentialsResult.error || 'Failed to get OAuth credentials',
+                    });
+                }
+            }
+            // Check if result exists and has required fields
+            if (!credentialsResult.result) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'No credential found',
+                });
+            }
+            const { clientId, clientSecret } = credentialsResult.result;
+            if (!clientId || !clientSecret) {
+                return res.status(404).json({
+                    success: false,
+                    error: 'No credential found',
+                });
+            }
+            res.json({
+                success: true,
+                clientId,
+                clientSecret,
+            });
+        }
+        catch (error) {
+            console.error('Failed to fetch OAuth credentials:', error);
+            res.status(500).json({
+                success: false,
+                error: 'Failed to fetch OAuth credentials',
+                details: error instanceof Error ? error.message : String(error),
+            });
+        }
+    });
     router.post('/api/tools/oauth/test', async (req, res) => {
         try {
             const { provider } = req.body;

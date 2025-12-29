@@ -475,11 +475,11 @@ export default function Layout({ children }: LayoutProps) {
                 ]
               </span>
             </a>
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <div className="relative font-mono uppercase text-xs">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-3 h-3" />
               <input
                 type="text"
-                placeholder="Search..."
+                placeholder="SEARCH..."
                 onClick={() => setIsCommandPaletteOpen(true)}
                 className="pl-10 pr-4 py-2  bg-black border rounded-none border-gray-600 text-white border-dashed border-white/20 focus:ring-2 focus:ring-white focus:border-transparent transition-colors placeholder-gray-400 cursor-pointer"
                 readOnly
