@@ -29,9 +29,6 @@ importers:
       better-auth:
         specifier: 1.4.5
         version: 1.4.5(@sveltejs/kit@2.49.1(@sveltejs/vite-plugin-svelte@3.1.2(svelte@5.45.4)(vite@5.4.21(@types/node@20.19.25)(lightningcss@1.30.2)))(svelte@5.45.4)(vite@5.4.21(@types/node@20.19.25)(lightningcss@1.30.2)))(next@15.5.9(@babel/core@7.28.5)(react-dom@19.1.0(react@19.2.0))(react@19.2.0))(react-dom@19.1.0(react@19.2.0))(react@19.2.0)(svelte@5.45.4)
-      better-auth-studio:
-        specifier: 'link:'
-        version: 'link:'
       bumpp:
         specifier: ^10.2.3
         version: 10.3.1
@@ -53,9 +50,6 @@ importers:
       dotenv:
         specifier: ^16.3.1
         version: 16.6.1
-      drizzle-orm:
-        specifier: ^0.29.0
-        version: 0.29.5(@types/better-sqlite3@7.6.13)(@types/react@19.2.6)(better-sqlite3@12.4.1)(kysely@0.28.8)(postgres@3.4.7)(react@19.2.0)
       express:
         specifier: ^4.18.2
         version: 4.21.2
@@ -68,9 +62,6 @@ importers:
       open:
         specifier: ^10.0.2
         version: 10.2.0
-      postgres:
-        specifier: ^3.4.0
-        version: 3.4.7
       preset-react:
         specifier: link:@types/@babel/preset-react
         version: link:@types/@babel/preset-react
@@ -8303,6 +8294,7 @@ snapshots:
       kysely: 0.28.8
       postgres: 3.4.7
       react: 19.2.0
+    optional: true
 
   dunder-proto@1.0.1:
     dependencies:
@@ -9870,7 +9862,8 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
-  postgres@3.4.7: {}
+  postgres@3.4.7:
+    optional: true
 
   postprocessing@6.38.0(three@0.180.0):
     dependencies:

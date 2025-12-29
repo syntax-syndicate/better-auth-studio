@@ -411,7 +411,7 @@ export default function Layout({ children }: LayoutProps) {
               <img src={assetPath('/logo.png')} alt="Logo" className="w-10 h-10 object-contain" />
               <div className="mb-0 cursor-pointer" onClick={() => navigate('/')}>
                 <h1 className="text-md inline-flex mb-0 items-start font-light font-mono uppercase text-white gap-2">
-                  Better-Auth Studio
+                  Better-Auth Studio.
                   <sup className="text-xs text-gray-400 ml-1 mt-0 flex items-center space-x-2">
                     <span className="inline-flex items-center">
                       <span className="mr-1">[</span>

@@ -16,7 +16,7 @@ importers:
         version: 1.4.5(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       better-auth-studio:
         specifier: file:../../..
-        version: file:../../..(@babel/core@7.28.5)(@types/react@18.3.27)(kysely@0.28.8)(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: file:../../..(@babel/core@7.28.5)(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -722,77 +722,6 @@ packages:
     resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
     engines: {node: '>=12'}
 
-  drizzle-orm@0.29.5:
-    resolution: {integrity: sha512-jS3+uyzTz4P0Y2CICx8FmRQ1eplURPaIMWDn/yq6k4ShRFj9V7vlJk67lSf2kyYPzQ60GkkNGXcJcwrxZ6QCRw==}
-    peerDependencies:
-      '@aws-sdk/client-rds-data': '>=3'
-      '@cloudflare/workers-types': '>=3'
-      '@libsql/client': '*'
-      '@neondatabase/serverless': '>=0.1'
-      '@opentelemetry/api': ^1.4.1
-      '@planetscale/database': '>=1'
-      '@types/better-sqlite3': '*'
-      '@types/pg': '*'
-      '@types/react': '>=18'
-      '@types/sql.js': '*'
-      '@vercel/postgres': '*'
-      better-sqlite3: '>=7'
-      bun-types: '*'
-      expo-sqlite: '>=13.2.0'
-      knex: '*'
-      kysely: '*'
-      mysql2: '>=2'
-      pg: '>=8'
-      postgres: '>=3'
-      react: '>=18'
-      sql.js: '>=1'
-      sqlite3: '>=5'
-    peerDependenciesMeta:
-      '@aws-sdk/client-rds-data':
-        optional: true
-      '@cloudflare/workers-types':
-        optional: true
-      '@libsql/client':
-        optional: true
-      '@neondatabase/serverless':
-        optional: true
-      '@opentelemetry/api':
-        optional: true
-      '@planetscale/database':
-        optional: true
-      '@types/better-sqlite3':
-        optional: true
-      '@types/pg':
-        optional: true
-      '@types/react':
-        optional: true
-      '@types/sql.js':
-        optional: true
-      '@vercel/postgres':
-        optional: true
-      better-sqlite3:
-        optional: true
-      bun-types:
-        optional: true
-      expo-sqlite:
-        optional: true
-      knex:
-        optional: true
-      kysely:
-        optional: true
-      mysql2:
-        optional: true
-      pg:
-        optional: true
-      postgres:
-        optional: true
-      react:
-        optional: true
-      sql.js:
-        optional: true
-      sqlite3:
-        optional: true
-
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -1120,10 +1049,6 @@ packages:
   postcss@8.4.31:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
-
-  postgres@3.4.7:
-    resolution: {integrity: sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw==}
-    engines: {node: '>=12'}
 
   prisma@6.19.0:
     resolution: {integrity: sha512-F3eX7K+tWpkbhl3l4+VkFtrwJlLXbAM+f9jolgoUZbFcm1DgHZ4cq9AgVEgUym2au5Ad/TDLN8lg83D+M10ycw==}
@@ -1817,7 +1742,7 @@ snapshots:
 
   baseline-browser-mapping@2.9.0: {}
 
-  better-auth-studio@file:../../..(@babel/core@7.28.5)(@types/react@18.3.27)(kysely@0.28.8)(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
+  better-auth-studio@file:../../..(@babel/core@7.28.5)(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/preset-react': 7.28.5(@babel/core@7.28.5)
       '@babel/preset-typescript': 7.28.5(@babel/core@7.28.5)
@@ -1826,7 +1751,6 @@ snapshots:
       '@number-flow/react': 0.5.10(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@types/chokidar': 2.1.7
       better-auth: 1.4.5(next@15.5.7(@babel/core@7.28.5)(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      better-auth-studio: 'link:'
       bumpp: 10.3.2
       c12: 3.3.2
       chalk: 5.6.2
@@ -1834,45 +1758,23 @@ snapshots:
       commander: 11.1.0
       cors: 2.8.5
       dotenv: 16.6.1
-      drizzle-orm: 0.29.5(@types/react@18.3.27)(kysely@0.28.8)(postgres@3.4.7)(react@18.3.1)
       express: 4.22.1
       jiti: 2.6.1
       maxmind: 5.0.1
       open: 10.2.0
-      postgres: 3.4.7
       preset-react: link:@types/@babel/preset-react
       ws: 8.18.3
     transitivePeerDependencies:
-      - '@aws-sdk/client-rds-data'
       - '@babel/core'
-      - '@cloudflare/workers-types'
-      - '@libsql/client'
       - '@lynx-js/react'
-      - '@neondatabase/serverless'
-      - '@opentelemetry/api'
-      - '@planetscale/database'
       - '@sveltejs/kit'
       - '@tanstack/react-start'
-      - '@types/better-sqlite3'
-      - '@types/pg'
-      - '@types/react'
-      - '@types/sql.js'
-      - '@vercel/postgres'
-      - better-sqlite3
       - bufferutil
-      - bun-types
-      - expo-sqlite
-      - knex
-      - kysely
       - magicast
-      - mysql2
       - next
-      - pg
       - react
       - react-dom
       - solid-js
-      - sql.js
-      - sqlite3
       - supports-color
       - svelte
       - utf-8-validate
@@ -2069,13 +1971,6 @@ snapshots:
   dotenv@16.6.1: {}
 
   dotenv@17.2.3: {}
-
-  drizzle-orm@0.29.5(@types/react@18.3.27)(kysely@0.28.8)(postgres@3.4.7)(react@18.3.1):
-    optionalDependencies:
-      '@types/react': 18.3.27
-      kysely: 0.28.8
-      postgres: 3.4.7
-      react: 18.3.1
 
   dunder-proto@1.0.1:
     dependencies:
@@ -2392,8 +2287,6 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
     optional: true
-
-  postgres@3.4.7: {}
 
   prisma@6.19.0(typescript@5.9.3):
     dependencies:
