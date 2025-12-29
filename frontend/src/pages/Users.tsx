@@ -99,6 +99,7 @@ export default function Users() {
   const [isUnbanning, setIsUnbanning] = useState(false);
   const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [editRole, setEditRole] = useState<string>('');
+  const [userAccounts, setUserAccounts] = useState<Record<string, any[]>>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [seedRole, setSeedRole] = useState<string>('');
@@ -118,7 +119,23 @@ export default function Users() {
     try {
       const response = await fetch('/api/users?limit=10000');
       const data = await response.json();
-      setUsers(data.users || []);
+      const usersList = data.users || [];
+      setUsers(usersList);
+
+      // Fetch accounts for all users to check for credential accounts
+      const accountsMap: Record<string, any[]> = {};
+      for (const user of usersList) {
+        try {
+          const accountsResponse = await fetch(`/api/users/${user.id}/accounts`);
+          if (accountsResponse.ok) {
+            const accountsData = await accountsResponse.json();
+            accountsMap[user.id] = accountsData.accounts || [];
+          }
+        } catch (_error) {
+          accountsMap[user.id] = [];
+        }
+      }
+      setUserAccounts(accountsMap);
     } catch (_error) {
     } finally {
       setLoading(false);
@@ -598,7 +615,8 @@ export default function Users() {
         setSelectedUser(null);
         (document.getElementById('update-password') as HTMLInputElement).value = '';
       } else {
-        toast.error(`Error updating password: ${result.error || 'Unknown error'}`, { id: toastId });
+        const errorMessage = result.message || result.error || 'Unknown error';
+        toast.error(`Error updating password: ${errorMessage}`, { id: toastId });
       }
     } catch (_error) {
       toast.error('Error updating password', { id: toastId });
@@ -1151,18 +1169,31 @@ export default function Users() {
                               <span>Edit User</span>
                               <Edit className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
                             </button>
-                            <button
-                              className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActionMenuOpen(null);
-                                setSelectedUser(user);
-                                setShowPasswordModal(true);
-                              }}
-                            >
-                              <span>Update Password</span>
-                              <Shield className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
-                            </button>
+                            {userAccounts[user.id]?.some(
+                              (acc) => acc.providerId === 'credential'
+                            ) ? (
+                              <button
+                                className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActionMenuOpen(null);
+                                  setSelectedUser(user);
+                                  setShowPasswordModal(true);
+                                }}
+                              >
+                                <span>Update Password</span>
+                                <Shield className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
+                              </button>
+                            ) : (
+                              <button
+                                className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/30 cursor-not-allowed flex items-center justify-between font-mono uppercase tracking-tight opacity-50"
+                                disabled
+                                title="Password update is only available for users with credential accounts"
+                              >
+                                <span>Update Password</span>
+                                <Shield className="w-3 h-3 text-white/10" />
+                              </button>
+                            )}
                             {adminPluginEnabled &&
                               (user.banned ? (
                                 <button

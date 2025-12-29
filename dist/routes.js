@@ -1101,8 +1101,35 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 return res.status(400).json({ error: 'Password is required' });
             }
             const adapter = await getAuthAdapterWithConfig();
-            if (!adapter || !adapter.update) {
+            if (!adapter) {
                 return res.status(500).json({ error: 'Auth adapter not available' });
+            }
+            if (!adapter.update) {
+                return res.status(500).json({ error: 'Auth adapter update method not available' });
+            }
+            // Find the credential account first to get its unique id
+            let credentialAccount = null;
+            if (adapter.findFirst) {
+                credentialAccount = await adapter.findFirst({
+                    model: 'account',
+                    where: [
+                        { field: 'userId', value: userId },
+                        { field: 'providerId', value: 'credential' },
+                    ],
+                });
+            }
+            else if (adapter.findMany) {
+                const accounts = await adapter.findMany({
+                    model: 'account',
+                    where: [
+                        { field: 'userId', value: userId },
+                        { field: 'providerId', value: 'credential' },
+                    ],
+                });
+                credentialAccount = accounts && accounts.length > 0 ? accounts[0] : null;
+            }
+            if (!credentialAccount) {
+                return res.status(404).json({ error: 'Credential account not found for this user' });
             }
             let hashedPassword = password;
             try {
@@ -1111,17 +1138,18 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 hashedPassword = `${salt}:${hex.encode(key)}`;
             }
             catch {
-                res.status(500).json({ error: 'Failed to hash password' });
+                return res.status(500).json({ error: 'Failed to hash password' });
             }
-            const account = await adapter.update({
+            // Update using the account's unique id to fix Prisma error
+            const updatedAccount = await adapter.update({
                 model: 'account',
-                where: [
-                    { field: 'userId', value: userId },
-                    { field: 'providerId', value: 'credential' },
-                ],
-                update: { password: hashedPassword },
+                where: [{ field: 'id', value: credentialAccount.id }],
+                update: {
+                    password: hashedPassword,
+                    updatedAt: new Date().toISOString(),
+                },
             });
-            res.json({ success: true, account });
+            res.json({ success: true, account: updatedAccount });
         }
         catch (error) {
             res.status(500).json({ error: 'Failed to update password', message: error?.message });

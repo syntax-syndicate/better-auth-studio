@@ -1109,17 +1109,28 @@ export default function UserDetails() {
                       <span>Edit User</span>
                       <Edit className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
                     </button>
-                    <button
-                      className="w-full px-4 py-2 text-left text-[11px] text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setActionMenuOpen(false);
-                        setShowPasswordModal(true);
-                      }}
-                    >
-                      <span>Update Password</span>
-                      <Shield className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
-                    </button>
+                    {accounts.some((acc) => acc.providerId === 'credential') ? (
+                      <button
+                        className="w-full px-4 py-2 text-left text-[11px] text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActionMenuOpen(false);
+                          setShowPasswordModal(true);
+                        }}
+                      >
+                        <span>Update Password</span>
+                        <Shield className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
+                      </button>
+                    ) : (
+                      <button
+                        className="w-full px-4 py-2 text-left text-[11px] text-white/30 cursor-not-allowed flex items-center justify-between font-mono uppercase tracking-tight opacity-50"
+                        disabled
+                        title="Password update is only available for users with credential accounts"
+                      >
+                        <span>Update Password</span>
+                        <Shield className="w-3 h-3 text-white/10" />
+                      </button>
+                    )}
                     {adminPluginEnabled &&
                       (user.banned ? (
                         <button
@@ -2439,7 +2450,8 @@ export default function UserDetails() {
                       (document.getElementById('new-password') as HTMLInputElement).value = '';
                       toast.success('Password updated successfully!', { id: toastId });
                     } else {
-                      toast.error(`Error updating password: ${result.error || 'Unknown error'}`, {
+                      const errorMessage = result.message || result.error || 'Unknown error';
+                      toast.error(`Error updating password: ${errorMessage}`, {
                         id: toastId,
                       });
                     }

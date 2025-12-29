@@ -1762,7 +1762,6 @@ snapshots:
       jiti: 2.6.1
       maxmind: 5.0.1
       open: 10.2.0
-      preset-react: link:@types/@babel/preset-react
       ws: 8.18.3
     transitivePeerDependencies:
       - '@babel/core'
