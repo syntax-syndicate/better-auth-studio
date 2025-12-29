@@ -68,7 +68,6 @@
     "jiti": "^2.5.1",
     "maxmind": "^5.0.0",
     "open": "^10.0.2",
-    "preset-react": "link:@types/@babel/preset-react",
     "ws": "^8.14.2"
   },
   "devDependencies": {
