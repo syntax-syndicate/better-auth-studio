@@ -1532,8 +1532,7 @@ export default function UserDetails() {
                             </div>
                           </div>
                           <div className="flex flex-col items-end space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <div className="flex items-center space-x-2">
+                           <div className="flex items-center space-x-2">
                                 <span className="text-gray-500 font-mono text-xs uppercase">
                                   Expires:{' '}
                                 </span>
@@ -1550,7 +1549,9 @@ export default function UserDetails() {
                                     hour12: true,
                                   })}
                                 </span>
-                              </div>
+                              </div> 
+                            <div className="flex items-center space-x-2">
+                              
                               <div className="flex items-center space-x-2">
                                 <span className="text-gray-500 font-mono text-xs uppercase">
                                   Created:{' '}
