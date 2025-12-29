@@ -3672,7 +3672,6 @@ export function createRoutes(
       if (!createdInvitation) {
         return res.status(500).json({ error: 'Failed to create invitation' });
       }
-
       res.json({ success: true, invitation: createdInvitation });
     } catch (error) {
       console.error('Error creating invitation:', error);
