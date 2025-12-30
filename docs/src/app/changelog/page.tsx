@@ -177,16 +177,7 @@ export default function Changelog() {
                   <ChevronIcon />
                   Complete example projects demonstrating Prisma integration with both frameworks
                 </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  Framework-specific routing patterns documented (including Elysia's dual-route requirement)
-                </li>
               </ul>
-              <div className="bg-black/50 border border-white/10 p-3 mt-4">
-                <p className="text-xs font-light tracking-tight text-white/70">
-                  <strong className="text-white/90">Note:</strong> Hono and Elysia adapters follow the same universal handler pattern as Express and Next.js, ensuring consistent behavior across all frameworks. For Elysia, both <code className="text-white/80 px-1">/api/studio</code> and <code className="text-white/80 px-1">/api/studio/*</code> routes are required due to Elysia's routing behavior.
-                </p>
-              </div>
             </div>
           </PixelCard>
         </section>
