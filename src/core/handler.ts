@@ -35,9 +35,25 @@ export async function handleStudioRequest(
     const basePath = config.basePath || '';
 
     let path = request.url;
+    const [pathname, queryString] = path.split('?');
+
     if (isSelfHosted && basePath) {
-      path = path.replace(basePath, '') || '/';
+      const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
+      let normalizedPath = pathname;
+
+      if (normalizedPath === normalizedBasePath || normalizedPath === normalizedBasePath + '/') {
+        normalizedPath = '/';
+      } else if (normalizedPath.startsWith(normalizedBasePath + '/')) {
+        normalizedPath = normalizedPath.slice(normalizedBasePath.length);
+      } else if (normalizedPath.startsWith(normalizedBasePath)) {
+        normalizedPath = normalizedPath.slice(normalizedBasePath.length) || '/';
+      }
+
+      path = normalizedPath + (queryString ? '?' + queryString : '');
+    } else {
+      path = pathname + (queryString ? '?' + queryString : '');
     }
+
     if (path === '' || path === '/') {
       path = '/';
     }
@@ -77,8 +93,6 @@ export async function handleStudioRequest(
         acceptHeader === '*/*' ||
         !acceptHeader.includes('text/html');
 
-      // If client wants JSON or this looks like an API call, route to API
-      // /users → /api/users, /config → /api/config
       if (wantsJson) {
         const apiPath = '/api' + path;
         if (isProtectedApiPath(apiPath)) {
@@ -90,11 +104,10 @@ export async function handleStudioRequest(
         return await handleApiRoute(request, apiPath, config);
       }
 
-      // Otherwise, it's a browser navigation - serve SPA
+      // it's a browser navigation - serve SPA
       return handleStaticFile(path, config);
     }
 
-    // Fallback: serve index.html for SPA routing
     return handleStaticFile(path, config);
   } catch (error) {
     console.error('Studio handler error:', error);
