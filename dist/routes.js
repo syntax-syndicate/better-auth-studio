@@ -1107,7 +1107,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             if (!adapter.update) {
                 return res.status(500).json({ error: 'Auth adapter update method not available' });
             }
-            // Find the credential account first to get its unique id
+            // Find the credential account first to get its unique id (fixes Prisma error)
             let credentialAccount = null;
             if (adapter.findFirst) {
                 credentialAccount = await adapter.findFirst({
@@ -1129,7 +1129,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 credentialAccount = accounts && accounts.length > 0 ? accounts[0] : null;
             }
             if (!credentialAccount) {
-                return res.status(404).json({ error: 'Credential account not found for this user' });
+                return res.status(404).json({ error: 'Credential account not found' });
             }
             let hashedPassword = password;
             try {
@@ -1140,6 +1140,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             catch {
                 return res.status(500).json({ error: 'Failed to hash password' });
             }
+            // Update using the account's unique id to fix Prisma error
             const updatedAccount = await adapter.update({
                 model: 'account',
                 where: [{ field: 'id', value: credentialAccount.id }],

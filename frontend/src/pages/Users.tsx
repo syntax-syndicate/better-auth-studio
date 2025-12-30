@@ -13,7 +13,6 @@ import {
   MoreVertical,
   Plus,
   Search,
-  Shield,
   Trash2,
   User,
   UserPlus,
@@ -86,7 +85,6 @@ export default function Users() {
   const [showSeedModal, setShowSeedModal] = useState(false);
   const [showBanModal, setShowBanModal] = useState(false);
   const [showUnbanModal, setShowUnbanModal] = useState(false);
-  const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [actionMenuOpen, setActionMenuOpen] = useState<string | null>(null);
   const [banReason, setBanReason] = useState('');
@@ -97,9 +95,7 @@ export default function Users() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBanning, setIsBanning] = useState(false);
   const [isUnbanning, setIsUnbanning] = useState(false);
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const [editRole, setEditRole] = useState<string>('');
-  const [userAccounts, setUserAccounts] = useState<Record<string, any[]>>({});
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedImageFile, setSelectedImageFile] = useState<File | null>(null);
   const [seedRole, setSeedRole] = useState<string>('');
@@ -119,23 +115,7 @@ export default function Users() {
     try {
       const response = await fetch('/api/users?limit=10000');
       const data = await response.json();
-      const usersList = data.users || [];
-      setUsers(usersList);
-
-      // Fetch accounts for all users to check for credential accounts
-      const accountsMap: Record<string, any[]> = {};
-      for (const user of usersList) {
-        try {
-          const accountsResponse = await fetch(`/api/users/${user.id}/accounts`);
-          if (accountsResponse.ok) {
-            const accountsData = await accountsResponse.json();
-            accountsMap[user.id] = accountsData.accounts || [];
-          }
-        } catch (_error) {
-          accountsMap[user.id] = [];
-        }
-      }
-      setUserAccounts(accountsMap);
+      setUsers(data.users || []);
     } catch (_error) {
     } finally {
       setLoading(false);
@@ -581,47 +561,6 @@ export default function Users() {
       toast.error('Error unbanning user', { id: toastId });
     } finally {
       setIsUnbanning(false);
-    }
-  };
-
-  const handleUpdatePassword = async () => {
-    if (!selectedUser) {
-      toast.error('No user selected');
-      return;
-    }
-
-    const password = (document.getElementById('update-password') as HTMLInputElement)?.value;
-
-    if (!password) {
-      toast.error('Please enter a new password');
-      return;
-    }
-
-    setIsUpdatingPassword(true);
-    const toastId = toast.loading('Updating password...');
-
-    try {
-      const response = await fetch(`/api/users/${selectedUser.id}/password`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        toast.success('Password updated successfully!', { id: toastId });
-        setShowPasswordModal(false);
-        setSelectedUser(null);
-        (document.getElementById('update-password') as HTMLInputElement).value = '';
-      } else {
-        const errorMessage = result.message || result.error || 'Unknown error';
-        toast.error(`Error updating password: ${errorMessage}`, { id: toastId });
-      }
-    } catch (_error) {
-      toast.error('Error updating password', { id: toastId });
-    } finally {
-      setIsUpdatingPassword(false);
     }
   };
 
@@ -1169,31 +1108,6 @@ export default function Users() {
                               <span>Edit User</span>
                               <Edit className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
                             </button>
-                            {userAccounts[user.id]?.some(
-                              (acc) => acc.providerId === 'credential'
-                            ) ? (
-                              <button
-                                className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActionMenuOpen(null);
-                                  setSelectedUser(user);
-                                  setShowPasswordModal(true);
-                                }}
-                              >
-                                <span>Update Password</span>
-                                <Shield className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
-                              </button>
-                            ) : (
-                              <button
-                                className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/30 cursor-not-allowed flex items-center justify-between font-mono uppercase tracking-tight opacity-50"
-                                disabled
-                                title="Password update is only available for users with credential accounts"
-                              >
-                                <span>Update Password</span>
-                                <Shield className="w-3 h-3 text-white/10" />
-                              </button>
-                            )}
                             {adminPluginEnabled &&
                               (user.banned ? (
                                 <button
@@ -1970,95 +1884,6 @@ export default function Users() {
                 className="bg-green-400 hover:bg-green-500 text-white border border-green-400 rounded-none disabled:opacity-50 font-mono uppercase text-xs tracking-tight"
               >
                 {isUnbanning ? 'Unbanning...' : 'Unban User'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Update Password Modal */}
-      {showPasswordModal && selectedUser && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-          <div className="bg-black border border-white/15 rounded-none p-6 w-full max-w-lg shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg text-white font-light uppercase font-mono">Update Password</h3>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setSelectedUser(null);
-                  (document.getElementById('update-password') as HTMLInputElement).value = '';
-                }}
-                disabled={isUpdatingPassword}
-                className="text-gray-400 -mt-2 hover:text-white rounded-none"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-
-            <div className="flex flex-col items-center justify-center mt-2">
-              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
-              <div className="relative z-20 h-4 w-[calc(100%+3rem)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
-              <hr className="w-[calc(100%+3rem)] border-white/10 h-px" />
-            </div>
-
-            <div className="space-y-4 mt-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-14 h-14 rounded-none border border-dashed border-white/15 bg-white/10 flex items-center justify-center overflow-hidden">
-                  {selectedUser.image ? (
-                    <img
-                      src={selectedUser.image}
-                      alt={selectedUser.name}
-                      className="w-14 h-14 object-cover"
-                    />
-                  ) : (
-                    <User className="w-7 h-7 text-white" />
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <div className="text-white font-medium leading-tight flex items-center gap-2">
-                    <span>{selectedUser.name}</span>
-                    <CopyableId id={selectedUser.id} variant="subscript" nonSliced={true} />
-                  </div>
-                  <div className="text-sm text-gray-400">{selectedUser.email}</div>
-                </div>
-              </div>
-              <div>
-                <Label
-                  htmlFor="update-password"
-                  className="text-xs text-white/80 font-mono uppercase"
-                >
-                  New Password
-                </Label>
-                <Input
-                  id="update-password"
-                  type="password"
-                  placeholder="Enter new password"
-                  disabled={isUpdatingPassword}
-                  className="mt-1 border border-dashed border-white/20 bg-black/30 text-white rounded-none"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-3 mt-6">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setShowPasswordModal(false);
-                  setSelectedUser(null);
-                  (document.getElementById('update-password') as HTMLInputElement).value = '';
-                }}
-                disabled={isUpdatingPassword}
-                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none font-mono uppercase text-xs tracking-tight"
-              >
-                Cancel
-              </Button>
-              <Button
-                onClick={handleUpdatePassword}
-                disabled={isUpdatingPassword}
-                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50 font-mono uppercase text-xs tracking-tight"
-              >
-                {isUpdatingPassword ? 'Updating...' : 'Update Password'}
               </Button>
             </div>
           </div>
