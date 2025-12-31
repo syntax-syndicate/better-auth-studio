@@ -226,18 +226,15 @@ function findPublicDir() {
         const pnpmPackageRoot = pnpmMatch[1];
         candidates.unshift(join(pnpmPackageRoot, 'dist', 'public'), join(pnpmPackageRoot, 'public'), join(pnpmPackageRoot, '..', 'dist', 'public'));
     }
-    // For SvelteKit: check .svelte-kit output directory and build output
     try {
         const svelteKitOutput = join(process.cwd(), '.svelte-kit', 'output', 'server');
         if (existsSync(svelteKitOutput)) {
             candidates.unshift(join(svelteKitOutput, 'node_modules', 'better-auth-studio', 'dist', 'public'), join(svelteKitOutput, 'node_modules', 'better-auth-studio', 'public'));
         }
-        // Check build output directory
         const buildOutput = join(process.cwd(), 'build');
         if (existsSync(buildOutput)) {
             candidates.unshift(join(buildOutput, 'node_modules', 'better-auth-studio', 'dist', 'public'), join(buildOutput, 'node_modules', 'better-auth-studio', 'public'));
         }
-        // Check if public was copied to static directory (common in SvelteKit)
         const staticDir = join(process.cwd(), 'static', 'studio-assets');
         if (existsSync(staticDir)) {
             candidates.unshift(staticDir);
@@ -285,8 +282,6 @@ function findPublicDir() {
     console.error('[Studio] Current working directory:', process.cwd());
     console.error('[Studio] __dirname:', __dirname);
     console.error('[Studio] __realdir:', __realdir);
-    console.error('[Studio] Tried paths (first 10):', candidates.slice(0, 10).join('\n  - '));
-    // Log import.meta.url if available
     try {
         if (typeof import.meta !== 'undefined' && import.meta.url) {
             console.error('[Studio] import.meta.url:', import.meta.url);

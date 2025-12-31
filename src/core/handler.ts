@@ -425,7 +425,7 @@ function handleStaticFile(path: string, config: StudioConfig): UniversalResponse
       background: #0a0a0a; 
       border: 1px solid #1a1a1a;
       padding: 24px; 
-      border-radius: 8px; 
+      border-radius: 0px; 
       margin: 24px 0; 
     }
     .steps h3 {
