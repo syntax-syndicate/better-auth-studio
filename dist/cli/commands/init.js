@@ -213,8 +213,7 @@ function detectFramework() {
             const pkgPath = join(process.cwd(), 'package.json');
             if (existsSync(pkgPath)) {
                 const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
-                if (pkg.dependencies?.['@sveltejs/kit'] ||
-                    pkg.devDependencies?.['@sveltejs/kit']) {
+                if (pkg.dependencies?.['@sveltejs/kit'] || pkg.devDependencies?.['@sveltejs/kit']) {
                     return 'sveltekit';
                 }
             }
