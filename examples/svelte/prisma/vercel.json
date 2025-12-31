@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "src/routes/api/studio/**/*.ts": {
+      "includeFiles": "node_modules/better-auth-studio/dist/public/**"
+    }
+  }
+}
+

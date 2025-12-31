@@ -199,7 +199,7 @@ function findPublicDir() {
         }
     }
     catch (err) { }
-    // Try to resolve from import.meta.url for better ESM support (SvelteKit)
+    // Try to resolve from import.meta.url for better ESM support (SvelteKit/Vercel)
     try {
         const moduleUrl = import.meta.url;
         if (moduleUrl) {
@@ -213,18 +213,52 @@ function findPublicDir() {
                     return moduleDir;
                 }
             })();
+            // If we're in dist/core or dist/adapters, go up to dist and then to public
+            if (moduleDir.includes('/dist/')) {
+                const distDir = resolve(moduleDir, '..');
+                candidates.unshift(join(distDir, 'public'));
+            }
             candidates.unshift(resolve(realModuleDir, '../public'), resolve(realModuleDir, '../../public'), resolve(realModuleDir, '../../../public'), resolve(realModuleDir, '../../dist/public'), resolve(realModuleDir, '../../../dist/public'), resolve(realModuleDir, '../dist/public'));
         }
     }
     catch (err) { }
+    // Direct path resolution from __dirname (highest priority for Vercel)
+    // If __dirname is in dist/core, public should be at dist/public
+    if (__dirname.includes('/dist/')) {
+        const distDir = resolve(__dirname, '..');
+        candidates.unshift(join(distDir, 'public'));
+    }
+    // Direct path resolution from __dirname (HIGHEST PRIORITY for Vercel/serverless)
+    // If __dirname is in dist/core or dist/adapters, public should be at dist/public
+    // This handles: .../better-auth-studio/dist/core -> .../better-auth-studio/dist/public
+    if (__dirname.includes('/dist/')) {
+        const distDir = resolve(__dirname, '..');
+        candidates.unshift(join(distDir, 'public'));
+    }
+    // Handle pnpm store paths (common in Vercel/serverless)
+    // Pattern: .../.pnpm/better-auth-studio@version_hash/node_modules/better-auth-studio/...
+    const pnpmMatch = __dirname.match(/(.+\/.pnpm\/better-auth-studio@[^/]+\/node_modules\/better-auth-studio)\//);
+    if (pnpmMatch) {
+        const pnpmPackageRoot = pnpmMatch[1];
+        candidates.unshift(join(pnpmPackageRoot, 'dist', 'public'), join(pnpmPackageRoot, 'public'));
+    }
+    // Also try the older pattern for compatibility
+    const pnpmMatchAlt = __dirname.match(/(.+\/.pnpm\/[^/]+\/node_modules\/better-auth-studio)\//);
+    if (pnpmMatchAlt && !pnpmMatch) {
+        const pnpmPackageRoot = pnpmMatchAlt[1];
+        candidates.unshift(join(pnpmPackageRoot, 'dist', 'public'), join(pnpmPackageRoot, 'public'), join(pnpmPackageRoot, '..', 'dist', 'public'));
+    }
+    // Extract package root from __dirname if it's in better-auth-studio
+    if (__dirname.includes('/better-auth-studio/')) {
+        const betterAuthMatch = __dirname.match(/(.+\/better-auth-studio[^/]*)\//);
+        if (betterAuthMatch) {
+            const packageRoot = betterAuthMatch[1];
+            candidates.unshift(join(packageRoot, 'dist', 'public'), join(packageRoot, 'public'));
+        }
+    }
     const baseDirs = [__dirname, __realdir];
     for (const baseDir of baseDirs) {
         candidates.push(resolve(baseDir, '../public'), resolve(baseDir, '../../public'), resolve(baseDir, '../../../public'), resolve(baseDir, '../../dist/public'), resolve(baseDir, '../../../dist/public'), resolve(baseDir, '../dist/public'));
-    }
-    const pnpmMatch = __dirname.match(/(.+\/.pnpm\/[^/]+\/node_modules\/better-auth-studio)\//);
-    if (pnpmMatch) {
-        const pnpmPackageRoot = pnpmMatch[1];
-        candidates.unshift(join(pnpmPackageRoot, 'dist', 'public'), join(pnpmPackageRoot, 'public'), join(pnpmPackageRoot, '..', 'dist', 'public'));
     }
     try {
         const svelteKitOutput = join(process.cwd(), '.svelte-kit', 'output', 'server');
@@ -282,11 +316,17 @@ function findPublicDir() {
     console.error('[Studio] Current working directory:', process.cwd());
     console.error('[Studio] __dirname:', __dirname);
     console.error('[Studio] __realdir:', __realdir);
+    console.error('[Studio] Tried paths (first 10):', candidates.slice(0, 10).join('\n  - '));
     try {
         if (typeof import.meta !== 'undefined' && import.meta.url) {
             console.error('[Studio] import.meta.url:', import.meta.url);
             const modulePath = fileURLToPath(import.meta.url);
             console.error('[Studio] Resolved module path:', modulePath);
+            // Try to construct the public path from the module path
+            const moduleDir = dirname(modulePath);
+            const expectedPublicPath = resolve(moduleDir, '../public');
+            console.error('[Studio] Expected public path from module:', expectedPublicPath);
+            console.error('[Studio] Expected public path exists:', existsSync(expectedPublicPath));
         }
     }
     catch (err) {
@@ -338,7 +378,7 @@ function handleStaticFile(path, config) {
       background: #1a1a1a; 
       color: #4ade80; 
       padding: 3px 8px; 
-      border-radius: 4px; 
+      border-radius: 0px; 
       font-size: 14px; 
       border: 1px solid #2a2a2a;
     }
@@ -346,7 +386,7 @@ function handleStaticFile(path, config) {
       background: #0a0a0a; 
       border: 1px solid #1a1a1a;
       padding: 24px; 
-      border-radius: 8px; 
+      border-radius: 0px; 
       margin: 24px 0; 
     }
     .steps h3 {
@@ -400,7 +440,16 @@ function handleStaticFile(path, config) {
     '/api/studio': ['./node_modules/better-auth-studio/dist/public/**/*', './node_modules/better-auth-studio/public/**/*'],
 }</pre>
           </li>
-          <li><strong>For SvelteKit:</strong> Ensure <code>better-auth-studio</code> is in <code>dependencies</code> (not devDependencies). For serverless deployments, you may need to configure your adapter to include the public directory. Check your <code>vite.config.ts</code> or adapter configuration.</li>
+          <li><strong>For SvelteKit on Vercel:</strong> Create a <code>vercel.json</code> file in your project root:
+            <pre>{
+  "functions": {
+    "src/routes/api/studio/**/*.ts": {
+      "includeFiles": "node_modules/better-auth-studio/dist/public/**"
+    }
+  }
+}</pre>
+            This ensures Vercel includes the UI assets in your serverless functions.
+          </li>
           <li>Ensure <code>better-auth-studio</code> is in <code>dependencies</code> (not devDependencies)</li>
           <li>Clear your build cache and redeploy</li>
         </ol>
