@@ -187,7 +187,7 @@ export default config;`}
 
         <section>
           <PixelCard variant="highlight" className="relative">
-            <div className="absolute -top-10 left-0 flex gap-2 flex-wrap">
+            <div className="absolute -top-10 left-0 flex gap-2 flex-wrap z-99">
               {frameworks.map((framework) => {
                 const Icon = framework.icon;
                 const isActive = activeFramework === framework.id;
@@ -196,16 +196,18 @@ export default config;`}
                     key={framework.id}
                     onClick={() => setActiveFramework(framework.id)}
                     className={`
-                      relative text-[12px] font-light uppercase tracking-tight 
+                      relative text-[12px] font-light z-10 uppercase tracking-tight 
                       text-white/90 border bg-[#0a0a0a] 
                       px-2 py-[6px] overflow-hidden transition-all duration-200
                       inline-flex items-center gap-[5px]
                       ${isActive
-                        ? "border-white/40 bg-white/8 shadow-[0_0_0_1px_rgba(255,255,255,0.15)]"
+                        ? "border-white/40 bg-white/10 shadow-[0_0_0_1px_rgba(255,255,255,0.15)]"
                         : "border-white/20 hover:border-white/30 hover:bg-white/5"
                       }
                     `}
                   >
+                    {isActive && <div className="absolute -z-1 inset-0 bg-black" />}
+                    {isActive && <div className="absolute z-10 inset-0 bg-white/10" />}
                     {isActive ? (
                       <>
                         <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[8%]" />
