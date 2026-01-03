@@ -33,7 +33,6 @@ const frameworks: Array<{
     { id: "sveltekit", name: "SvelteKit", icon: SvelteKitIcon },
     { id: "solidstart", name: "SolidStart", icon: SolidStartIcon },
   ];
-
 export default function SelfHosting() {
   const [activeFramework, setActiveFramework] = useState<Framework>("nextjs");
   return (
