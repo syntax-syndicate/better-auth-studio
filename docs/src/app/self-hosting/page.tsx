@@ -31,7 +31,7 @@ const frameworks: Array<{
     { id: "express", name: "Express", icon: ExpressIcon },
     { id: "hono", name: "Hono", icon: HonoIcon },
     { id: "elysia", name: "Elysia", icon: ElysiaIcon },
-    { id: "sveltekit", name: "SvelteKit", icon: SvelteKitIcon },
+    { id: "sveltekit", name: "Svelte Kit", icon: SvelteKitIcon },
     { id: "solidstart", name: "Solid Start", icon: SolidStartIcon },
     { id: "tanstackstart", name: "TanStack Start", icon: TanStackStartIcon },
   ];
@@ -251,7 +251,7 @@ export {
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:3000/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
                   </PixelCard>
@@ -282,7 +282,7 @@ app.listen(3000, () => {
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:3000/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
                   </PixelCard>
@@ -334,7 +334,7 @@ serve({
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:3000/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
                   </PixelCard>
@@ -374,7 +374,7 @@ app.listen(PORT, () => {
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:3000/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                       <div className="mt-4 p-3 bg-white/5 border border-white/10 rounded-none">
                         <p className="text-xs font-light tracking-tight text-white/60 mb-2">
@@ -437,7 +437,7 @@ export async function handle({ event, resolve }) {
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:5173/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                       <div className="mt-4 p-3 bg-white/5 border border-white/10 rounded-none">
                         <p className="text-xs font-light tracking-tight text-white/60 mb-2">
@@ -498,7 +498,7 @@ export const { GET, POST } = toSolidStartHandler(auth);`}
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:3000/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
                   </PixelCard>
@@ -554,7 +554,7 @@ export const Route = createFileRoute('/api/auth/$')({
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">http://localhost:3000/api/studio</code>
+                        Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
                   </PixelCard>
