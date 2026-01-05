@@ -282,6 +282,7 @@ app.use(express.json());
 app.use("/api/studio", betterAuthStudio(studioConfig));
 app.all("/api/auth/*", toNodeHandler(auth));
 
+
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
 });`}
