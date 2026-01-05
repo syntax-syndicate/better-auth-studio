@@ -443,29 +443,6 @@ export async function handle({ event, resolve }) {
                       <p className="text-sm font-light tracking-tight text-white/70">
                         Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
-                      <div className="mt-4 p-3 bg-white/5 border border-white/10 rounded-none">
-                        <p className="text-xs font-light tracking-tight text-white/60 mb-2">
-                          <strong className="font-bold text-white/80">For Vercel deployments:</strong> Use <code className="text-white/70 bg-white/10 px-1 py-0.5">@sveltejs/adapter-vercel</code> in your <code className="text-white/70 bg-white/10 px-1 py-0.5">svelte.config.js</code>:
-                        </p>
-                        <CodeHighlighter
-                          code={`// svelte.config.js
-import adapter from '@sveltejs/adapter-vercel';
-import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-
-/** @type {import('@sveltejs/kit').Config} */
-const config = {
-  preprocess: vitePreprocess(),
-  kit: {
-    adapter: adapter({
-      runtime: 'nodejs20.x',
-    }),
-  },
-};
-
-export default config;`}
-                          language="javascript"
-                        />
-                      </div>
                     </div>
                   </PixelCard>
                 )}
