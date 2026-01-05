@@ -271,13 +271,16 @@ export {
                       </p>
                       <CodeHighlighter
                         code={`import express from "express";
+import { toNodeHandler } from "better-auth/node";
 import { betterAuthStudio } from "better-auth-studio/express";
+import { auth } from "./auth";
 import studioConfig from "./studio.config";
 
 const app = express();
 
 app.use(express.json());
 app.use("/api/studio", betterAuthStudio(studioConfig));
+app.all("/api/auth/*", toNodeHandler(auth));
 
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
@@ -301,6 +304,7 @@ app.listen(3000, () => {
                         code={`import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
+import { auth } from './auth';
 import { betterAuthStudio } from 'better-auth-studio/hono';
 import studioConfig from './studio.config';
 
@@ -319,6 +323,11 @@ app.use(
 
 // Better Auth Studio routes
 app.on(['POST', 'GET', 'PUT', 'DELETE'], '/api/studio/*', betterAuthStudio(studioConfig));
+
+// Better Auth routes
+app.on(['POST', 'GET'], '/api/auth/*', (c) => {
+  return auth.handler(c.req.raw);
+});
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -345,12 +354,23 @@ serve({
                       </p>
                       <CodeHighlighter
                         code={`import { Elysia } from 'elysia';
+import { auth } from './auth';
 import { betterAuthStudio } from 'better-auth-studio/elysia';
 import studioConfig from './studio.config';
 
 const app = new Elysia()
+  
   .all('/api/studio', betterAuthStudio(studioConfig))
-  .all('/api/studio/*', betterAuthStudio(studioConfig));
+  .all('/api/studio/*', betterAuthStudio(studioConfig))
+  // Better Auth routes
+  .all('/api/auth', async (context) => {
+    const response = await auth.handler(context.request);
+    return response;
+  })
+  .all('/api/auth/*', async (context) => {
+    const response = await auth.handler(context.request);
+    return response;
+  });
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3000', 10);
