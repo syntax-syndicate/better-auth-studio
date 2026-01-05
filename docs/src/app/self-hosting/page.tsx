@@ -271,16 +271,13 @@ export {
                       </p>
                       <CodeHighlighter
                         code={`import express from "express";
-import { toNodeHandler } from "better-auth/node";
 import { betterAuthStudio } from "better-auth-studio/express";
-import { auth } from "./auth";
 import studioConfig from "./studio.config";
 
 const app = express();
 
 app.use(express.json());
 app.use("/api/studio", betterAuthStudio(studioConfig));
-app.all("/api/auth/*", toNodeHandler(auth));
 
 app.listen(3000, () => {
   console.log("Server running on http://localhost:3000");
@@ -304,7 +301,6 @@ app.listen(3000, () => {
                         code={`import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
-import { auth } from './auth';
 import { betterAuthStudio } from 'better-auth-studio/hono';
 import studioConfig from './studio.config';
 
@@ -323,11 +319,6 @@ app.use(
 
 // Better Auth Studio routes
 app.on(['POST', 'GET', 'PUT', 'DELETE'], '/api/studio/*', betterAuthStudio(studioConfig));
-
-// Better Auth routes
-app.on(['POST', 'GET'], '/api/auth/*', (c) => {
-  return auth.handler(c.req.raw);
-});
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -354,23 +345,12 @@ serve({
                       </p>
                       <CodeHighlighter
                         code={`import { Elysia } from 'elysia';
-import { auth } from './auth';
 import { betterAuthStudio } from 'better-auth-studio/elysia';
 import studioConfig from './studio.config';
 
 const app = new Elysia()
-  
   .all('/api/studio', betterAuthStudio(studioConfig))
-  .all('/api/studio/*', betterAuthStudio(studioConfig))
-  // Better Auth routes
-  .all('/api/auth', async (context) => {
-    const response = await auth.handler(context.request);
-    return response;
-  })
-  .all('/api/auth/*', async (context) => {
-    const response = await auth.handler(context.request);
-    return response;
-  });
+  .all('/api/studio/*', betterAuthStudio(studioConfig));
 
 // Start server
 const PORT = parseInt(process.env.PORT || '3000', 10);
@@ -429,20 +409,6 @@ export async function PATCH(event) {
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Make sure your <code className="text-white/90 bg-white/10 px-1 py-0.5">hooks.server.ts</code> includes the Better Auth handler:
-                      </p>
-                      <CodeHighlighter
-                        code={`// src/hooks.server.ts
-import { auth } from "$lib/auth";
-import { svelteKitHandler } from "better-auth/svelte-kit";
-import { building } from "$app/environment";
-
-export async function handle({ event, resolve }) {
-  return svelteKitHandler({ event, resolve, auth, building });
-}`}
-                        language="typescript"
-                      />
-                      <p className="text-sm font-light tracking-tight text-white/70">
                         Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
@@ -467,17 +433,6 @@ export const POST = handler;
 export const PUT = handler;
 export const DELETE = handler;
 export const PATCH = handler;`}
-                        language="typescript"
-                      />
-                      <p className="text-sm font-light tracking-tight text-white/70">
-                        Make sure your Better Auth routes are set up. For example, in <code className="text-white/90 bg-white/10 px-1 py-0.5">src/routes/api/auth/*auth.ts</code>:
-                      </p>
-                      <CodeHighlighter
-                        code={`// src/routes/api/auth/*auth.ts
-import { auth } from "~/lib/auth";
-import { toSolidStartHandler } from "better-auth/solid-start";
-
-export const { GET, POST } = toSolidStartHandler(auth);`}
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
@@ -515,28 +470,6 @@ export const Route = createFileRoute('/api/studio/$')({
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Make sure your Better Auth routes are set up. For example, in <code className="text-white/90 bg-white/10 px-1 py-0.5">src/routes/api/auth/$.ts</code>:
-                      </p>
-                      <CodeHighlighter
-                        code={`// src/routes/api/auth/$.ts
-import { createFileRoute } from '@tanstack/react-router';
-import { auth } from '@/lib/auth';
-
-export const Route = createFileRoute('/api/auth/$')({
-  server: {
-    handlers: {
-      GET: ({ request }) => {
-        return auth.handler(request);
-      },
-      POST: ({ request }) => {
-        return auth.handler(request);
-      },
-    },
-  },
-});`}
-                        language="typescript"
-                      />
-                      <p className="text-sm font-light tracking-tight text-white/70">
                         Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
@@ -559,21 +492,6 @@ const handler = betterAuthStudio(studioConfig);
 
 export const ALL: APIRoute = async (ctx) => {
   return handler(ctx);
-};`}
-                        language="typescript"
-                      />
-                      <p className="text-sm font-light tracking-tight text-white/70">
-                        Make sure your Better Auth routes are set up. For example, in <code className="text-white/90 bg-white/10 px-1 py-0.5">pages/api/auth/[...all].ts</code>:
-                      </p>
-                      <CodeHighlighter
-                        code={`// pages/api/auth/[...all].ts
-import { auth } from "~/auth";
-import type { APIRoute } from "astro";
-
-export const ALL: APIRoute = async (ctx) => {
-  // If you want to use rate limiting, make sure to set the 'x-forwarded-for' header
-  // ctx.request.headers.set("x-forwarded-for", ctx.clientAddress);
-  return auth.handler(ctx.request);
 };`}
                         language="typescript"
                       />
@@ -608,23 +526,6 @@ export async function action({ request }: ActionFunctionArgs) {
                         language="typescript"
                       />
                       <p className="text-sm font-light tracking-tight text-white/70">
-                        Make sure your Better Auth routes are set up. For example, in <code className="text-white/90 bg-white/10 px-1 py-0.5">app/routes/api.auth.$.ts</code>:
-                      </p>
-                      <CodeHighlighter
-                        code={`// app/routes/api.auth.$.ts
-import { auth } from '~/lib/auth.server';
-import type { LoaderFunctionArgs, ActionFunctionArgs } from '@remix-run/node';
-
-export async function loader({ request }: LoaderFunctionArgs) {
-  return auth.handler(request);
-}
-
-export async function action({ request }: ActionFunctionArgs) {
-  return auth.handler(request);
-}`}
-                        language="typescript"
-                      />
-                      <p className="text-sm font-light tracking-tight text-white/70">
                         Access the studio at <code className="text-white/90 bg-white/10 px-1 py-0.5">/api/studio</code>
                       </p>
                     </div>
@@ -647,19 +548,6 @@ const handler = betterAuthStudio(studioConfig);
 
 export default defineEventHandler(async (event) => {
   return handler(toWebRequest(event));
-});`}
-                        language="typescript"
-                      />
-                      <p className="text-sm font-light tracking-tight text-white/70">
-                        Make sure your Better Auth routes are set up. For example, in <code className="text-white/90 bg-white/10 px-1 py-0.5">server/api/auth/[...all].ts</code>:
-                      </p>
-                      <CodeHighlighter
-                        code={`// server/api/auth/[...all].ts
-import { auth } from '~/server/lib/auth';
-import { toNodeHandler } from 'better-auth/node';
-
-export default defineEventHandler(async (event) => {
-  return toNodeHandler(auth)(event.node.req, event.node.res);
 });`}
                         language="typescript"
                       />
