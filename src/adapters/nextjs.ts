@@ -10,7 +10,7 @@ function getUrlFromRequest(req: Request): string {
   return url.pathname + url.search;
 }
 
-export function createStudioHandler(config: StudioConfig) {
+export function betterAuthStudio(config: StudioConfig) {
   return async (request: Request): Promise<Response> => {
     try {
       const universalRequest = await requestToUniversal(request);

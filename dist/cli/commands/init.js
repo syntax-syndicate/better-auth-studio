@@ -101,10 +101,10 @@ async function setupNextJS(basePath, customApiDir) {
 `);
 }
 function generateNextJSRoute() {
-    return `import { createStudioHandler } from 'better-auth-studio/nextjs';
+    return `import { betterAuthStudio } from 'better-auth-studio/nextjs';
 import studioConfig from '@/studio.config';
 
-const handler = createStudioHandler(studioConfig);
+const handler = betterAuthStudio(studioConfig);
 
 export {
   handler as GET,

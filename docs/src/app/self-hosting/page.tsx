@@ -242,10 +242,10 @@ export default config;`}
                         For Next.js App Router, the init command automatically creates the API route file at <code className="text-white/90 bg-white/10 px-1 py-0.5">app/api/studio/[[...path]]/route.ts</code>:
                       </p>
                       <CodeHighlighter
-                        code={`import { createStudioHandler } from "better-auth-studio/nextjs";
+                        code={`import { betterAuthStudio } from "better-auth-studio/nextjs";
 import studioConfig from "@/studio.config";
 
-const handler = createStudioHandler(studioConfig);
+const handler = betterAuthStudio(studioConfig);
 
 export {
   handler as GET,
