@@ -33,7 +33,7 @@ export default function Installation() {
             </div>
             <div className="pt-4">
               <p className="text-sm font-light tracking-tight text-white/70">
-                For the hosted version, please join the waitlist: <a href="https://better-auth.build?utm_source=better-auth-studio&utm_medium=studio&utm_campaign=self-hosting" target="_blank" rel="noopener" className="underline underline-offset-2 font-bold">better-auth.build</a>
+                For the hosted version, please join the waitlist: <a href="https://better-auth.build?utm_source=better-auth-studio&utm_medium=studio&utm_campaign=installation" target="_blank" rel="noopener" className="underline underline-offset-2 font-bold">better-auth.build</a>
               </p>
             </div>
           </PixelCard>
