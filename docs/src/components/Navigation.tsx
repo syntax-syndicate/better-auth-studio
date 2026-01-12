@@ -34,9 +34,9 @@ export default function Navigation({ currentPage }: NavigationProps) {
 
   return (
     <nav className="absolute font-mono top-4 left-4 right-4 md:top-10 md:left-10 md:right-10 z-30">
-      <ul className="hidden md:flex gap-4 lg:gap-6">
+      <ul className="hidden md:flex gap-4 lg:gap-8">
         {navItems.map((item) => (
-          <li key={item.name}>
+          <li key={item.name} className="relative">
             <Link
               href={item.href}
               onMouseEnter={() => setHoveredItem(item.name)}
@@ -50,6 +50,16 @@ export default function Navigation({ currentPage }: NavigationProps) {
                 <ChevronUpRight />
               </span>
             </Link>
+            {item.name === 'CHANGELOG' && (
+              <Link
+                href="/v/1.1.0"
+                className="absolute -top-2 -right-5 inline-flex group gap-x-0.5 text-[8px] font-mono hover:opacity-100 transition-opacity cursor-pointer mix-blend-difference"
+              >
+                <span className="text-white/50 group-hover:text-white transition-colors">[</span>
+                <span className="text-white/70 group-hover:text-white text-[9px] lowercase">v 1.1.0</span>
+                <span className="text-white/50 group-hover:text-white transition-colors">]</span>
+              </Link>
+            )}
           </li>
         ))}
       </ul>
