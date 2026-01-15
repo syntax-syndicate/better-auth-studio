@@ -97,7 +97,12 @@ export async function startStudio(options: StudioOptions) {
     ? join(__dirname, '../public')
     : join(__dirname, '../../public');
   let studioEnabled = false;
-  const possibleFiles = ["studio.config.ts", "studio.config.js", "studio.config.mjs", "studio.config.cjs"];
+  const possibleFiles = [
+    'studio.config.ts',
+    'studio.config.js',
+    'studio.config.mjs',
+    'studio.config.cjs',
+  ];
   for (const file of possibleFiles) {
     const studioConfigPath = join(process.cwd(), file);
     if (existsSync(studioConfigPath)) {

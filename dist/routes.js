@@ -5406,6 +5406,12 @@ export const authClient = createAuthClient({
     });
     router.post('/api/tools/write-env-secret', async (req, res) => {
         try {
+            if (isSelfHosted) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'On hosted versions, they are not to write it to file system',
+                });
+            }
             const { secret, action = 'override' } = req.body || {};
             if (!secret) {
                 return res.status(400).json({
@@ -5527,6 +5533,12 @@ export const authClient = createAuthClient({
     });
     router.post('/api/tools/write-env-credentials', async (req, res) => {
         try {
+            if (isSelfHosted) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'On hosted versions, they are not to write it to file system',
+                });
+            }
             const { provider, clientId, clientSecret, action = 'override' } = req.body || {};
             if (!provider || !clientId || !clientSecret) {
                 return res.status(400).json({

@@ -342,20 +342,22 @@ export default function TeamDetails() {
           <nav className="flex space-x-8 px-6">
             <button
               onClick={() => setActiveTab('details')}
-              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === 'details'
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
+                activeTab === 'details'
                   ? 'border-white text-white'
                   : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-                }`}
+              }`}
             >
               <Users className="w-4 h-4 text-white/90" />
               <span className="font-mono uppercase text-xs font-normal">Details</span>
             </button>
             <button
               onClick={() => setActiveTab('members')}
-              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${activeTab === 'members'
+              className={`flex items-center space-x-2 py-4 px-2 border-b-2 font-medium text-sm ${
+                activeTab === 'members'
                   ? 'border-white text-white'
                   : 'border-transparent text-gray-400 hover:text-white hover:border-white/50'
-                }`}
+              }`}
             >
               <Users className="w-4 h-4 text-white/90" />
               <span className="inline-flex items-start font-mono uppercase text-xs font-normal">
@@ -434,7 +436,7 @@ export default function TeamDetails() {
                         <AnimatedNumber
                           value={Math.ceil(
                             (Date.now() - new Date(team.createdAt).getTime()) /
-                            (1000 * 60 * 60 * 24)
+                              (1000 * 60 * 60 * 24)
                           )}
                           format={{ notation: 'standard', maximumFractionDigits: 0 }}
                         />
@@ -639,8 +641,9 @@ export default function TeamDetails() {
                     {filteredUsers.map((user) => (
                       <div
                         key={user.id}
-                        className={`flex items-center space-x-3 p-4 cursor-pointer hover:bg-white/5 ${selectedUsers.includes(user.id) ? 'bg-blue-900/20' : ''
-                          }`}
+                        className={`flex items-center space-x-3 p-4 cursor-pointer hover:bg-white/5 ${
+                          selectedUsers.includes(user.id) ? 'bg-blue-900/20' : ''
+                        }`}
                         onClick={() => toggleUserSelection(user.id)}
                       >
                         <input

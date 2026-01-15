@@ -44,13 +44,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { getProviderIcon } from '../lib/icons';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '../components/ui/tooltip-docs';
+import { getProviderIcon } from '../lib/icons';
 
 interface Tool {
   id: string;
@@ -373,7 +373,7 @@ migrateFromClerk()
 
 export default function Tools() {
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const isSelfHosted = !!(window as any).__STUDIO_CONFIG__?.basePath;
   const [runningTool, setRunningTool] = useState<string | null>(null);
   const [toolLogs, setToolLogs] = useState<
@@ -5653,7 +5653,10 @@ export const authClient = createAuthClient({
                         </TooltipTrigger>
                         {isSelfHosted && (
                           <TooltipContent>
-                            <p>On hosted versions, writing to the file system is not allowed. Please use the studio one</p>
+                            <p>
+                              On hosted versions, writing to the file system is not allowed. Please
+                              use the studio one
+                            </p>
                           </TooltipContent>
                         )}
                       </Tooltip>
