@@ -1055,7 +1055,9 @@ export default function Dashboard() {
         </p>
       </div> */}
         <div className="px-6 overflow-hidden">
-          <div className={`flex items-center justify-between gap-8 py-4 px-6 bg-gradient-to-b from-white/[4%] to-white/[2.5%]  border border-white/10 rounded-none overflow-x-auto relative`}>
+          <div
+            className={`flex items-center justify-between gap-8 py-4 px-6 bg-gradient-to-b from-white/[4%] to-white/[2.5%]  border border-white/10 rounded-none overflow-x-auto relative`}
+          >
             {/* Top-left corner */}
             <div className="absolute top-0 left-0 w-[12px] h-[0.5px] bg-white/20" />
             <div className="absolute top-0 left-0 w-[0.5px] h-[12px] bg-white/20" />

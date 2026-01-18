@@ -701,7 +701,7 @@ export default function Layout({ children }: LayoutProps) {
           ) : null;
         })()}
 
-      <div className={`flex-1 ${!(config.liveMarquee) && "mt-4"}`}>{children}</div>
+      <div className={`flex-1 ${!(config.liveMarquee) && 'mt-4'}`}>{children}</div>
 
       <CommandPalette
         isOpen={isCommandPaletteOpen}

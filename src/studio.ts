@@ -2,23 +2,23 @@ import { existsSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import chalk from 'chalk';
-import cors from 'cors';
-import express from 'express';
-import open from 'open';
-import type { WebSocket } from 'ws';
-import { WebSocketServer } from 'ws';
-import { loadConfig } from 'c12';
-import type { JitiOptions as JO } from 'jiti/native';
 // @ts-expect-error - No types available
 import babelPresetReact from '@babel/preset-react';
 // @ts-expect-error - No types available
 import babelPresetTypeScript from '@babel/preset-typescript';
+import { loadConfig } from 'c12';
+import chalk from 'chalk';
+import cors from 'cors';
+import express from 'express';
+import type { JitiOptions as JO } from 'jiti/native';
+import open from 'open';
+import type { WebSocket } from 'ws';
+import { WebSocketServer } from 'ws';
 import type { AuthConfig } from './config.js';
 import { getPathAliases } from './config.js';
 import { createRoutes } from './routes.js';
-import { serveIndexHtml } from './utils/html-injector.js';
 import type { StudioConfig } from './types/handler.js';
+import { serveIndexHtml } from './utils/html-injector.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -145,14 +145,14 @@ export async function startStudio(options: StudioOptions) {
         alias,
         interopDefault: true,
       };
-      
+
       const { config } = await loadConfig<{ default?: StudioConfig; config?: StudioConfig }>({
         configFile: studioConfigPath,
         cwd: process.cwd(),
         dotenv: true,
         jitiOptions,
       });
-      console.log({config})
+      console.log({ config });
       const studioConfig = config?.default || config?.config || (config as any);
       if (studioConfig?.events) {
         const eventsConfig = studioConfig.events;
@@ -160,7 +160,7 @@ export async function startStudio(options: StudioOptions) {
         const hasProvider = !!eventsConfig.provider;
         const hasClient = !!eventsConfig.client && !!eventsConfig.clientType;
         const configured = hasProvider || hasClient || !!studioConfig.auth; // If auth exists, can fallback to adapter
-        
+
         eventsStatus = {
           enabled,
           configured,
@@ -172,8 +172,7 @@ export async function startStudio(options: StudioOptions) {
           configured: false,
         };
       }
-    } catch (_error) {
-    }
+    } catch (_error) {}
   }
   app.use(
     '/assets',
@@ -235,9 +234,7 @@ export async function startStudio(options: StudioOptions) {
       if (eventsStatus) {
         if (eventsStatus.enabled) {
           if (eventsStatus.configured) {
-            const clientTypeInfo = eventsStatus.clientType
-              ? ` (${eventsStatus.clientType})`
-              : '';
+            const clientTypeInfo = eventsStatus.clientType ? ` (${eventsStatus.clientType})` : '';
             process.stdout.write(
               chalk.green(`✅ Events enabled${clientTypeInfo} - configuration is valid\n`)
             );
