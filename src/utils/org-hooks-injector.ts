@@ -80,8 +80,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'organization.created',
             {
               status: 'success',
@@ -129,8 +128,7 @@ export function createOrganizationHooksWithEvents(
           }
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          if (data.organization) {
+         if (data.organization) {
             emitEvent(
               'organization.updated',
               {
@@ -177,8 +175,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'organization.deleted',
             {
               status: 'success',
@@ -228,8 +225,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'member.added',
             {
               status: 'success',
@@ -277,8 +273,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'member.removed',
             {
               status: 'success',
@@ -326,8 +321,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'member.role_changed',
             {
               status: 'success',
@@ -378,8 +372,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'team.created',
             {
               status: 'success',
@@ -431,8 +424,7 @@ export function createOrganizationHooksWithEvents(
           }
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          if (data.team) {
+         if (data.team) {
             emitEvent(
               'team.updated',
               {
@@ -483,8 +475,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'team.deleted',
             {
               status: 'success',
@@ -538,8 +529,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'team.member.added',
             {
               status: 'success',
@@ -592,8 +582,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'team.member.removed',
             {
               status: 'success',
@@ -647,8 +636,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'invitation.created',
             {
               status: 'success',
@@ -699,8 +687,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'invitation.accepted',
             {
               status: 'success',
@@ -748,8 +735,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'invitation.rejected',
             {
               status: 'success',
@@ -797,8 +783,7 @@ export function createOrganizationHooksWithEvents(
           ).catch(() => {});
         }
       : async (data: any) => {
-          // Emit event even if no user hook
-          emitEvent(
+         emitEvent(
             'invitation.cancelled',
             {
               status: 'success',

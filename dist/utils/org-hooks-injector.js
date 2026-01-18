@@ -36,7 +36,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('organization.created', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -75,7 +74,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }
             }
             : async (data) => {
-                // Emit event even if no user hook
                 if (data.organization) {
                     emitEvent('organization.updated', {
                         status: 'success',
@@ -113,7 +111,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('organization.deleted', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -154,7 +151,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('member.added', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -193,7 +189,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('member.removed', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -232,7 +227,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('member.role_changed', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -274,7 +268,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('team.created', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -317,7 +310,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }
             }
             : async (data) => {
-                // Emit event even if no user hook
                 if (data.team) {
                     emitEvent('team.updated', {
                         status: 'success',
@@ -359,7 +351,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('team.deleted', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -404,7 +395,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('team.member.added', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -448,7 +438,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('team.member.removed', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -493,7 +482,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('invitation.created', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -535,7 +523,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('invitation.accepted', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -574,7 +561,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('invitation.rejected', {
                     status: 'success',
                     organizationId: data.organization.id,
@@ -613,7 +599,6 @@ export function createOrganizationHooksWithEvents(eventsConfig, userHooks) {
                 }, capturedConfig).catch(() => { });
             }
             : async (data) => {
-                // Emit event even if no user hook
                 emitEvent('invitation.cancelled', {
                     status: 'success',
                     organizationId: data.organization.id,
