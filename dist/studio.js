@@ -2,16 +2,16 @@ import { existsSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+// @ts-expect-error - No types available
+import babelPresetReact from '@babel/preset-react';
+// @ts-expect-error - No types available
+import babelPresetTypeScript from '@babel/preset-typescript';
+import { loadConfig } from 'c12';
 import chalk from 'chalk';
 import cors from 'cors';
 import express from 'express';
 import open from 'open';
 import { WebSocketServer } from 'ws';
-import { loadConfig } from 'c12';
-// @ts-expect-error - No types available
-import babelPresetReact from '@babel/preset-react';
-// @ts-expect-error - No types available
-import babelPresetTypeScript from '@babel/preset-typescript';
 import { getPathAliases } from './config.js';
 import { createRoutes } from './routes.js';
 import { serveIndexHtml } from './utils/html-injector.js';
@@ -128,8 +128,7 @@ export async function startStudio(options) {
                 };
             }
         }
-        catch (_error) {
-        }
+        catch (_error) { }
     }
     app.use('/assets', express.static(join(publicDir, 'assets'), {
         setHeaders: (res) => {
@@ -182,9 +181,7 @@ export async function startStudio(options) {
             if (eventsStatus) {
                 if (eventsStatus.enabled) {
                     if (eventsStatus.configured) {
-                        const clientTypeInfo = eventsStatus.clientType
-                            ? ` (${eventsStatus.clientType})`
-                            : '';
+                        const clientTypeInfo = eventsStatus.clientType ? ` (${eventsStatus.clientType})` : '';
                         process.stdout.write(chalk.green(`✅ Events enabled${clientTypeInfo} - configuration is valid\n`));
                     }
                     else {

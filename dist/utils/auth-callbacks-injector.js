@@ -220,7 +220,6 @@ export function wrapAuthCallbacks(auth, eventsConfig) {
             emailOtpPlugin.__studio_wrapped = true;
         }
     }
-    catch (error) {
-    }
+    catch (error) { }
 }
 //# sourceMappingURL=auth-callbacks-injector.js.map
