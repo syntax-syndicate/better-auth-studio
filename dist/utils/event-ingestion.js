@@ -1,5 +1,5 @@
+import { createClickHouseProvider, createHttpProvider, createPostgresProvider, } from '../providers/events/helpers.js';
 import { EVENT_TEMPLATES, getEventSeverity } from '../types/events.js';
-import { createPostgresProvider, createClickHouseProvider, createHttpProvider, } from '../providers/events/helpers.js';
 let provider = null;
 let config = null;
 let eventQueue = [];
@@ -66,7 +66,6 @@ export function initializeEventIngestion(eventsConfig) {
  * Emit an event
  */
 export async function emitEvent(type, data, eventsConfig) {
-    // Initialize if not already initialized and config is provided
     if (!isInitialized && eventsConfig?.enabled) {
         initializeEventIngestion(eventsConfig);
     }
@@ -78,7 +77,6 @@ export async function emitEvent(type, data, eventsConfig) {
     if (!useConfig) {
         return;
     }
-    // Ensure provider is available
     if (!provider) {
         console.warn(`[Event Ingestion] Provider not initialized. Skipping event: ${type}`);
         return;

@@ -87,15 +87,12 @@ export function createPostgresProvider(options) {
     let tableEnsured = false;
     let tableEnsuringPromise = null;
     const ensureTableSync = async () => {
-        // If already ensured, return immediately
         if (tableEnsured) {
             return;
         }
-        // If table creation is in progress, wait for it
         if (tableEnsuringPromise) {
             return tableEnsuringPromise;
         }
-        // Start table creation and store the promise
         tableEnsuringPromise = (async () => {
             try {
                 await ensureTable();
@@ -103,22 +100,18 @@ export function createPostgresProvider(options) {
             }
             catch (error) {
                 console.error('Failed to ensure table:', error);
-                // Reset promise so we can retry
                 tableEnsuringPromise = null;
                 throw error;
             }
             finally {
-                // Clear the promise after completion (success or failure)
                 tableEnsuringPromise = null;
             }
         })();
         return tableEnsuringPromise;
     };
-    // Call ensureTable asynchronously (don't block initialization)
     ensureTableSync().catch(console.error);
     return {
         async ingest(event) {
-            // Ensure table exists before ingesting
             if (!tableEnsured) {
                 await ensureTableSync();
             }
@@ -181,14 +174,13 @@ export function createPostgresProvider(options) {
                                 event.display?.message || null,
                                 event.display?.severity || null,
                             ]);
-                            return; // Success after retry
+                            return;
                         }
                         catch (retryError) {
                             console.error(`Retry after table creation also failed:`, retryError);
                             throw retryError;
                         }
                     }
-                    // If it's a connection error and we have a pool, log helpful info
                     if (error.code === 'ECONNREFUSED' ||
                         error.code === 'ETIMEDOUT' ||
                         error.message?.includes('Connection terminated')) {
@@ -206,7 +198,6 @@ export function createPostgresProvider(options) {
         async ingestBatch(events) {
             if (events.length === 0)
                 return;
-            // Ensure table exists before ingesting (wait if creation is in progress)
             await ensureTableSync();
             // Support Prisma client ($executeRaw) or standard pg client (query)
             if (client.$executeRaw) {
@@ -268,7 +259,6 @@ export function createPostgresProvider(options) {
                         await client.query(query, params);
                     }
                     catch (error) {
-                        // Provide more context in error messages
                         console.error(`Failed to insert batch chunk (${chunk.length} events) into ${schema}.${tableName}:`, error);
                         if (error.code === 'ECONNREFUSED' ||
                             error.code === 'ETIMEDOUT' ||
@@ -416,7 +406,6 @@ export function createPostgresProvider(options) {
                 };
             }
             catch (error) {
-                // If table doesn't exist, return empty result instead of throwing
                 if (error?.message?.includes('does not exist') || error?.code === '42P01') {
                     return {
                         events: [],
@@ -492,7 +481,6 @@ export function createClickHouseProvider(options) {
             tableEnsuring = false;
         }
     };
-    // Call ensureTable asynchronously (don't block initialization)
     ensureTableSync().catch(console.error);
     const ingestBatchFn = async (events) => {
         if (events.length === 0)
@@ -526,7 +514,6 @@ export function createClickHouseProvider(options) {
                 console.log(`✅ Inserted ${rows.length} event(s) into ClickHouse ${tableFullName}`);
             }
             else {
-                // Fallback: use INSERT query
                 const values = rows
                     .map((row) => `('${row.id}', '${row.type}', '${new Date(row.timestamp).toISOString().replace('T', ' ').slice(0, 19)}', '${row.status || 'success'}', ${row.user_id ? `'${row.user_id.replace(/'/g, "''")}'` : 'NULL'}, ${row.session_id ? `'${row.session_id.replace(/'/g, "''")}'` : 'NULL'}, ${row.organization_id ? `'${row.organization_id.replace(/'/g, "''")}'` : 'NULL'}, '${row.metadata.replace(/'/g, "''")}', ${row.ip_address ? `'${row.ip_address.replace(/'/g, "''")}'` : 'NULL'}, ${row.user_agent ? `'${row.user_agent.replace(/'/g, "''")}'` : 'NULL'}, '${row.source}', ${row.display_message ? `'${row.display_message.replace(/'/g, "''")}'` : 'NULL'}, ${row.display_severity ? `'${row.display_severity}'` : 'NULL'})`)
                     .join(', ');
@@ -588,7 +575,6 @@ export function createClickHouseProvider(options) {
                         tableExists = false;
                     }
                 }
-                // If table doesn't exist, try to create it
                 if (!tableExists) {
                     const createTableQuery = `
             CREATE TABLE IF NOT EXISTS ${tableFullName} (
@@ -618,7 +604,6 @@ export function createClickHouseProvider(options) {
                     }
                 }
                 else {
-                    // Table exists, check if status column exists
                     try {
                         const checkColumnQuery = `
               SELECT count() as exists 
@@ -663,7 +648,6 @@ export function createClickHouseProvider(options) {
                             }
                             catch (alterError) {
                                 console.warn(`Failed to add status column to ${tableFullName}:`, alterError);
-                                // Continue anyway - we'll handle missing column in query
                             }
                         }
                     }
@@ -694,7 +678,6 @@ export function createClickHouseProvider(options) {
             }
             const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
             const orderDirection = sort === 'desc' ? 'DESC' : 'ASC';
-            // Try to query with status column first, fallback if it doesn't exist
             let query = `
         SELECT id, type, timestamp, status, user_id, session_id, organization_id, 
                metadata, ip_address, user_agent, source, display_message, display_severity
@@ -719,12 +702,10 @@ export function createClickHouseProvider(options) {
                 }
             }
             catch (error) {
-                // If error is about missing status column, retry without it
                 if (error?.message?.includes('Unknown expression identifier') &&
                     error?.message?.includes('status')) {
                     console.warn(`Status column not found in ${tableFullName}, querying without it`);
                     hasStatusColumn = false;
-                    // Retry query without status column
                     query = `
             SELECT id, type, timestamp, user_id, session_id, organization_id, 
                    metadata, ip_address, user_agent, source, display_message, display_severity
@@ -765,14 +746,13 @@ export function createClickHouseProvider(options) {
                     throw error;
                 }
             }
-            // Handle case where result might be an array or object
             const rows = Array.isArray(result) ? result : result?.data || [];
             const hasMore = rows.length > limit;
             const events = rows.slice(0, limit).map((row) => ({
                 id: row.id,
                 type: row.type,
                 timestamp: new Date(row.timestamp),
-                status: hasStatusColumn ? row.status || 'success' : 'success', // Default to 'success' if column doesn't exist
+                status: hasStatusColumn ? row.status || 'success' : 'success',
                 userId: row.user_id || undefined,
                 sessionId: row.session_id || undefined,
                 organizationId: row.organization_id || undefined,
@@ -816,7 +796,6 @@ export function createHttpProvider(options) {
 }
 export function createStorageProvider(options) {
     const { adapter, tableName = 'auth_events' } = options;
-    // Ensure table exists (for Prisma/Drizzle adapters)
     const ensureTable = async () => {
         if (!adapter)
             return;
