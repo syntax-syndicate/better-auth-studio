@@ -390,7 +390,7 @@ export default studioConfig;`,
                 noise={{ opacity: 1, scale: 1.2 }}
                 sizing="fill"
               />
-              <div className="absolute top-4 left-0 right-0 flex items-start justify-center z-20 pointer-events-none">
+              <div className="absolute -top-3 left-0 right-0 flex items-start justify-center z-20 pointer-events-none">
                 <div className="pointer-events-auto w-full">
                   <EventIngestionFlow
                     className="w-full"
