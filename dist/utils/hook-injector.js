@@ -1,8 +1,8 @@
 import { createAuthMiddleware } from 'better-auth/plugins';
-import { wrapAuthCallbacks } from './auth-callbacks-injector.js';
-import { emitEvent, isEventIngestionInitialized } from './event-ingestion.js';
-import { wrapOrganizationPluginHooks } from './org-hooks-injector.js';
 import { createClickHouseProvider, createHttpProvider, createPostgresProvider, } from '../providers/events/helpers.js';
+import { wrapAuthCallbacks } from './auth-callbacks-injector.js';
+import { emitEvent, isEventIngestionInitialized, } from './event-ingestion.js';
+import { wrapOrganizationPluginHooks } from './org-hooks-injector.js';
 const INJECTED_HOOKS_MARKER = '__better_auth_studio_events_injected__';
 /**
  * Create a Better Auth plugin for event ingestion
@@ -529,8 +529,7 @@ function createEventIngestionPlugin(eventsConfig) {
                             });
                         }
                     }
-                    catch (error) {
-                    }
+                    catch (error) { }
                 }
             }
             return context;
@@ -617,9 +616,6 @@ function createEventIngestionPlugin(eventsConfig) {
 }
 /**
  * Inject middleware hooks into Better Auth using plugins
- *
- * Better Auth processes plugins during initialization, so we add the plugin
- * to auth.options.plugins array
  */
 export function injectEventHooks(auth, eventsConfig) {
     if (!auth || !eventsConfig?.enabled) {
