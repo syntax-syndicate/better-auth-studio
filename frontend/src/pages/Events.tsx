@@ -25,6 +25,7 @@ import {
 } from '../components/PixelIcons';
 import { Button } from '../components/ui/button';
 import { Calendar } from '../components/ui/calendar';
+import { Checkbox } from '../components/ui/checkbox';
 import { Input } from '../components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '../components/ui/popover';
 import {
@@ -35,6 +36,42 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { buildApiUrl } from '../utils/api';
+
+const EVENT_TYPES = [
+  'user.joined',
+  'user.logged_in',
+  'user.updated',
+  'user.logged_out',
+  'user.password_changed',
+  'user.email_verified',
+  'user.banned',
+  'user.unbanned',
+  'user.deleted',
+  'user.delete_verification_requested',
+  'organization.created',
+  'organization.deleted',
+  'organization.updated',
+  'member.added',
+  'member.removed',
+  'member.role_changed',
+  'session.created',
+  'password.reset_requested',
+  'password.reset_completed',
+  'password.reset_requested_otp',
+  'password.reset_completed_otp',
+  'oauth.linked',
+  'oauth.unlinked',
+  'oauth.sign_in',
+  'team.created',
+  'team.updated',
+  'team.deleted',
+  'team.member.added',
+  'team.member.removed',
+  'invitation.created',
+  'invitation.accepted',
+  'invitation.rejected',
+  'invitation.cancelled',
+] as const;
 
 interface AuthEvent {
   id: string;
@@ -148,6 +185,7 @@ export default function Events() {
   interface FilterConfig {
     type: string;
     dateRange?: DateRange;
+    eventTypes?: string[];
   }
 
   const [activeFilters, setActiveFilters] = useState<FilterConfig[]>([]);
@@ -326,7 +364,11 @@ export default function Events() {
   const addFilter = (filterType: string) => {
     const exists = activeFilters.some((f) => f.type === filterType);
     if (!exists) {
-      setActiveFilters((prev) => [...prev, { type: filterType }]);
+      if (filterType === 'eventType') {
+        setActiveFilters((prev) => [...prev, { type: filterType, eventTypes: [] }]);
+      } else {
+        setActiveFilters((prev) => [...prev, { type: filterType }]);
+      }
     }
   };
 
@@ -336,6 +378,24 @@ export default function Events() {
 
   const updateFilterDateRange = (filterType: string, dateRange?: DateRange) => {
     setActiveFilters((prev) => prev.map((f) => (f.type === filterType ? { ...f, dateRange } : f)));
+  };
+
+  const updateEventTypes = (filterType: string, eventTypes: string[]) => {
+    setActiveFilters((prev) =>
+      prev.map((f) => (f.type === filterType ? { ...f, eventTypes } : f))
+    );
+  };
+
+  const toggleEventType = (filterType: string, eventType: string) => {
+    const filter = activeFilters.find((f) => f.type === filterType);
+    if (!filter) return;
+
+    const currentTypes = filter.eventTypes || [];
+    const newTypes = currentTypes.includes(eventType)
+      ? currentTypes.filter((t) => t !== eventType)
+      : [...currentTypes, eventType];
+
+    updateEventTypes(filterType, newTypes);
   };
 
   const filteredEvents = events.filter((event) => {
@@ -352,9 +412,9 @@ export default function Events() {
       (filter === 'info' && event.display?.severity === 'info') ||
       (filter === 'warning' && event.display?.severity === 'warning');
 
-    // Apply date range filters
+    // Apply active filters
     if (activeFilters.length > 0) {
-      const matchesDateFilters = activeFilters.every((filter) => {
+      const matchesActiveFilters = activeFilters.every((filter) => {
         if (filter.type === 'timestamp') {
           if (!filter.dateRange?.from && !filter.dateRange?.to) return true;
           const eventDate = new Date(event.timestamp);
@@ -370,10 +430,14 @@ export default function Events() {
           }
           return true;
         }
+        if (filter.type === 'eventType') {
+          if (!filter.eventTypes || filter.eventTypes.length === 0) return true;
+          return filter.eventTypes.includes(event.type);
+        }
         return true;
       });
 
-      return matchesSearch && matchesFilter && matchesDateFilters;
+      return matchesSearch && matchesFilter && matchesActiveFilters;
     }
 
     return matchesSearch && matchesFilter;
@@ -588,6 +652,9 @@ export const auth = betterAuth({
                 {!activeFilters.some((f) => f.type === 'timestamp') && (
                   <SelectItem value="timestamp">Date Range</SelectItem>
                 )}
+                {!activeFilters.some((f) => f.type === 'eventType') && (
+                  <SelectItem value="eventType">Event Type</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -657,6 +724,49 @@ export const auth = betterAuth({
                           }
                           className="rounded-none"
                         />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                )}
+
+                {filter.type === 'eventType' && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-mono uppercase text-gray-400">Event Types:</span>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="h-8 px-3 text-xs font-mono uppercase text-gray-400 hover:text-white bg-transparent border-white/10 hover:bg-white/5"
+                        >
+                          {filter.eventTypes && filter.eventTypes.length > 0
+                            ? `${filter.eventTypes.length} selected`
+                            : 'Select types'}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-black border-white/10 max-h-[400px] overflow-y-auto">
+                        <div className="p-3 space-y-2 min-w-[250px]">
+                          <div className="text-xs font-mono uppercase text-gray-400 mb-2 px-2">
+                            Select Event Types
+                          </div>
+                          <div className="space-y-1">
+                            {EVENT_TYPES.map((eventType) => {
+                              const isSelected = filter.eventTypes?.includes(eventType) || false;
+                              return (
+                                <label
+                                  key={eventType}
+                                  className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 cursor-pointer rounded-none"
+                                >
+                                  <Checkbox
+                                    checked={isSelected}
+                                    onCheckedChange={() => toggleEventType('eventType', eventType)}
+                                    className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:border-white"
+                                  />
+                                  <span className="text-xs font-mono text-white">{eventType}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
                       </PopoverContent>
                     </Popover>
                   </div>
