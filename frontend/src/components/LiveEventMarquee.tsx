@@ -139,9 +139,9 @@ export function LiveEventMarquee({
       retryDelayRef.current = 2000;
 
       if (data.events && Array.isArray(data.events)) {
-        setEvents((prev) => {
+          setEvents((prev) => {
           // Merge and deduplicate - only add events we don't already have
-          const existingIds = new Set(prev.map((e) => e.id));
+            const existingIds = new Set(prev.map((e) => e.id));
           const uniqueNew = data.events.filter((e: AuthEvent) => !existingIds.has(e.id));
 
           if (uniqueNew.length > 0) {
@@ -156,7 +156,7 @@ export function LiveEventMarquee({
 
           // No new events, return previous state
           return prev;
-        });
+          });
       } else if (!data.events) {
         // If response doesn't have events array, log for debugging
         console.warn('Events API response missing events array:', data);
