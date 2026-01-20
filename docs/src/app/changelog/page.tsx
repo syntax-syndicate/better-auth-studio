@@ -97,6 +97,8 @@ const ChevronIcon = () => (
 );
 
 const versionHistory = [
+  { version: "v1.1.1", date: "2025-01-XX", description: "Database event ingestion support. Better Auth Studio now supports comprehensive event ingestion across multiple database clients including PostgreSQL (pg Pool/Client), SQLite (better-sqlite3), Prisma Client, Drizzle ORM, and ClickHouse. Features automatic table creation and seamless event capture for authentication workflows." },
+  { version: "v1.1.0", date: "2025-01-XX", description: "Comprehensive framework support for self-hosting. Better Auth Studio now supports 10 major web frameworks (Next.js, Express, Hono, Elysia, SvelteKit, SolidStart, TanStack Start, Astro, Remix, Nuxt) with seamless integration for production deployments. Added environment variable support for admin emails and mobile-responsive documentation." },
   { version: "v1.0.79-beta.66", date: "2025-01-XX", description: "Comprehensive framework support for self-hosting. Better Auth Studio now supports 10 major web frameworks (Next.js, Express, Hono, Elysia, SvelteKit, SolidStart, TanStack Start, Astro, Remix, Nuxt) with seamless integration for production deployments. Added environment variable support for admin emails and mobile-responsive documentation." },
   { version: "v1.0.80-beta.1", date: "2025-12-30", description: "Added Hono and Elysia framework support for self-hosting. Better Auth Studio now supports integration with Hono.js and Elysia.js frameworks, expanding framework compatibility beyond Next.js and Express. Includes example projects with Prisma integration for both frameworks." },
   { version: "v1.0.79-beta.19", date: "2025-12-25", description: "Beta release with self-hosting support. Better Auth Studio can now be embedded directly into your application for production use. Full support for Next.js App Router and Express.js integration. Fixed adapter resolution, auth config loading, and database schema loading for all endpoints in production deployments." },
@@ -138,15 +140,15 @@ export default function Changelog() {
                       fill="currentColor"
                     />
                   </svg>
-                  v1.1.0 <span className="text-white/50 ml-2">/ Latest Release</span>
+                  v1.1.1 <span className="text-white/50 ml-2">/ Latest Release</span>
                 </span>
               </h3>
             </div>
             <p className="text-sm font-light tracking-tight text-white/70 mb-4 pt-4">
-              Comprehensive framework support for self-hosting. Better Auth Studio now supports 10 major web frameworks, providing seamless integration for production deployments across the entire JavaScript ecosystem.
+              Database event ingestion support. Better Auth Studio now supports comprehensive event ingestion across multiple database clients including PostgreSQL, SQLite, Prisma, Drizzle ORM, and ClickHouse with automatic table creation and seamless event capture.
             </p>
             <Link
-              href="/v/1.1.0"
+              href="/v/1.1.1"
               className="inline-flex mb-2 items-center text-xs font-light tracking-tight text-white/70 hover:text-white border border-white/20 hover:border-white/30 bg-black/50 hover:bg-white/5 px-3 py-2 transition-all duration-300"
             >
               View Full Release Notes
@@ -163,70 +165,25 @@ export default function Changelog() {
               </svg>
             </Link>
             <div className="space-y-3">
-              <h4 className="font-light tracking-tight text-white flex items-center"><RocketIcon />Complete Framework Support</h4>
+              <h4 className="font-light tracking-tight text-white flex items-center"><DatabaseIcon />Database Event Ingestion</h4>
               <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
                 <li className="flex items-center">
                   <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Next.js:</strong> Full support for App Router with automatic route generation via <code className="text-white/80 bg-white/10 px-1">better-auth-studio/nextjs</code>
+                  PostgreSQL, SQLite, Prisma, Drizzle ORM, and ClickHouse support with automatic table creation and event capture.
                 </li>
+              </ul>
+              <h4 className="font-light tracking-tight text-white flex items-center mt-4"><RocketIcon />Complete Framework Support</h4>
+              <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
                 <li className="flex items-center">
                   <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Express:</strong> Native Express.js middleware integration with <code className="text-white/80 bg-white/10 px-1">better-auth-studio/express</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Hono:</strong> Lightweight and fast web framework support via <code className="text-white/80 bg-white/10 px-1">better-auth-studio/hono</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Elysia:</strong> Bun-optimized framework with full TypeScript support using <code className="text-white/80 bg-white/10 px-1">better-auth-studio/elysia</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">SvelteKit:</strong> Complete SvelteKit integration with catch-all routes via <code className="text-white/80 bg-white/10 px-1">better-auth-studio/svelte-kit</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">SolidStart:</strong> Solid.js meta-framework support with <code className="text-white/80 bg-white/10 px-1">better-auth-studio/solid-start</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">TanStack Start:</strong> TanStack Router-based framework integration via <code className="text-white/80 bg-white/10 px-1">better-auth-studio/tanstack-start</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Astro:</strong> Astro API routes support with <code className="text-white/80 bg-white/10 px-1">better-auth-studio/astro</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Remix:</strong> Remix resource routes integration using <code className="text-white/80 bg-white/10 px-1">better-auth-studio/remix</code>
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  <strong className="text-white/90 mr-2">Nuxt:</strong> Nuxt 3 server API routes support via <code className="text-white/80 bg-white/10 px-1">better-auth-studio/nuxt</code>
+                  Support for 10 major frameworks: Next.js, Express, Hono, Elysia, SvelteKit, SolidStart, TanStack Start, Astro, Remix, and Nuxt.
                 </li>
               </ul>
               <h4 className="font-light tracking-tight text-white flex items-center mt-4"><SettingsIcon />Self-Hosting Features</h4>
               <ul className="list-none space-y-2 text-sm font-light tracking-tight text-white/70 ml-4">
                 <li className="flex items-center">
                   <ChevronIcon />
-                  Framework-agnostic self-hosting - deploy Better Auth Studio alongside your application
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  Role-based access control and email allowlists for secure admin access
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  Environment variable support for admin emails (<code className="text-white/80 bg-white/10 px-1">ADMIN_EMAIL_1</code>, <code className="text-white/80 bg-white/10 px-1">ADMIN_EMAIL_2</code>, etc.)
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  Custom base paths - mount studio at any route (e.g., <code className="text-white/80 bg-white/10 px-1">/api/studio</code>, <code className="text-white/80 bg-white/10 px-1">/admin</code>)
-                </li>
-                <li className="flex items-center">
-                  <ChevronIcon />
-                  Production-ready deployment patterns for all supported frameworks
+                  Framework-agnostic self-hosting with role-based access control, email allowlists, custom base paths, and production-ready deployment patterns.
                 </li>
               </ul>
               <h4 className="font-light tracking-tight text-white flex items-center mt-4"><GlobeIcon />Documentation & UX</h4>
