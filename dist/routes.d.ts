@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import type { AuthConfig } from './config.js';
 import type { StudioAccessConfig } from './utils/html-injector.js';
+import { StudioConfig } from './types/handler.js';
 export declare function safeImportAuthConfig(authConfigPath: string, noCache?: boolean): Promise<any>;
-export declare function createRoutes(authConfig: AuthConfig, configPath?: string, geoDbPath?: string, preloadedAdapter?: any, preloadedAuthOptions?: any, accessConfig?: StudioAccessConfig, authInstance?: any): Router;
+export declare function createRoutes(authConfig: AuthConfig, configPath?: string, geoDbPath?: string, preloadedAdapter?: any, preloadedAuthOptions?: any, accessConfig?: StudioAccessConfig, authInstance?: any, studioConfig?: StudioConfig): Router;
 export declare function handleStudioApiRequest(ctx: {
     path: string;
     method: string;
@@ -12,6 +13,7 @@ export declare function handleStudioApiRequest(ctx: {
     basePath?: string;
     configPath?: string;
     accessConfig?: StudioAccessConfig;
+    studioConfig?: StudioConfig;
 }): Promise<{
     status: number;
     data: any;

@@ -195,15 +195,20 @@ export default function Events() {
   const [activeFilters, setActiveFilters] = useState<FilterConfig[]>([]);
 
   const eventStats = useMemo(() => {
-    const success = events.filter(
-      (e) => e.status === 'success' && e.display?.severity !== 'failed'
-    ).length;
     const failed = events.filter(
       (e) => e.status === 'failed' || e.display?.severity === 'failed'
     ).length;
     const warning = events.filter((e) => e.display?.severity === 'warning').length;
     const info = events.filter(
-      (e) => e.display?.severity === 'info' || !e.display?.severity
+      (e) => e.display?.severity === 'info' || (!e.display?.severity && e.status !== 'failed')
+    ).length;
+    const success = events.filter(
+      (e) => 
+        e.status === 'success' && 
+        e.display?.severity !== 'failed' && 
+        e.display?.severity !== 'warning' && 
+        e.display?.severity !== 'info' &&
+        !e.display?.severity
     ).length;
     return { success, failed, warning, info };
   }, [events]);
@@ -740,20 +745,25 @@ export const auth = betterAuth({
 
               if (groupedData[key]) {
                 const status = event.status || 'success';
-                const severity = event.display?.severity || 'info';
-                const isSuccess = status === 'success' && severity !== 'failed';
+                const severity = event.display?.severity;
+                
                 const isFailed = status === 'failed' || severity === 'failed';
                 const isWarning = severity === 'warning';
-                const isInfo = severity === 'info' || (!severity && !isFailed && !isWarning);
+                const isInfo = severity === 'info' || (!severity && status !== 'failed');
+                const isSuccess = 
+                  status === 'success' && 
+                  !isFailed && 
+                  !isWarning && 
+                  !isInfo;
 
-                if (isSuccess) {
-                  groupedData[key].success++;
-                } else if (isFailed) {
+                if (isFailed) {
                   groupedData[key].failed++;
                 } else if (isWarning) {
                   groupedData[key].warning++;
                 } else if (isInfo) {
                   groupedData[key].info++;
+                } else if (isSuccess) {
+                  groupedData[key].success++;
                 }
               }
             });

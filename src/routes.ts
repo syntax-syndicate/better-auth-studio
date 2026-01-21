@@ -346,7 +346,8 @@ export function createRoutes(
   preloadedAdapter?: any,
   preloadedAuthOptions?: any,
   accessConfig?: StudioAccessConfig,
-  authInstance?: any
+  authInstance?: any,
+  studioConfig?: StudioConfig
 ): Router {
   const isSelfHosted = !!preloadedAdapter;
 
@@ -622,7 +623,6 @@ export function createRoutes(
       } catch (err: any) {
         signInError = err?.message || 'Sign-in failed';
       }
-
       if (!signInResult || signInResult.error || signInError) {
         const errorMessage = signInError || signInResult?.error?.message || 'Invalid credentials';
 
@@ -632,7 +632,6 @@ export function createRoutes(
             where: [{ field: 'email', value: email }],
             limit: 1,
           });
-
           if (!users || users.length === 0) {
             return res.status(401).json({ success: false, message: 'Invalid credentials' });
           }
@@ -1097,7 +1096,9 @@ export function createRoutes(
       const initialized = isEventIngestionInitialized();
       const provider = getEventIngestionProvider();
 
-      if (!initialized) {
+      let configToUse: StudioConfig | null = studioConfig || null;
+
+      if (!initialized && !configToUse) {
         try {
           const { initializeEventIngestionAndHooks } = await import('./core/handler.js');
           const { existsSync } = await import('node:fs');
@@ -1118,35 +1119,8 @@ export function createRoutes(
               break;
             }
           }
-          const alias = getPathAliases(process.cwd()) || {};
-          const jitiOptions: JO = {
-            debug: false,
-            transformOptions: {
-              babel: {
-                presets: [
-                  [
-                    babelPresetTypeScript,
-                    {
-                      isTSX: true,
-                      allExtensions: true,
-                    },
-                  ],
-                  [babelPresetReact, { runtime: 'automatic' }],
-                ],
-              },
-            },
-            extensions: ['.ts', '.js', '.tsx', '.jsx'],
-            alias,
-            interopDefault: true,
-          };
-
-          const { config } = await loadConfig<{ default?: StudioConfig; config?: StudioConfig }>({
-            configFile: studioConfigPath || undefined,
-            cwd: process.cwd(),
-            dotenv: true,
-            jitiOptions,
-          });
-          if (!config) {
+          
+          if (!studioConfigPath && configPath) {
             const configDir = require('node:path').dirname(configPath);
             for (const file of possibleFiles) {
               const path = require('node:path').join(configDir, file);
@@ -1157,18 +1131,58 @@ export function createRoutes(
             }
           }
 
-          if (config) {
-            const studioConfig = config?.default || config?.config || (config as any);
-            if (studioConfig.events?.enabled) {
-              await initializeEventIngestionAndHooks(studioConfig);
+          if (studioConfigPath) {
+            const alias = getPathAliases(process.cwd()) || {};
+            const jitiOptions: JO = {
+              debug: false,
+              transformOptions: {
+                babel: {
+                  presets: [
+                    [
+                      babelPresetTypeScript,
+                      {
+                        isTSX: true,
+                        allExtensions: true,
+                      },
+                    ],
+                    [babelPresetReact, { runtime: 'automatic' }],
+                  ],
+                },
+              },
+              extensions: ['.ts', '.js', '.tsx', '.jsx'],
+              alias,
+              interopDefault: true,
+            };
+
+            const { config } = await loadConfig<{ default?: StudioConfig; config?: StudioConfig }>({
+              configFile: studioConfigPath || undefined,
+              cwd: process.cwd(),
+              dotenv: true,
+              jitiOptions,
+            });
+            
+            if (config) {
+              configToUse = config?.default || config?.config || (config as any);
             }
           }
+        } catch (initError: any) {
+          console.warn('Failed to load studio config:', initError?.message || initError);
+        }
+      }
+
+      // Initialize if we have a config and events are enabled
+      if (!initialized && configToUse?.events?.enabled) {
+        try {
+          const { initializeEventIngestionAndHooks } = await import('./core/handler.js');
+          await initializeEventIngestionAndHooks(configToUse);
         } catch (initError: any) {
           console.warn('Failed to initialize event ingestion:', initError?.message || initError);
         }
       }
 
-      const isEnabled = isEventIngestionInitialized() && !!getEventIngestionProvider();
+      const isEnabled = 
+        (configToUse?.events?.enabled === true) && 
+        (isEventIngestionInitialized() && !!getEventIngestionProvider());
 
       res.json({
         enabled: isEnabled,
@@ -7327,6 +7341,7 @@ export async function handleStudioApiRequest(ctx: {
   basePath?: string;
   configPath?: string;
   accessConfig?: StudioAccessConfig;
+  studioConfig?: StudioConfig;
 }): Promise<{
   status: number;
   data: any;
@@ -7350,7 +7365,8 @@ export async function handleStudioApiRequest(ctx: {
     preloadedAdapter,
     authOptions,
     ctx.accessConfig,
-    ctx.auth
+    ctx.auth,
+    ctx.studioConfig
   );
 
   const [pathname, queryString] = ctx.path.split('?');

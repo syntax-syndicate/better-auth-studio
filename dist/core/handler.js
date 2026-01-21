@@ -241,6 +241,7 @@ async function handleApiRoute(request, path, config) {
             auth: config.auth,
             basePath: config.basePath || '/api/studio',
             accessConfig: config.access,
+            studioConfig: config,
         });
         const headers = { 'Content-Type': 'application/json' };
         if (result.cookies && result.cookies.length > 0) {

@@ -293,6 +293,7 @@ async function handleApiRoute(
       auth: config.auth,
       basePath: config.basePath || '/api/studio',
       accessConfig: config.access,
+      studioConfig: config,
     });
 
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };

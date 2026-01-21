@@ -269,7 +269,7 @@ async function findAuthConfigPath() {
     }
     return null;
 }
-export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter, preloadedAuthOptions, accessConfig, authInstance) {
+export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter, preloadedAuthOptions, accessConfig, authInstance, studioConfig) {
     const isSelfHosted = !!preloadedAdapter;
     const getAuthConfigSafe = async () => {
         if (isSelfHosted) {
@@ -938,7 +938,8 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             const { isEventIngestionInitialized, getEventIngestionProvider } = await import('./utils/event-ingestion.js');
             const initialized = isEventIngestionInitialized();
             const provider = getEventIngestionProvider();
-            if (!initialized) {
+            let configToUse = studioConfig || null;
+            if (!initialized && !configToUse) {
                 try {
                     const { initializeEventIngestionAndHooks } = await import('./core/handler.js');
                     const { existsSync } = await import('node:fs');
@@ -957,34 +958,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                             break;
                         }
                     }
-                    const alias = getPathAliases(process.cwd()) || {};
-                    const jitiOptions = {
-                        debug: false,
-                        transformOptions: {
-                            babel: {
-                                presets: [
-                                    [
-                                        babelPresetTypeScript,
-                                        {
-                                            isTSX: true,
-                                            allExtensions: true,
-                                        },
-                                    ],
-                                    [babelPresetReact, { runtime: 'automatic' }],
-                                ],
-                            },
-                        },
-                        extensions: ['.ts', '.js', '.tsx', '.jsx'],
-                        alias,
-                        interopDefault: true,
-                    };
-                    const { config } = await loadConfig({
-                        configFile: studioConfigPath || undefined,
-                        cwd: process.cwd(),
-                        dotenv: true,
-                        jitiOptions,
-                    });
-                    if (!config) {
+                    if (!studioConfigPath && configPath) {
                         const configDir = require('node:path').dirname(configPath);
                         for (const file of possibleFiles) {
                             const path = require('node:path').join(configDir, file);
@@ -994,18 +968,55 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                             }
                         }
                     }
-                    if (config) {
-                        const studioConfig = config?.default || config?.config || config;
-                        if (studioConfig.events?.enabled) {
-                            await initializeEventIngestionAndHooks(studioConfig);
+                    if (studioConfigPath) {
+                        const alias = getPathAliases(process.cwd()) || {};
+                        const jitiOptions = {
+                            debug: false,
+                            transformOptions: {
+                                babel: {
+                                    presets: [
+                                        [
+                                            babelPresetTypeScript,
+                                            {
+                                                isTSX: true,
+                                                allExtensions: true,
+                                            },
+                                        ],
+                                        [babelPresetReact, { runtime: 'automatic' }],
+                                    ],
+                                },
+                            },
+                            extensions: ['.ts', '.js', '.tsx', '.jsx'],
+                            alias,
+                            interopDefault: true,
+                        };
+                        const { config } = await loadConfig({
+                            configFile: studioConfigPath || undefined,
+                            cwd: process.cwd(),
+                            dotenv: true,
+                            jitiOptions,
+                        });
+                        if (config) {
+                            configToUse = config?.default || config?.config || config;
                         }
                     }
+                }
+                catch (initError) {
+                    console.warn('Failed to load studio config:', initError?.message || initError);
+                }
+            }
+            // Initialize if we have a config and events are enabled
+            if (!initialized && configToUse?.events?.enabled) {
+                try {
+                    const { initializeEventIngestionAndHooks } = await import('./core/handler.js');
+                    await initializeEventIngestionAndHooks(configToUse);
                 }
                 catch (initError) {
                     console.warn('Failed to initialize event ingestion:', initError?.message || initError);
                 }
             }
-            const isEnabled = isEventIngestionInitialized() && !!getEventIngestionProvider();
+            const isEnabled = (configToUse?.events?.enabled === true) &&
+                (isEventIngestionInitialized() && !!getEventIngestionProvider());
             res.json({
                 enabled: isEnabled,
                 initialized: isEventIngestionInitialized(),
@@ -6391,7 +6402,7 @@ export async function handleStudioApiRequest(ctx) {
         catch { }
     }
     const authOptions = ctx.auth?.options || null;
-    const router = createRoutes(ctx.auth, ctx.configPath || '', undefined, preloadedAdapter, authOptions, ctx.accessConfig, ctx.auth);
+    const router = createRoutes(ctx.auth, ctx.configPath || '', undefined, preloadedAdapter, authOptions, ctx.accessConfig, ctx.auth, ctx.studioConfig);
     const [pathname, queryString] = ctx.path.split('?');
     const query = {};
     if (queryString) {

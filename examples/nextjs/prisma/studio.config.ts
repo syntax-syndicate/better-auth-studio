@@ -16,16 +16,17 @@ const config: StudioConfig = {
   },
   access: {
     roles: ['admin'],
-    allowEmails: ['kinfetare83@gmail.com'],
+    allowEmails: ['kinfetare83@gmail.com' , 'kinfishtechy@gmail.com'],
   },
-  events: {
-    enabled: true,
-    client: clickhouseClient,
-    clientType: 'clickhouse',
-    tableName: 'auth_events',
-    // batchSize: 10,
-    // flushInterval: 5000
-  }
+  // events: {
+  //   enabled: true,
+  //   client: clickhouseClient,
+  //   clientType: 'clickhouse',
+  //   tableName: 'auth_events',
+  //   liveMarquee: {
+  //     enabled: true,
+  //   }
+  // }
 };
 
 export default config;

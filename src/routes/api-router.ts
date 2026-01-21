@@ -1,4 +1,5 @@
 import type { StudioAccessConfig } from '../utils/html-injector.js';
+import type { StudioConfig } from '../types/handler.js';
 
 export type ApiContext = {
   path: string;
@@ -8,6 +9,7 @@ export type ApiContext = {
   auth: any;
   basePath?: string;
   accessConfig?: StudioAccessConfig;
+  studioConfig?: StudioConfig;
 };
 
 export type ApiResponse = {
