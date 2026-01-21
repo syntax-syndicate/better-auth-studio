@@ -50,16 +50,6 @@ export default function Navigation({ currentPage }: NavigationProps) {
                 <ChevronUpRight />
               </span>
             </Link>
-            {item.name === 'CHANGELOG' && (
-              <Link
-                href="/v/1.1.1"
-                className="absolute -top-2 -right-5 inline-flex group gap-x-0.5 text-[8px] font-mono hover:opacity-100 transition-opacity cursor-pointer mix-blend-difference"
-              >
-                <span className="text-white/50 group-hover:text-white transition-colors">[</span>
-                <span className="text-white/70 group-hover:text-white text-[9px] lowercase">v 1.1.1</span>
-                <span className="text-white/50 group-hover:text-white transition-colors">]</span>
-              </Link>
-            )}
           </li>
         ))}
       </ul>
