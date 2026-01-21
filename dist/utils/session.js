@@ -45,7 +45,9 @@ export function createStudioSession(user, durationMs = 7 * 24 * 60 * 60 * 1000) 
     return {
         userId: user.id,
         email: user.email.length > maxEmailLength ? user.email.substring(0, maxEmailLength) : user.email,
-        name: (user.name || '').length > maxNameLength ? (user.name || '').substring(0, maxNameLength) : (user.name || ''),
+        name: (user.name || '').length > maxNameLength
+            ? (user.name || '').substring(0, maxNameLength)
+            : user.name || '',
         role: user.role || 'user',
         // Don't store image in session to reduce cookie size - it can be fetched from user data if needed
         issuedAt: Date.now(),

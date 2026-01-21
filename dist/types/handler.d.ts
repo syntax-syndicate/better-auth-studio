@@ -62,7 +62,7 @@ export type StudioAccessConfig = {
     sessionDuration?: number;
     secret?: string;
 };
-import type { AuthEventType, EventIngestionProvider } from './events.js';
+import type { AuthEvent, AuthEventType, EventIngestionProvider } from './events.js';
 export type StudioConfig = {
     auth: any;
     basePath?: string;
@@ -80,6 +80,7 @@ export type StudioConfig = {
         flushInterval?: number;
         retryOnError?: boolean;
         liveMarquee?: LiveMarqueeConfig;
+        onEventIngest?: (event: AuthEvent) => void | Promise<void>;
     };
 };
 export type EventColors = {

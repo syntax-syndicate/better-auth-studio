@@ -80,7 +80,7 @@ export type StudioAccessConfig = {
   secret?: string;
 };
 
-import type { AuthEventType, EventIngestionProvider } from './events.js';
+import type { AuthEvent, AuthEventType, EventIngestionProvider } from './events.js';
 
 export type StudioConfig = {
   auth: any;
@@ -99,6 +99,7 @@ export type StudioConfig = {
     flushInterval?: number;
     retryOnError?: boolean;
     liveMarquee?: LiveMarqueeConfig;
+    onEventIngest?: (event: AuthEvent) => void | Promise<void>; // Callback invoked when an event is ingested
   };
 };
 

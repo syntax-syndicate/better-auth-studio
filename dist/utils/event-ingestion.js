@@ -126,6 +126,16 @@ export async function emitEvent(type, data, eventsConfig) {
             severity: getEventSeverity(tempEvent, data.status),
         },
     };
+    // Call onEventIngest callback if provided
+    if (useConfig.onEventIngest) {
+        try {
+            await useConfig.onEventIngest(event);
+        }
+        catch (error) {
+            // Don't block event ingestion if callback fails
+            console.error('onEventIngest callback error:', error);
+        }
+    }
     const batchSize = useConfig.batchSize || 1;
     if (batchSize > 1 && provider?.ingestBatch) {
         eventQueue.push(event);
@@ -153,6 +163,18 @@ async function flushEvents() {
     }
     const eventsToSend = [...eventQueue];
     eventQueue = [];
+    // Call onEventIngest callback for each event if provided
+    if (config?.onEventIngest) {
+        for (const event of eventsToSend) {
+            try {
+                await config.onEventIngest(event);
+            }
+            catch (error) {
+                // Don't block event ingestion if callback fails
+                console.error('onEventIngest callback error:', error);
+            }
+        }
+    }
     try {
         if (provider.ingestBatch) {
             await provider.ingestBatch(eventsToSend);

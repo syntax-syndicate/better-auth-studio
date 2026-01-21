@@ -26,6 +26,9 @@ const config: StudioConfig = {
     client: new Database("./db.sqlite"),
     clientType: 'sqlite',
     tableName: 'auth_events',
+    onEventIngest: (event) => {
+      console.log("event ingested ", event);
+    },
     liveMarquee: {
       enabled: true,
       pollInterval: 2000,
