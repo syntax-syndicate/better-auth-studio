@@ -304,23 +304,28 @@ export function LiveEventMarquee({
     // Calculate the width of one set of events
     const calculateSingleSetWidth = () => {
       if (!container || events.length === 0) return 0;
-      
+
       const totalWidth = container.scrollWidth;
       const setsCount = events.length === 1 ? 6 : 3; // More duplicates for single event
       const singleSetWidth = totalWidth / setsCount;
-      
+
       if (events.length > 0 && container.children.length >= events.length) {
         const firstSetEnd = container.children[events.length - 1] as HTMLElement;
         const firstSetStart = container.children[0] as HTMLElement;
         if (firstSetEnd && firstSetStart) {
-          const measuredWidth = firstSetEnd.offsetLeft + firstSetEnd.offsetWidth - firstSetStart.offsetLeft;
+          const measuredWidth =
+            firstSetEnd.offsetLeft + firstSetEnd.offsetWidth - firstSetStart.offsetLeft;
           // Use measured width if it's reasonable (within 10% of calculated)
-          if (measuredWidth > 0 && measuredWidth > 0 && Math.abs(measuredWidth - singleSetWidth) / singleSetWidth < 0.1) {
+          if (
+            measuredWidth > 0 &&
+            measuredWidth > 0 &&
+            Math.abs(measuredWidth - singleSetWidth) / singleSetWidth < 0.1
+          ) {
             return measuredWidth;
           }
         }
       }
-      
+
       return singleSetWidth;
     };
 
@@ -341,7 +346,11 @@ export function LiveEventMarquee({
       requestAnimationFrame(() => {
         if (container) {
           const newWidth = calculateSingleSetWidth();
-          if (singleSetWidthRef.current > 0 && newWidth !== singleSetWidthRef.current && newWidth > 0) {
+          if (
+            singleSetWidthRef.current > 0 &&
+            newWidth !== singleSetWidthRef.current &&
+            newWidth > 0
+          ) {
             const ratio = newWidth / singleSetWidthRef.current;
             positionRef.current = positionRef.current * ratio;
           }
@@ -378,7 +387,7 @@ export function LiveEventMarquee({
           singleSetWidthRef.current = currentSingleSetWidth;
         }
       }
-      
+
       if (currentSingleSetWidth > 0) {
         if (Math.abs(positionRef.current) >= currentSingleSetWidth) {
           positionRef.current = positionRef.current + currentSingleSetWidth;
@@ -504,25 +513,28 @@ export function LiveEventMarquee({
             const totalWidth = containerRef.current.scrollWidth;
             const setsCount = events.length === 1 ? 6 : 3; // Match the duplication logic
             const singleSetWidth = totalWidth / setsCount;
-            
+
             // Try to measure the first set directly for accuracy
             if (containerRef.current.children.length >= events.length) {
               const firstSetEnd = containerRef.current.children[events.length - 1] as HTMLElement;
               const firstSetStart = containerRef.current.children[0] as HTMLElement;
               if (firstSetEnd && firstSetStart) {
-                const measuredWidth = firstSetEnd.offsetLeft + firstSetEnd.offsetWidth - firstSetStart.offsetLeft;
-                if (measuredWidth > 0 && Math.abs(measuredWidth - singleSetWidth) / singleSetWidth < 0.1) {
+                const measuredWidth =
+                  firstSetEnd.offsetLeft + firstSetEnd.offsetWidth - firstSetStart.offsetLeft;
+                if (
+                  measuredWidth > 0 &&
+                  Math.abs(measuredWidth - singleSetWidth) / singleSetWidth < 0.1
+                ) {
                   return measuredWidth;
                 }
               }
             }
-            
+
             return singleSetWidth;
           };
 
-          const currentSingleSetWidth =
-            singleSetWidthRef.current || calculateSingleSetWidth();
-          
+          const currentSingleSetWidth = singleSetWidthRef.current || calculateSingleSetWidth();
+
           // When position goes beyond one set width, wrap it back seamlessly
           if (currentSingleSetWidth > 0 && Math.abs(positionRef.current) >= currentSingleSetWidth) {
             // Add the width back to create seamless loop (no visible jump)
@@ -573,10 +585,11 @@ export function LiveEventMarquee({
             // Duplicate events multiple times to ensure smooth continuous scrolling
             // Use more duplicates for single event to prevent glitches, fewer for multiple events
             (() => {
-              const duplicatedEvents = events.length === 1 
-                ? [...events, ...events, ...events, ...events, ...events, ...events] // 6 sets for single event
-                : [...events, ...events, ...events]; // 3 sets for multiple events (original behavior)
-              
+              const duplicatedEvents =
+                events.length === 1
+                  ? [...events, ...events, ...events, ...events, ...events, ...events] // 6 sets for single event
+                  : [...events, ...events, ...events]; // 3 sets for multiple events (original behavior)
+
               return duplicatedEvents.map((event, index) => {
                 const setIndex = Math.floor(index / events.length);
                 const eventIndex = index % events.length;
