@@ -10,7 +10,21 @@ A web-based studio interface for managing Better Auth applications. Better Auth 
 ## Preview
 A sneak peek of the studio dashboard and management interface.
 
-Demo app will be up soon.
+---
+
+## ✨ Try Better Auth Studio Demo
+
+You can try a live, demo version of Better Auth Studio here:
+
+👉 **[https://bt-nextjs.vercel.app/admin](https://bt-nextjs.vercel.app/admin)**
+
+- **Login email:** `admin@test.com`
+- **Password:** `admin@test.com`
+
+This online demo lets you explore the admin studio UI. Please note this is a test environment.
+
+---
+
 
 ## 🚀 Quick Start
 
