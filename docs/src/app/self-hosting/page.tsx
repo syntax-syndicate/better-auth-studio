@@ -838,6 +838,228 @@ export default config;`}
               <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
+                  <ConfigIcon />
+                  Events Configuration
+                </span>
+              </h3>
+            </div>
+            <div className="pt-4 space-y-4">
+              <div className="space-y-3">
+                <div className="border-b border-white/10 pb-3">
+                  <code className="text-white/90 text-sm">events.enabled</code>
+                  <span className="text-white/50 text-xs ml-2">(optional)</span>
+                  <p className="text-sm font-light tracking-tight text-white/50 mt-1">
+                    Enable event ingestion to track authentication events. When enabled, events are automatically captured and stored in your database. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">false</code>
+                  </p>
+                </div>
+                <div className="border-b border-white/10 pb-3">
+                  <code className="text-white/90 text-sm">events.client</code>
+                  <span className="text-white/50 text-xs ml-2">(optional)</span>
+                  <p className="text-sm font-light tracking-tight text-white/50 mt-1">
+                    Database client instance (Prisma client, Drizzle instance, Postgres pool, ClickHouse client, etc.)
+                  </p>
+                </div>
+                <div className="border-b border-white/10 pb-3">
+                  <code className="text-white/90 text-sm">events.clientType</code>
+                  <span className="text-white/50 text-xs ml-2">(optional)</span>
+                  <p className="text-sm font-light tracking-tight text-white/50 mt-1">
+                    Type of database client. Options: <code className="text-white/70 bg-white/10 px-1 py-0.5">"prisma"</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">"drizzle"</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">"postgres"</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">"sqlite"</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">"clickhouse"</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">"http"</code>
+                  </p>
+                </div>
+                <div className="border-b border-white/10 pb-3">
+                  <code className="text-white/90 text-sm">events.tableName</code>
+                  <span className="text-white/50 text-xs ml-2">(optional)</span>
+                  <p className="text-sm font-light tracking-tight text-white/50 mt-1">
+                    Name of the table to store events. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">"auth_events"</code>
+                  </p>
+                </div>
+                <div className="border-b border-white/10 pb-3">
+                  <code className="text-white/90 text-sm">events.onEventIngest</code>
+                  <span className="text-white/50 text-xs ml-2">(optional)</span>
+                  <p className="text-sm font-light tracking-tight text-white/50 mt-1">
+                    Callback function invoked when an event is ingested. Receives the complete event object with all data (type, metadata, userId, etc.) that will be sent to the database. Useful for external actions like webhooks, analytics tracking, or custom logging.
+                  </p>
+                  <div className="mt-3 p-3 bg-white/5 border border-white/10 rounded-none">
+                    <p className="text-xs font-light tracking-tight text-white/60 mb-2">
+                      <strong className="font-bold text-white/80">💡 Example:</strong> Using onEventIngest callback:
+                    </p>
+                    <CodeHighlighter
+                      code={`// studio.config.ts
+import type { StudioConfig } from "better-auth-studio";
+import { auth } from "./lib/auth";
+import { prisma } from "./db";
+
+const config: StudioConfig = {
+  auth,
+  basePath: "/api/studio",
+  events: {
+    enabled: true,
+    client: prisma,
+    clientType: "prisma",
+    tableName: "auth_events",
+    onEventIngest: async (event) => {
+      // event contains all data that will be sent to DB:
+      // - event.id, event.type, event.timestamp
+      // - event.status, event.userId, event.sessionId
+      // - event.organizationId, event.metadata
+      // - event.ipAddress, event.userAgent, event.source
+      // - event.display.message, event.display.severity
+      
+      // Send to webhook
+      await fetch('https://your-webhook.com/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(event),
+      });
+      
+      // Track analytics
+      await trackEvent(event.type, event);
+    },
+  },
+};
+
+export default config;`}
+                      language="typescript"
+                    />
+                  </div>
+                </div>
+                <div className="pb-3">
+                  <code className="text-white/90 text-sm">events.liveMarquee</code>
+                  <span className="text-white/50 text-xs ml-2">(optional)</span>
+                  <p className="text-sm font-light tracking-tight text-white/50 mt-1">
+                    Configuration for the live event marquee displayed at the top of the studio interface
+                  </p>
+                  <div className="mt-3 space-y-3">
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.enabled</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Enable the live event marquee. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">true</code>
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.pollInterval</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Polling interval in milliseconds for fetching new events. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">2000</code> (2 seconds)
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.speed</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Animation speed in pixels per frame for the scrolling marquee. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">0.5</code>
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.pauseOnHover</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Pause the marquee animation when hovered. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">true</code>
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.limit</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Maximum number of events to display in the marquee. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">50</code>
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.sort</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Sort order for events. Options: <code className="text-white/70 bg-white/10 px-1 py-0.5">"desc"</code> (newest first) or <code className="text-white/70 bg-white/10 px-1 py-0.5">"asc"</code> (oldest first). Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">"desc"</code>
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.colors</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Custom colors for event severity types. Object with optional properties: <code className="text-white/70 bg-white/10 px-1 py-0.5">success</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">info</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">warning</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">error</code>, <code className="text-white/70 bg-white/10 px-1 py-0.5">failed</code>
+                      </p>
+                    </div>
+                    <div className="pl-4 border-l-2 border-white/10">
+                      <code className="text-white/90 text-xs">events.liveMarquee.timeWindow</code>
+                      <span className="text-white/50 text-xs ml-2">(optional)</span>
+                      <p className="text-xs font-light tracking-tight text-white/50 mt-1">
+                        Time window for fetching events in the marquee. Can be a predefined preset or a custom duration in seconds. Default: <code className="text-white/70 bg-white/10 px-1 py-0.5">"1h"</code>
+                      </p>
+                      <div className="mt-2 p-2 bg-white/5 border border-white/10 rounded-none">
+                        <p className="text-xs font-light tracking-tight text-white/60 mb-2">
+                          <strong className="font-bold text-white/80">Options:</strong>
+                        </p>
+                        <ul className="text-xs font-light tracking-tight text-white/50 space-y-1 ml-2">
+                          <li>• <code className="text-white/70 bg-white/10 px-1 py-0.5">since: "15m" | "30m" | "1h" | "2h" | "4h" | "6h" | "12h" | "1d" | "2d" | "3d" | "7d" | "14d" | "30d"</code> - Predefined time window</li>
+                          <li>• <code className="text-white/70 bg-white/10 px-1 py-0.5">custom: number</code> - Custom duration in seconds (e.g., <code className="text-white/70 bg-white/10 px-1 py-0.5">2 * 60 * 60</code> for 2 hours)</li>
+                        </ul>
+                        <p className="text-xs font-light tracking-tight text-white/50 mt-2">
+                          <strong className="font-bold text-white/70">Note:</strong> Either <code className="text-white/70 bg-white/10 px-1 py-0.5">since</code> or <code className="text-white/70 bg-white/10 px-1 py-0.5">custom</code> must be provided, but not both.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-4 p-3 bg-white/5 border border-white/10 rounded-none">
+                    <p className="text-xs font-light tracking-tight text-white/60 mb-2">
+                      <strong className="font-bold text-white/80">💡 Example:</strong> Complete events configuration:
+                    </p>
+                    <CodeHighlighter
+                      code={`// studio.config.ts
+import type { StudioConfig } from "better-auth-studio";
+import { auth } from "./lib/auth";
+import { prisma } from "./db";
+
+const config: StudioConfig = {
+  auth,
+  basePath: "/api/studio",
+  events: {
+    enabled: true,
+    client: prisma,
+    clientType: "prisma",
+    tableName: "auth_events",
+    onEventIngest: async (event) => {
+      // Custom logic when events are ingested
+      console.log('Event ingested:', event.type);
+    },
+    liveMarquee: {
+      enabled: true,
+      pollInterval: 2000,
+      speed: 1,
+      pauseOnHover: true,
+      limit: 10,
+      sort: "desc",
+      colors: {
+        success: "#34d399",
+        info: "#fcd34d",
+        warning: "#facc15",
+        error: "#f87171",
+        failed: "#f87171",
+      },
+      timeWindow: {
+        since: "1h", // Fetch events from the last hour
+        // OR use custom duration:
+        // custom: 2 * 60 * 60, // 2 hours in seconds
+      },
+    },
+  },
+};
+
+export default config;`}
+                      language="typescript"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </PixelCard>
+        </section>
+
+        <section>
+          <PixelCard variant="highlight" className="relative">
+            <div className="absolute -top-10 left-0">
+              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+                <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
+                <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <WarningIcon />
                   Security Notes
                 </span>

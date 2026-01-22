@@ -1998,7 +1998,9 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
             if (betterAuthConfig) {
                 const plugins = betterAuthConfig.plugins || [];
-                const pluginInfo = plugins.map((plugin) => ({
+                const pluginInfo = plugins
+                    .filter((plugin) => plugin.id !== 'better-auth-studio-events')
+                    .map((plugin) => ({
                     id: plugin.id,
                     name: plugin.name || plugin.id,
                     description: plugin.description || `${plugin.id} plugin for Better Auth`,
@@ -2046,7 +2048,9 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                         });
                     }
                     const plugins = auth.options?.plugins || [];
-                    const pluginInfo = plugins.map((plugin) => ({
+                    const pluginInfo = plugins
+                        .filter((plugin) => plugin.id !== 'better-auth-studio-events')
+                        .map((plugin) => ({
                         id: plugin.id,
                         name: plugin.name || plugin.id,
                         description: plugin.description || `${plugin.id} plugin for Better Auth`,
@@ -3930,7 +3934,8 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             return res.json({
                 enabled: !!hasOrganizationPlugin,
                 configPath: configPath || null,
-                availablePlugins: plugins.map((p) => p.id) || [],
+                availablePlugins: plugins.filter((p) => p.id !== 'better-auth-studio-events').map((p) => p.id) ||
+                    [],
                 organizationPlugin: hasOrganizationPlugin || null,
             });
         }
