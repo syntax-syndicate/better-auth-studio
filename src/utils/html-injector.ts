@@ -36,6 +36,31 @@ export interface EventColors {
   failed?: string;
 }
 
+export type TimeWindowPreset =
+  | '15m'
+  | '30m'
+  | '1h'
+  | '2h'
+  | '4h'
+  | '6h'
+  | '12h'
+  | '1d'
+  | '2d'
+  | '3d'
+  | '7d'
+  | '14d'
+  | '30d';
+
+export type TimeWindowConfig =
+  | {
+      since: TimeWindowPreset;
+      custom?: never;
+    }
+  | {
+      custom: number;
+      since?: never;
+    };
+
 export interface LiveMarqueeConfig {
   enabled?: boolean;
   pollInterval?: number;
@@ -44,6 +69,7 @@ export interface LiveMarqueeConfig {
   limit?: number; // Maximum number of events to display in marquee (default: 50)
   sort?: 'asc' | 'desc'; // Sort order for events: 'desc' = newest first (default), 'asc' = oldest first
   colors?: EventColors;
+  timeWindow?: TimeWindowConfig; // Time window for fetching events
 }
 
 export interface WindowStudioConfig {
@@ -99,6 +125,7 @@ function prepareFrontendConfig(config: Partial<StudioConfig>): WindowStudioConfi
         limit: liveMarqueeConfig?.limit ?? 50, // Default: 50 events in marquee
         sort: liveMarqueeConfig?.sort ?? 'desc', // Default: 'desc' (newest first)
         colors: liveMarqueeConfig?.colors || undefined,
+        timeWindow: liveMarqueeConfig?.timeWindow || undefined, // Include timeWindow config
       }
     : undefined;
 

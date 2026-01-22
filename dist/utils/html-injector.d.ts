@@ -29,6 +29,14 @@ export interface EventColors {
     error?: string;
     failed?: string;
 }
+export type TimeWindowPreset = '15m' | '30m' | '1h' | '2h' | '4h' | '6h' | '12h' | '1d' | '2d' | '3d' | '7d' | '14d' | '30d';
+export type TimeWindowConfig = {
+    since: TimeWindowPreset;
+    custom?: never;
+} | {
+    custom: number;
+    since?: never;
+};
 export interface LiveMarqueeConfig {
     enabled?: boolean;
     pollInterval?: number;
@@ -37,6 +45,7 @@ export interface LiveMarqueeConfig {
     limit?: number;
     sort?: 'asc' | 'desc';
     colors?: EventColors;
+    timeWindow?: TimeWindowConfig;
 }
 export interface WindowStudioConfig {
     basePath: string;

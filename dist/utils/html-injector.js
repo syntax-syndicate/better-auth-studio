@@ -39,6 +39,7 @@ function prepareFrontendConfig(config) {
             limit: liveMarqueeConfig?.limit ?? 50, // Default: 50 events in marquee
             sort: liveMarqueeConfig?.sort ?? 'desc', // Default: 'desc' (newest first)
             colors: liveMarqueeConfig?.colors || undefined,
+            timeWindow: liveMarqueeConfig?.timeWindow || undefined, // Include timeWindow config
         }
         : undefined;
     return {

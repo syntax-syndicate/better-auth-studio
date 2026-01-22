@@ -155,9 +155,8 @@ export function LiveEventMarquee({
       // Use sort from props, default to 'desc' (newest first)
       const sortOrder = propSort ?? 'desc';
 
-      // Get time window from config (nested under liveMarquee)
       const config = getStudioConfig();
-      const timeWindow = config.events?.liveMarquee?.timeWindow || '1h';
+      const timeWindow = config.liveMarquee?.timeWindow || '1h';
       const since = parseTimeWindow(timeWindow);
 
       const params = new URLSearchParams({
@@ -202,6 +201,15 @@ export function LiveEventMarquee({
 
       if (data.events && Array.isArray(data.events)) {
         setEvents((prev) => {
+          // If this is the first fetch and we have events, set them directly
+          if (prev.length === 0 && data.events.length > 0) {
+            const initialEvents = data.events.slice(0, maxEvents);
+            if (initialEvents.length > 0) {
+              setLastEventId(initialEvents[0].id);
+            }
+            return initialEvents;
+          }
+
           // Merge and deduplicate - only add events we don't already have
           const existingIds = new Set(prev.map((e) => e.id));
           const uniqueNew = data.events.filter((e: AuthEvent) => !existingIds.has(e.id));

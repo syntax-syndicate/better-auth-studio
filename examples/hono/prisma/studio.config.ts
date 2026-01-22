@@ -36,7 +36,7 @@ const config: StudioConfig = {
       sort: "desc",
       pauseOnHover: true,
       timeWindow: {
-        since: "15m"
+        since: "1h"
       },
       limit: 10,
       colors: {

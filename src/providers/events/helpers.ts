@@ -1200,7 +1200,10 @@ export function createClickHouseProvider(options: {
       }
       if (since) {
         const sinceDate = since instanceof Date ? since : new Date(since);
-        whereClauses.push(`timestamp >= '${sinceDate.toISOString().replace(/'/g, "''")}'`);
+        // ClickHouse requires DateTime type, so we need to cast the string to DateTime
+        // Format: 'YYYY-MM-DD HH:MM:SS' or use toDateTime() function
+        const isoString = sinceDate.toISOString().replace('T', ' ').slice(0, 19);
+        whereClauses.push(`timestamp >= toDateTime('${isoString.replace(/'/g, "''")}')`);
       }
 
       const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : '';
