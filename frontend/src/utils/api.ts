@@ -9,7 +9,7 @@ export function getBasePath(): string {
  * Build an API URL with the correct base path
  * @param path - The API path (e.g., '/api/users')
  * @returns The full URL with base path
- */
+*/
 export function buildApiUrl(path: string): string {
   const basePath = getBasePath();
 

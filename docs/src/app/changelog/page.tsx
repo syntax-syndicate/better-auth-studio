@@ -393,7 +393,7 @@ export default function Changelog() {
                       fill="currentColor"
                     />
                   </svg>
-                  Self-Hosting Support (Beta) <span className="text-white/50 ml-2">/ 2024-12-24</span>
+                  Self-Hosting Support (Beta) <span className="text-white/50 ml-2">/ 2025-12-24</span>
                 </span>
               </h3>
             </div>
