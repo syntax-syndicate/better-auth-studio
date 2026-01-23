@@ -46,13 +46,22 @@ export default function SelfHosting() {
   const [activeFramework, setActiveFramework] = useState<Framework>("nextjs");
 
   useEffect(() => {
-    if (window.location.hash === '#frameworks') {
-      const element = document.getElementById('frameworks');
+    const hash = window.location.hash;
+    if (hash) {
+      const element = document.getElementById(hash.substring(1));
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   }, []);
+
+  const handleSectionClick = (sectionId: string) => {
+    window.history.pushState(null, '', `#${sectionId}`);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
   return (
     <PixelLayout
       currentPage="self-hosting"
@@ -83,10 +92,13 @@ export default function SelfHosting() {
         </section>
       </div>
       <div className="space-y-8">
-        <section>
+        <section id="beta">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('beta')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <BetaIcon />
@@ -102,10 +114,13 @@ export default function SelfHosting() {
           </PixelCard>
         </section>
 
-        <section>
+        <section id="overview">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('overview')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <ServerIcon />
@@ -142,10 +157,13 @@ export default function SelfHosting() {
           </PixelCard>
         </section>
 
-        <section>
+        <section id="prerequisites">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('prerequisites')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <PrerequisitesIcon />
@@ -181,10 +199,13 @@ export default function SelfHosting() {
           </PixelCard>
         </section>
 
-        <section>
+        <section id="step-1">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('step-1')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <ConfigIcon />
@@ -646,10 +667,13 @@ export default defineEventHandler(async (event) => {
           </PixelCard>
         </section>
 
-        <section>
+        <section id="configuration">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('configuration')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <ConfigIcon />
@@ -832,10 +856,13 @@ export default config;`}
           </PixelCard>
         </section>
 
-        <section>
+        <section id="events">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('events')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <ConfigIcon />
@@ -1054,10 +1081,13 @@ export default config;`}
           </PixelCard>
         </section>
 
-        <section>
+        <section id="security">
           <PixelCard variant="highlight" className="relative">
             <div className="absolute -top-10 left-0">
-              <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
+              <h3 
+                onClick={() => handleSectionClick('security')}
+                className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden cursor-pointer hover:border-white/40 hover:bg-white/15 transition-all duration-200"
+              >
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
                 <span className="relative z-10 inline-flex gap-[5px] items-center">
                   <WarningIcon />
