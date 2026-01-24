@@ -503,7 +503,9 @@ export const auth = betterAuth({
           <div className="flex flex-col items-center justify-center space-y-6">
             <div className="flex items-center space-x-3">
               <div className="text-left">
-                <h2 className="text-xl text-white font-light mb-2">Event Ingestion Not Enabled</h2>
+                <h2 className="text-xl text-white font-mono font-light mb-2">
+                  Event Ingestion Not Enabled
+                </h2>
                 <p className="text-gray-400 text-sm font-mono">
                   {!isSelfHosted
                     ? "Event ingestion is only available in self-hosted mode."

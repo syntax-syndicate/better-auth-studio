@@ -347,20 +347,22 @@ export default function Changelog() {
             <div className="absolute -top-10 left-0">
               <h3 className="relative text-[12px] font-light uppercase tracking-tight text-white/90 border border-white/20 bg-[#0a0a0a] px-2 py-[6px] overflow-hidden">
                 <div className="absolute inset-0 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[2.5%]" />
-                <span className="relative z-10 inline-flex gap-[2px] items-center">
-                  <svg
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    className="w-3 h-3 inline-flex mr-1 text-white/50"
-                  >
-                    <path
-                      d="M15 2h2v2h4v18H3V4h4V2h2v2h6V2zM9 6H5v2h14V6H9zm-4 4v10h14V10H5zm2 2h8v2H7v-2zm4 6v-2H7v2h4z"
-                      fill="currentColor"
-                    />
-                  </svg>
-                  v1.1.1 <span className="text-white/50 ml-2">/ Latest Release</span>
-                </span>
+                <Link href="/v/1.1.1" className="relative z-10 inline-flex gap-[2px] items-center">
+                  <span className="relative z-10 inline-flex gap-[2px] items-center">
+                    <svg
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      className="w-3 h-3 inline-flex mr-1 text-white/50"
+                    >
+                      <path
+                        d="M15 2h2v2h4v18H3V4h4V2h2v2h6V2zM9 6H5v2h14V6H9zm-4 4v10h14V10H5zm2 2h8v2H7v-2zm4 6v-2H7v2h4z"
+                        fill="currentColor"
+                      />
+                    </svg>
+                    v1.1.1 <span className="text-white/50 ml-2">/ Latest Release</span>
+                  </span>
+                </Link>
               </h3>
             </div>
             <p className="text-sm font-light tracking-tight text-white/70 mb-4 pt-4">
