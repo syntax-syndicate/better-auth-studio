@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, Computer, Eye, Filter, Loader, Search, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { useNavigate } from "react-router-dom";
 import { CodeBlock } from "../components/CodeBlock";
@@ -63,6 +63,34 @@ const EVENT_TYPES = [
   "invitation.rejected",
   "invitation.cancelled",
 ] as const;
+
+/** Category is the first segment of event type (e.g. "user.joined" -> "user"). */
+const getEventCategory = (eventType: string): string => {
+  const dot = eventType.indexOf(".");
+  return dot === -1 ? eventType : eventType.slice(0, dot);
+};
+
+const EVENT_CATEGORY_ORDER = [
+  "user",
+  "organization",
+  "member",
+  "session",
+  "password",
+  "oauth",
+  "team",
+  "invitation",
+] as const;
+
+const EVENT_CATEGORY_LABELS: Record<string, string> = {
+  user: "User",
+  organization: "Organization",
+  member: "Member",
+  session: "Session",
+  password: "Password",
+  oauth: "OAuth",
+  team: "Team",
+  invitation: "Invitation",
+};
 
 interface AuthEvent {
   id: string;
@@ -452,6 +480,37 @@ export default function Events() {
 
     return matchesSearch && matchesFilter;
   });
+
+  const groupedEventsByCategory = useMemo(() => {
+    const groups = new Map<string, AuthEvent[]>();
+    for (const event of filteredEvents) {
+      const category = getEventCategory(event.type);
+      if (!groups.has(category)) groups.set(category, []);
+      groups.get(category)!.push(event);
+    }
+    const ordered: { category: string; label: string; events: AuthEvent[] }[] = [];
+    for (const category of EVENT_CATEGORY_ORDER) {
+      const events = groups.get(category);
+      if (events?.length) {
+        ordered.push({
+          category,
+          label: EVENT_CATEGORY_LABELS[category] ?? category,
+          events,
+        });
+      }
+    }
+    const known = new Set(EVENT_CATEGORY_ORDER);
+    for (const [category, events] of groups) {
+      if (!known.has(category as (typeof EVENT_CATEGORY_ORDER)[number])) {
+        ordered.push({
+          category,
+          label: EVENT_CATEGORY_LABELS[category] ?? category,
+          events,
+        });
+      }
+    }
+    return ordered;
+  }, [filteredEvents]);
 
   if (checkingEvents) {
     return (
@@ -1211,23 +1270,80 @@ export const auth = betterAuth({
                           <div className="text-xs font-mono uppercase text-gray-400 mb-2 px-2">
                             Select Event Types
                           </div>
-                          <div className="space-y-1">
-                            {EVENT_TYPES.map((eventType) => {
-                              const isSelected = filter.eventTypes?.includes(eventType) || false;
+                          <div className="space-y-3">
+                            {EVENT_CATEGORY_ORDER.map((category) => {
+                              const typesInCategory = EVENT_TYPES.filter(
+                                (t) => getEventCategory(t) === category,
+                              );
+                              if (typesInCategory.length === 0) return null;
+                              const label = EVENT_CATEGORY_LABELS[category] ?? category;
                               return (
-                                <label
-                                  key={eventType}
-                                  className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 cursor-pointer rounded-none"
-                                >
-                                  <Checkbox
-                                    checked={isSelected}
-                                    onCheckedChange={() => toggleEventType("eventType", eventType)}
-                                    className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:border-white"
-                                  />
-                                  <span className="text-xs font-mono text-white">{eventType}</span>
-                                </label>
+                                <div key={category} className="space-y-1">
+                                  <div className="text-[10px] font-mono uppercase tracking-widest text-white/50 px-2 py-1 border-b border-dashed border-white/10">
+                                    {label}
+                                  </div>
+                                  {typesInCategory.map((eventType) => {
+                                    const isSelected =
+                                      filter.eventTypes?.includes(eventType) || false;
+                                    return (
+                                      <label
+                                        key={eventType}
+                                        className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 cursor-pointer rounded-none"
+                                      >
+                                        <Checkbox
+                                          checked={isSelected}
+                                          onCheckedChange={() =>
+                                            toggleEventType("eventType", eventType)
+                                          }
+                                          className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:border-white"
+                                        />
+                                        <span className="text-xs font-mono text-white">
+                                          {eventType}
+                                        </span>
+                                      </label>
+                                    );
+                                  })}
+                                </div>
                               );
                             })}
+                            {EVENT_TYPES.filter(
+                              (t) =>
+                                !EVENT_CATEGORY_ORDER.includes(
+                                  getEventCategory(t) as (typeof EVENT_CATEGORY_ORDER)[number],
+                                ),
+                            ).length > 0 && (
+                              <div className="space-y-1">
+                                <div className="text-[10px] font-mono uppercase tracking-widest text-white/50 px-2 py-1 border-b border-dashed border-white/10">
+                                  Other
+                                </div>
+                                {EVENT_TYPES.filter(
+                                  (t) =>
+                                    !EVENT_CATEGORY_ORDER.includes(
+                                      getEventCategory(t) as (typeof EVENT_CATEGORY_ORDER)[number],
+                                    ),
+                                ).map((eventType) => {
+                                  const isSelected =
+                                    filter.eventTypes?.includes(eventType) || false;
+                                  return (
+                                    <label
+                                      key={eventType}
+                                      className="flex items-center gap-2 px-2 py-1.5 hover:bg-white/5 cursor-pointer rounded-none"
+                                    >
+                                      <Checkbox
+                                        checked={isSelected}
+                                        onCheckedChange={() =>
+                                          toggleEventType("eventType", eventType)
+                                        }
+                                        className="border-white/20 data-[state=checked]:bg-white data-[state=checked]:border-white"
+                                      />
+                                      <span className="text-xs font-mono text-white">
+                                        {eventType}
+                                      </span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </PopoverContent>
@@ -1276,121 +1392,133 @@ export const auth = betterAuth({
                   </td>
                 </tr>
               ) : (
-                filteredEvents.map((event) => {
-                  const isNew = newEventIds.has(event.id);
-                  const severity = event.display?.severity || "info";
-                  const status = event.status || "success";
-                  const isSuccess = status === "success" && severity !== "failed";
-                  const isFailed = status === "failed" || severity === "failed";
-
-                  return (
-                    <tr
-                      key={event.id}
-                      onClick={() => openViewModal(event)}
-                      className={`border-b border-dashed border-white/5 hover:bg-white/5 transition-all cursor-pointer ${isNew ? (isSuccess ? "new-event-row bg-green-400/10 border-green-400/20" : isFailed ? "new-event-row bg-red-400/10 border-red-400/20" : "") : ""}`}
-                    >
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-3">
-                          <div
-                            className={`w-10 h-10 rounded-none border border-dashed flex items-center justify-center relative overflow-hidden group ${getSeverityColor(
-                              severity,
-                              status,
-                            )}`}
-                          >
-                            {/* Horizontal pattern overlay for success - only on icon, show on hover */}
-                            {isSuccess && (
-                              <div
-                                className="absolute inset-0 pointer-events-none opacity-5 group-hover:opacity-[8%] transition-opacity"
-                                style={{
-                                  backgroundImage: `repeating-linear-gradient(0deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.3) 1px, transparent 1px, transparent 4px)`,
-                                }}
-                              />
-                            )}
-                            {/* Horizontal pattern overlay for failed - only on icon, show on hover */}
-                            {isFailed && (
-                              <div
-                                className="absolute inset-0 pointer-events-none opacity-5 group-hover:opacity-[8%] transition-opacity"
-                                style={{
-                                  backgroundImage: `repeating-linear-gradient(0deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.3) 1px, transparent 1px, transparent 4px)`,
-                                }}
-                              />
-                            )}
-                            <div className="relative z-10">
-                              {getEventIcon(event.type, severity, status)}
-                            </div>
-                          </div>
-                          <div>
-                            <div className="text-white font-light">
-                              {event.display?.message || event.type}
-                            </div>
-                            <CopyableId id={event.id} />
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <span className="text-xs font-mono text-gray-400 uppercase">
-                          {event.type}
-                        </span>
-                      </td>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center space-x-2">
-                          <div
-                            className={`w-px h-5 rounded-none ${
-                              status === "success" ? "bg-green-400" : "bg-red-400"
-                            }`}
-                          />
-                          <span className="text-xs font-mono uppercase text-gray-400">
-                            {status}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        {event.userId ? (
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/users/${event.userId}`);
-                            }}
-                            className="underline underline-offset-4 decoration-dashed hover:underline font-mono text-xs cursor-pointer transition-colors"
-                          >
-                            {event.userId.slice(0, 8)}...
-                          </button>
-                        ) : (
-                          <span className="text-gray-500">—</span>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-xs text-gray-400">
-                        <div className="flex font-mono uppercase flex-col">
-                          {new Date(event.timestamp).toLocaleString()}
-                          <p className="text-xs">
-                            {new Date(event.timestamp).toLocaleString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                              second: "2-digit",
-                              hour12: false,
-                            })}
-                          </p>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-white rounded-none"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openViewModal(event);
-                          }}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
+                groupedEventsByCategory.map(({ category, label, events }) => (
+                  <Fragment key={category}>
+                    <tr className="border-b border-dashed border-white/10 bg-white/5">
+                      <td
+                        colSpan={6}
+                        className="py-2.5 px-4 text-[10px] font-mono uppercase tracking-widest text-white/50"
+                      >
+                        {label}
                       </td>
                     </tr>
-                  );
-                })
+                    {events.map((event) => {
+                      const isNew = newEventIds.has(event.id);
+                      const severity = event.display?.severity || "info";
+                      const status = event.status || "success";
+                      const isSuccess = status === "success" && severity !== "failed";
+                      const isFailed = status === "failed" || severity === "failed";
+
+                      return (
+                        <tr
+                          key={event.id}
+                          onClick={() => openViewModal(event)}
+                          className={`border-b border-dashed border-white/5 hover:bg-white/5 transition-all cursor-pointer ${isNew ? (isSuccess ? "new-event-row bg-green-400/10 border-green-400/20" : isFailed ? "new-event-row bg-red-400/10 border-red-400/20" : "") : ""}`}
+                        >
+                          <td className="py-4 px-4">
+                            <div className="flex items-center space-x-3">
+                              <div
+                                className={`w-10 h-10 rounded-none border border-dashed flex items-center justify-center relative overflow-hidden group ${getSeverityColor(
+                                  severity,
+                                  status,
+                                )}`}
+                              >
+                                {/* Horizontal pattern overlay for success - only on icon, show on hover */}
+                                {isSuccess && (
+                                  <div
+                                    className="absolute inset-0 pointer-events-none opacity-5 group-hover:opacity-[8%] transition-opacity"
+                                    style={{
+                                      backgroundImage: `repeating-linear-gradient(0deg, rgba(34, 197, 94, 0.3), rgba(34, 197, 94, 0.3) 1px, transparent 1px, transparent 4px)`,
+                                    }}
+                                  />
+                                )}
+                                {/* Horizontal pattern overlay for failed - only on icon, show on hover */}
+                                {isFailed && (
+                                  <div
+                                    className="absolute inset-0 pointer-events-none opacity-5 group-hover:opacity-[8%] transition-opacity"
+                                    style={{
+                                      backgroundImage: `repeating-linear-gradient(0deg, rgba(239, 68, 68, 0.3), rgba(239, 68, 68, 0.3) 1px, transparent 1px, transparent 4px)`,
+                                    }}
+                                  />
+                                )}
+                                <div className="relative z-10">
+                                  {getEventIcon(event.type, severity, status)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-white font-light">
+                                  {event.display?.message || event.type}
+                                </div>
+                                <CopyableId id={event.id} />
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            <span className="text-xs font-mono text-gray-400 uppercase">
+                              {event.type}
+                            </span>
+                          </td>
+                          <td className="py-4 px-4">
+                            <div className="flex items-center space-x-2">
+                              <div
+                                className={`w-px h-5 rounded-none ${
+                                  status === "success" ? "bg-green-400" : "bg-red-400"
+                                }`}
+                              />
+                              <span className="text-xs font-mono uppercase text-gray-400">
+                                {status}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4">
+                            {event.userId ? (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/users/${event.userId}`);
+                                }}
+                                className="underline underline-offset-4 decoration-dashed hover:underline font-mono text-xs cursor-pointer transition-colors"
+                              >
+                                {event.userId.slice(0, 8)}...
+                              </button>
+                            ) : (
+                              <span className="text-gray-500">—</span>
+                            )}
+                          </td>
+                          <td className="py-4 px-4 text-xs text-gray-400">
+                            <div className="flex font-mono uppercase flex-col">
+                              {new Date(event.timestamp).toLocaleString()}
+                              <p className="text-xs">
+                                {new Date(event.timestamp).toLocaleString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                  hour12: false,
+                                })}
+                              </p>
+                            </div>
+                          </td>
+                          <td className="py-4 px-4 text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-gray-400 hover:text-white rounded-none"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openViewModal(event);
+                              }}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </Fragment>
+                ))
               )}
             </tbody>
           </table>
