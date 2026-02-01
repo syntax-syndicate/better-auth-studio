@@ -5,22 +5,6 @@ import prisma from "./prisma";
 
 const baseURL = process.env.BETTER_AUTH_URL || "http://localhost:3000";
 
-const sendEmail = async ({
-  to,
-  subject,
-  text,
-  html,
-}: {
-  to: string;
-  subject: string;
-  text?: string;
-  html?: string;
-}) => {
-  console.log(`Sending email to ${to} | ${subject}`);
-  if (text) console.log("Text content:", text);
-  if (html) console.log("HTML content:", html);
-};
-
 export const auth = betterAuth({
   secret: process.env.AUTH_SECRET || "better-auth-secret-123456789",
   database: prismaAdapter(prisma, { provider: "postgresql" }),
@@ -85,11 +69,6 @@ export const auth = betterAuth({
     }),
     emailOTP({
       sendVerificationOTP: async ({ email, otp, type }) => {
-        // const result = await prisma.codeOtp.create({
-        //     data: {
-        //         code: otp,
-        //     }
-        // })
         console.log(`Verification OTP email for ${email}: ${otp}`);
       },
     }),
