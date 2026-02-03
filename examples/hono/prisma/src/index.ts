@@ -83,9 +83,14 @@ app.get("/", async (c) => {
   }
 });
 app.get("/test", async (c) => {
-  const { success } = await auth.api.forgetPasswordEmailOTP({
+  // const { success } = await auth.api.signInPhoneNumber({
+  //   body: {
+
+  //   }
+  // })
+  const result = await auth.api.sendPhoneNumberOTP({
     body: {
-      email: "user@test.com",
+      phoneNumber: "+16502530001",
     },
   });
   // for normal password reset requeset
@@ -94,7 +99,16 @@ app.get("/test", async (c) => {
   //     email: "user@test.com",
   //   }
   // })
-  return c.json({ message: "Test", success });
+  return c.json({ message: "Test", result });
+});
+app.get("/test/phone", async (c) => {
+  const result = await auth.api.verifyPhoneNumber({
+    body: {
+      phoneNumber: "+16502530001",
+      code: "031316",
+    },
+  });
+  return c.json({ message: "Test", result });
 });
 app.get("/test/reset", async (c) => {
   const token = c.req.query("token");
