@@ -969,7 +969,15 @@ export const auth = betterAuth({
                       <div className="flex items-center justify-end gap-1.5 mt-3">
                         <span className="text-[10px] text-gray-500 font-mono">Less</span>
                         <div className="flex items-center gap-0.5">
-                          {(["bg-white/5", "bg-white/15", "bg-white/25", "bg-white/35", "bg-white/50"] as const).map((bg) => (
+                          {(
+                            [
+                              "bg-white/5",
+                              "bg-white/15",
+                              "bg-white/25",
+                              "bg-white/35",
+                              "bg-white/50",
+                            ] as const
+                          ).map((bg) => (
                             <div
                               key={bg}
                               className={`rounded-[2px] border border-white/10 ${bg}`}
