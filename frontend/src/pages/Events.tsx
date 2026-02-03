@@ -845,8 +845,8 @@ export const auth = betterAuth({
             return "bg-white/50";
           };
 
-          const cellGap = 4;
-          const cellSize = 10;
+          const cellGap = 4.5;
+          const cellSize = 13;
           const monthRowHeight = 22;
           const gridWidth = WEEKS * cellSize + (WEEKS - 1) * cellGap;
 
@@ -962,10 +962,23 @@ export const auth = betterAuth({
                           );
                         })}
                       </div>
-                      {/* Year labels: last year (left), current year (right) — GitHub style */}
                       <div className="flex justify-between text-[10px] text-gray-500 font-mono mt-2 px-0.5">
                         <span>{leftYear}</span>
                         <span>{leftYear !== rightYear ? rightYear : "Today"}</span>
+                      </div>
+                      <div className="flex items-center justify-end gap-1.5 mt-3">
+                        <span className="text-[10px] text-gray-500 font-mono">Less</span>
+                        <div className="flex items-center gap-0.5">
+                          {(["bg-white/5", "bg-white/15", "bg-white/25", "bg-white/35", "bg-white/50"] as const).map((bg) => (
+                            <div
+                              key={bg}
+                              className={`rounded-[2px] border border-white/10 ${bg}`}
+                              style={{ width: cellSize, height: cellSize }}
+                              aria-hidden
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[10px] text-gray-500 font-mono">More</span>
                       </div>
                     </div>
                   </div>
@@ -1110,7 +1123,7 @@ export const auth = betterAuth({
                       aria-hidden
                     >
                       <ArrowDown className="w-3 h-3 shrink-0" />
-                      <span>Scroll for more</span>
+                      <span className="font-mono uppercase">Scroll</span>
                     </div>
                   )}
                 </div>
