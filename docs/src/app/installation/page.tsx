@@ -112,7 +112,7 @@ export default function Installation() {
             href="https://kinfish.dev"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] font-mono uppercase tracking-widest block hover:text-white transition-colors duration-300 text-white/70"
+            className="text-[11px] font-mono lowercase tracking-widest block hover:text-white transition-colors duration-300 text-white/70"
           >
             kinfish.dev
           </a>
