@@ -12,8 +12,8 @@ You can try a live, demo version of Better Auth Studio here:
 
 👉 **[https://bt-nextjs.vercel.app/admin](https://bt-nextjs.vercel.app/admin)**
 
-- **Login email:** `admin@test.com`
-- **Password:** `admin@test.com`
+- **Login email:** `admin@user.com`
+- **Password:** `admin@user.com`
 
 This online demo lets you explore the admin studio UI. Please note this is a test environment.
 

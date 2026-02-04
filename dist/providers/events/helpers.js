@@ -859,7 +859,9 @@ export function createNodeSqliteProvider(options) {
                     tableEnsured = false;
                     await ensureTableSync();
                     const stmt = actualClient.prepare(insertStmtSql);
-                    stmt.run(event.id, event.type, event.timestamp instanceof Date ? event.timestamp.toISOString() : String(event.timestamp), event.status || "success", event.userId ?? null, event.sessionId ?? null, event.organizationId ?? null, JSON.stringify(event.metadata || {}), event.ipAddress ?? null, event.userAgent ?? null, event.source ?? "app", event.display?.message ?? null, event.display?.severity ?? null);
+                    stmt.run(event.id, event.type, event.timestamp instanceof Date
+                        ? event.timestamp.toISOString()
+                        : String(event.timestamp), event.status || "success", event.userId ?? null, event.sessionId ?? null, event.organizationId ?? null, JSON.stringify(event.metadata || {}), event.ipAddress ?? null, event.userAgent ?? null, event.source ?? "app", event.display?.message ?? null, event.display?.severity ?? null);
                     return;
                 }
                 console.error(`Failed to insert event (${event.type}) into ${tableName} (node:sqlite):`, error);
@@ -875,7 +877,9 @@ export function createNodeSqliteProvider(options) {
                 try {
                     const stmt = actualClient.prepare(insertStmtSql);
                     for (const event of events) {
-                        stmt.run(event.id, event.type, event.timestamp instanceof Date ? event.timestamp.toISOString() : String(event.timestamp), event.status || "success", event.userId ?? null, event.sessionId ?? null, event.organizationId ?? null, JSON.stringify(event.metadata || {}), event.ipAddress ?? null, event.userAgent ?? null, event.source ?? "app", event.display?.message ?? null, event.display?.severity ?? null);
+                        stmt.run(event.id, event.type, event.timestamp instanceof Date
+                            ? event.timestamp.toISOString()
+                            : String(event.timestamp), event.status || "success", event.userId ?? null, event.sessionId ?? null, event.organizationId ?? null, JSON.stringify(event.metadata || {}), event.ipAddress ?? null, event.userAgent ?? null, event.source ?? "app", event.display?.message ?? null, event.display?.severity ?? null);
                     }
                     actualClient.exec("COMMIT");
                 }
@@ -892,7 +896,9 @@ export function createNodeSqliteProvider(options) {
                         actualClient.exec("BEGIN");
                         const stmt = actualClient.prepare(insertStmtSql);
                         for (const event of events) {
-                            stmt.run(event.id, event.type, event.timestamp instanceof Date ? event.timestamp.toISOString() : String(event.timestamp), event.status || "success", event.userId ?? null, event.sessionId ?? null, event.organizationId ?? null, JSON.stringify(event.metadata || {}), event.ipAddress ?? null, event.userAgent ?? null, event.source ?? "app", event.display?.message ?? null, event.display?.severity ?? null);
+                            stmt.run(event.id, event.type, event.timestamp instanceof Date
+                                ? event.timestamp.toISOString()
+                                : String(event.timestamp), event.status || "success", event.userId ?? null, event.sessionId ?? null, event.organizationId ?? null, JSON.stringify(event.metadata || {}), event.ipAddress ?? null, event.userAgent ?? null, event.source ?? "app", event.display?.message ?? null, event.display?.severity ?? null);
                         }
                         actualClient.exec("COMMIT");
                     }
@@ -947,7 +953,10 @@ export function createNodeSqliteProvider(options) {
                     userAgent: row.user_agent || undefined,
                     source: row.source || "app",
                     display: row.display_message || row.display_severity
-                        ? { message: row.display_message || undefined, severity: row.display_severity || undefined }
+                        ? {
+                            message: row.display_message || undefined,
+                            severity: row.display_severity || undefined,
+                        }
                         : undefined,
                 }));
                 return {
