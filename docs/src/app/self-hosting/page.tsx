@@ -1309,7 +1309,8 @@ export default config;`}
                 (or your chosen <code className="bg-white/10 px-1 text-white/90">columnName</code>)
                 to your user table and run your migration (e.g.{" "}
                 <code className="bg-white/10 px-1 text-white/90">prisma migrate dev</code>,{" "}
-                <code className="bg-white/10 px-1 text-white/90">drizzle-kit push</code>)
+                <code className="bg-white/10 px-1 text-white/90">drizzle-kit push</code>) or with
+                your database client of choice.
               </p>
             </div>
           </PixelCard>
