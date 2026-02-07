@@ -56,7 +56,8 @@ export interface AuthEvent {
 
 export interface EventQueryOptions {
   limit?: number;
-  after?: string; // Cursor for pagination
+  offset?: number; // Offset for pagination (fetch from N)
+  after?: string; // Cursor for pagination (used when offset not provided)
   sort?: "asc" | "desc"; // 'desc' = newest first (default), 'asc' = oldest first
   type?: string;
   userId?: string;
@@ -69,10 +70,20 @@ export interface EventQueryResult {
   nextCursor: string | null;
 }
 
+export interface EventStats {
+  total: number;
+  success: number;
+  failed: number;
+  warning: number;
+  info: number;
+}
+
 export interface EventIngestionProvider {
   ingest(event: AuthEvent): Promise<void>;
   ingestBatch?(events: AuthEvent[]): Promise<void>;
   query?(options: EventQueryOptions): Promise<EventQueryResult>;
+  count?(): Promise<number>;
+  getStats?(): Promise<EventStats>;
   healthCheck?(): Promise<boolean>;
   shutdown?(): Promise<void>;
 }
