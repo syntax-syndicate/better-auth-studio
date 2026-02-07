@@ -1,3 +1,8 @@
+/**
+ * Lightweight IP geolocation using maxmind (GeoLite2-City.mmdb).
+ * For accurate lookups: run `pnpm geo:update` to download the latest DB
+ * (or place GeoLite2-City.mmdb in ./data/). Fallbacks: data/default-geo.json, then hardcoded ranges.
+ */
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -195,6 +200,13 @@ function resolveIPFromRanges(ipAddress: string): LocationData | null {
         { min: "177.0.0.0", max: "177.255.255.255" },
         { min: "201.0.0.0", max: "201.255.255.255" },
       ],
+    },
+    {
+      country: "Ethiopia",
+      countryCode: "ET",
+      city: "Addis Ababa",
+      region: "Addis Ababa",
+      ranges: [{ min: "102.213.0.0", max: "102.213.255.255" }],
     },
     {
       country: "India",

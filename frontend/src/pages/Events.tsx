@@ -138,6 +138,7 @@ const formatDateTime = (value?: string | Date) => {
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
 
+  const year = format(d, "yyyy");
   const month = format(d, "MMM").toUpperCase();
   const day = format(d, "dd");
   const hours = String(d.getHours()).padStart(2, "0");
@@ -145,7 +146,7 @@ const formatDateTime = (value?: string | Date) => {
   const seconds = String(d.getSeconds()).padStart(2, "0");
   const milliseconds = String(d.getMilliseconds()).padStart(2, "0").slice(0, 2);
 
-  return `${month} ${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
+  return `${month} ${day} ${year} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 };
 
 const getSeverityColor = (severity?: string, status?: string) => {

@@ -40,6 +40,7 @@
   },
   "scripts": {
     "build": "tsc && pnpm run frontend:build && pnpm run copy:public && pnpm run verify:public",
+    "geo:update": "node scripts/download-geolite2.js",
     "copy:public": "rm -rf dist/public && cp -r public dist/",
     "verify:public": "test -f dist/public/index.html && echo '✓ Public directory copied successfully' || (echo '✗ ERROR: Public directory not copied!' && exit 1)",
     "postinstall": "node scripts/postinstall.js",
