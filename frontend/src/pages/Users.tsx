@@ -970,15 +970,7 @@ export default function Users() {
                             side="top"
                             className="max-w-xs lowercase border border-white/20 bg-black/95 text-white text-xs font-normal shadow-xl rounded-none px-3 py-2"
                           >
-                            Last seen is set when users sign in or sign up (no plugin needed). Add
-                            the column{" "}
-                            <code className="px-1 py-0.5 bg-white/10 rounded font-mono">
-                              {lastSeenAtColumnName}
-                            </code>{" "}
-                            to your user table and run migrations (e.g. Prisma:{" "}
-                            <code className="font-mono">prisma migrate dev</code>, Drizzle:{" "}
-                            <code className="font-mono">drizzle-kit push</code>) so values are saved
-                            and shown here.
+                            Last seen is last time the user was active.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
