@@ -399,6 +399,13 @@ export function createRoutes(
 
   if (geoDbPath) {
     setGeoDbPath(geoDbPath);
+  } else if (
+    studioConfig?.ipAddress &&
+    studioConfig.ipAddress.provider === "static" &&
+    "path" in studioConfig.ipAddress &&
+    studioConfig.ipAddress.path
+  ) {
+    setGeoDbPath(studioConfig.ipAddress.path);
   }
 
   initializeGeoService().catch(console.error);
@@ -1225,6 +1232,14 @@ export function createRoutes(
 
             if (config) {
               configToUse = config?.default || config?.config || (config as any);
+              if (
+                configToUse?.ipAddress?.provider === "static" &&
+                "path" in configToUse.ipAddress &&
+                configToUse.ipAddress.path
+              ) {
+                setGeoDbPath(configToUse.ipAddress.path);
+                await initializeGeoService();
+              }
             }
           }
         } catch (initError: any) {

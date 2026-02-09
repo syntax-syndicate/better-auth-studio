@@ -19,13 +19,10 @@ export interface LocationData {
 }
 
 /** Config passed from studio config ipAddress (avoids importing handler types). */
-export interface IpAddressProviderConfig {
-  provider: "ipinfo" | "ipapi";
-  apiToken?: string;
-  baseUrl?: string;
-  /** ipinfo only: "lite" | "lookup". Default "lookup". */
-  endpoint?: "lite" | "lookup";
-}
+export type IpAddressProviderConfig =
+  | { provider: "ipinfo"; apiToken?: string; baseUrl?: string; endpoint?: "lite" | "lookup" }
+  | { provider: "ipapi"; apiToken?: string; baseUrl?: string }
+  | { provider: "static"; path: string };
 
 /** ipapi.co JSON response (subset we use) */
 interface IpApiCoResponse {
@@ -112,6 +109,12 @@ function loadDefaultDatabase(): void {
 }
 
 export async function initializeGeoService(): Promise<void> {
+  if (lookup) {
+    try {
+      (lookup as any).close?.();
+    } catch (_e) {}
+    lookup = null;
+  }
   try {
     const dbPath = geoDbPath || "./data/GeoLite2-City.mmdb";
     lookup = await maxmind.open<CityResponse>(dbPath);
@@ -168,6 +171,9 @@ export async function resolveIPLocationAsync(
 ): Promise<LocationData | null> {
   const trimmed = ipAddress.trim();
   if (!trimmed || trimmed === "Unknown") return null;
+  if (ipConfig?.provider === "static") {
+    return resolveIPLocation(trimmed);
+  }
   if (ipConfig?.provider === "ipinfo" && ipConfig.apiToken) {
     try {
       const base = (ipConfig.baseUrl || DEFAULT_IPINFO_BASE).replace(/\/$/, "");
