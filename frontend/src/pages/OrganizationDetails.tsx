@@ -978,8 +978,12 @@ export default function OrganizationDetails() {
                   <div>
                     <label className="text-sm text-gray-400 font-mono uppercase">Created</label>
                     <div className="flex flex-col font-mono text-xs mt-1">
-                      <span className="text-white">{format(new Date(organization.createdAt), "dd MMM yyyy, HH:mm")}</span>
-                      <p className="text-gray-500 text-xs mt-0.5">{formatDistanceToNow(new Date(organization.createdAt), { addSuffix: true })}</p>
+                      <span className="text-white">
+                        {format(new Date(organization.createdAt), "dd MMM yyyy, HH:mm")}
+                      </span>
+                      <p className="text-gray-500 text-xs mt-0.5">
+                        {formatDistanceToNow(new Date(organization.createdAt), { addSuffix: true })}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -1207,8 +1211,14 @@ export default function OrganizationDetails() {
                             <td className="py-4 px-4 text-white">{team.memberCount || 0}</td>
                             <td className="py-4 px-4 text-sm text-gray-400">
                               <div className="flex flex-col uppercase font-mono text-xs">
-                                <span>{format(new Date(team.createdAt), "dd MMM yyyy, HH:mm")}</span>
-                                <p className="text-xs text-gray-500">{formatDistanceToNow(new Date(team.createdAt), { addSuffix: true })}</p>
+                                <span>
+                                  {format(new Date(team.createdAt), "dd MMM yyyy, HH:mm")}
+                                </span>
+                                <p className="text-xs text-gray-500">
+                                  {formatDistanceToNow(new Date(team.createdAt), {
+                                    addSuffix: true,
+                                  })}
+                                </p>
                               </div>
                             </td>
                             <td className="py-4 px-4 text-right">

@@ -874,8 +874,12 @@ export default function Organizations() {
                     <td className="py-4 px-4 text-white">{organization.slug}</td>
                     <td className="py-4 px-4 text-sm text-gray-400">
                       <div className="flex flex-col uppercase font-mono text-xs">
-                        <span>{format(new Date(organization.createdAt), "dd MMM yyyy, HH:mm")}</span>
-                        <p className="text-xs text-gray-500">{formatTimeAgo(organization.createdAt)}</p>
+                        <span>
+                          {format(new Date(organization.createdAt), "dd MMM yyyy, HH:mm")}
+                        </span>
+                        <p className="text-xs text-gray-500">
+                          {formatTimeAgo(organization.createdAt)}
+                        </p>
                       </div>
                     </td>
                     <td className="py-4 px-4 text-right">

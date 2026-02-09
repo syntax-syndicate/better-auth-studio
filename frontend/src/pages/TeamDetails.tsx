@@ -403,14 +403,18 @@ export default function TeamDetails() {
                     <label className="text-sm text-gray-400 font-mono uppercase">Created</label>
                     <div className="flex flex-col font-mono text-xs mt-1">
                       <span className="text-white">{formatDateTime(team.createdAt)}</span>
-                      <p className="text-gray-500 text-xs mt-0.5">{formatDistanceToNow(new Date(team.createdAt), { addSuffix: true })}</p>
+                      <p className="text-gray-500 text-xs mt-0.5">
+                        {formatDistanceToNow(new Date(team.createdAt), { addSuffix: true })}
+                      </p>
                     </div>
                   </div>
                   <div>
                     <label className="text-sm text-gray-400 font-mono uppercase">
                       Last Updated
                     </label>
-                    <p className="text-white font-mono text-xs mt-1">{formatDateTime(team.updatedAt)}</p>
+                    <p className="text-white font-mono text-xs mt-1">
+                      {formatDateTime(team.updatedAt)}
+                    </p>
                   </div>
                 </div>
               </div>

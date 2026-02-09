@@ -1295,8 +1295,12 @@ export default function UserDetails() {
                           Member Since
                         </div>
                         <div className="flex flex-col font-mono text-xs">
-                          <span className="text-white">{format(new Date(user.createdAt), "dd MMM yyyy, HH:mm")}</span>
-                          <p className="text-gray-500 text-xs mt-0.5">{formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}</p>
+                          <span className="text-white">
+                            {format(new Date(user.createdAt), "dd MMM yyyy, HH:mm")}
+                          </span>
+                          <p className="text-gray-500 text-xs mt-0.5">
+                            {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -1748,8 +1752,14 @@ export default function UserDetails() {
                             </div>
                             <div className="flex flex-col font-mono text-xs">
                               <span className="text-gray-500 uppercase">Created</span>
-                              <span className="text-white">{format(new Date(session.createdAt), "dd MMM yyyy, HH:mm")}</span>
-                              <p className="text-gray-500 text-xs mt-0.5">{formatDistanceToNow(new Date(session.createdAt), { addSuffix: true })}</p>
+                              <span className="text-white">
+                                {format(new Date(session.createdAt), "dd MMM yyyy, HH:mm")}
+                              </span>
+                              <p className="text-gray-500 text-xs mt-0.5">
+                                {formatDistanceToNow(new Date(session.createdAt), {
+                                  addSuffix: true,
+                                })}
+                              </p>
                             </div>
                           </div>
                         </div>
