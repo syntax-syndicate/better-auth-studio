@@ -2771,8 +2771,14 @@ export function createRoutes(
             ? "warning"
             : "info",
       ) => {
-        results.push({ category, check, status, message, suggestion, severity });
+        results.push({ category, check, message, suggestion, severity, status });
       };
+
+      // Resolve effective auth config (options object); when self-hosted, authConfig may be the auth instance and emailAndPassword lives on options
+      const effectiveAuthConfig =
+        (await getAuthConfigSafe()) ||
+        (typeof authConfig?.options === "object" ? authConfig.options : authConfig) ||
+        {};
 
       // 1. Core Configuration Checks
       const secret = process.env.BETTER_AUTH_SECRET || process.env.AUTH_SECRET;
@@ -2803,7 +2809,7 @@ export function createRoutes(
         );
       }
 
-      const baseURL = authConfig.baseURL || process.env.BETTER_AUTH_URL;
+      const baseURL = effectiveAuthConfig.baseURL || process.env.BETTER_AUTH_URL;
       if (!baseURL) {
         addResult(
           "Core Config",
@@ -2829,7 +2835,7 @@ export function createRoutes(
         }
       }
 
-      const basePath = authConfig.basePath || "/api/auth";
+      const basePath = effectiveAuthConfig.basePath || "/api/auth";
       if (!basePath.startsWith("/")) {
         addResult(
           "Core Config",
@@ -2888,7 +2894,7 @@ export function createRoutes(
       }
 
       const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.MYSQL_URL;
-      if (!dbUrl && !authConfig.database?.url) {
+      if (!dbUrl && !effectiveAuthConfig.database?.url) {
         addResult(
           "Database",
           "Connection String",
@@ -2907,7 +2913,7 @@ export function createRoutes(
       }
 
       // 3. OAuth/Social Providers
-      const socialProvidersRaw = (preloadedAuthOptions || authConfig || {}).socialProviders || {};
+      const socialProvidersRaw = effectiveAuthConfig.socialProviders || {};
       const effectiveSocialProviders = Array.isArray(socialProvidersRaw)
         ? socialProvidersRaw
         : Object.entries(socialProvidersRaw).map(([id, p]: [string, any]) => ({
@@ -2974,8 +2980,8 @@ export function createRoutes(
 
             if (provider.redirectURI) {
               const baseUrl =
-                authConfig.baseURL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
-              const expectedRedirect = `${baseUrl}${authConfig.basePath || "/api/auth"}/callback/${provider.id}`;
+                effectiveAuthConfig.baseURL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
+              const expectedRedirect = `${baseUrl}${effectiveAuthConfig.basePath || "/api/auth"}/callback/${provider.id}`;
               if (!provider.redirectURI.includes(baseUrl)) {
                 addResult(
                   "OAuth Providers",
@@ -3008,7 +3014,7 @@ export function createRoutes(
       }
 
       // 4. Email & Password
-      const emailAndPassword = authConfig.emailAndPassword;
+      const emailAndPassword = effectiveAuthConfig.emailAndPassword;
       if (emailAndPassword?.enabled) {
         addResult(
           "Email & Password",
@@ -3041,7 +3047,7 @@ export function createRoutes(
       }
 
       // 5. Security Settings
-      const advanced = authConfig.advanced || {};
+      const advanced = effectiveAuthConfig.advanced || {};
       const cookieAttrs = advanced.defaultCookieAttributes || {};
 
       if (process.env.NODE_ENV === "production") {
@@ -3095,7 +3101,7 @@ export function createRoutes(
       }
 
       // 6. Trusted Origins
-      const trustedOriginsRaw = authConfig.trustedOrigins || [];
+      const trustedOriginsRaw = effectiveAuthConfig.trustedOrigins || [];
       const trustedOrigins = Array.isArray(trustedOriginsRaw) ? trustedOriginsRaw : [];
       if (trustedOrigins.length === 0) {
         addResult(
