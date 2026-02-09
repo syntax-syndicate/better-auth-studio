@@ -2980,7 +2980,9 @@ export function createRoutes(
 
             if (provider.redirectURI) {
               const baseUrl =
-                effectiveAuthConfig.baseURL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
+                effectiveAuthConfig.baseURL ||
+                process.env.BETTER_AUTH_URL ||
+                "http://localhost:3000";
               const expectedRedirect = `${baseUrl}${effectiveAuthConfig.basePath || "/api/auth"}/callback/${provider.id}`;
               if (!provider.redirectURI.includes(baseUrl)) {
                 addResult(
@@ -3013,40 +3015,7 @@ export function createRoutes(
         });
       }
 
-      // 4. Email & Password
-      const emailAndPassword = effectiveAuthConfig.emailAndPassword;
-      if (emailAndPassword?.enabled) {
-        addResult(
-          "Email & Password",
-          "Enabled",
-          "pass",
-          "Email and password authentication is enabled",
-        );
-
-        if (emailAndPassword.minPasswordLength && emailAndPassword.minPasswordLength < 8) {
-          addResult(
-            "Email & Password",
-            "Password Policy",
-            "warning",
-            `Minimum password length is ${emailAndPassword.minPasswordLength}. Recommended minimum is 8`,
-            "Consider increasing minPasswordLength to 8 or higher",
-            "warning",
-          );
-        } else {
-          addResult("Email & Password", "Password Policy", "pass", "Password policy is configured");
-        }
-      } else {
-        addResult(
-          "Email & Password",
-          "Enabled",
-          "warning",
-          "Email and password authentication is disabled",
-          "Enable emailAndPassword in your config if you need email/password auth",
-          "info",
-        );
-      }
-
-      // 5. Security Settings
+      // 4. Security Settings
       const advanced = effectiveAuthConfig.advanced || {};
       const cookieAttrs = advanced.defaultCookieAttributes || {};
 
@@ -3100,7 +3069,7 @@ export function createRoutes(
         );
       }
 
-      // 6. Trusted Origins
+      // 5. Trusted Origins
       const trustedOriginsRaw = effectiveAuthConfig.trustedOrigins || [];
       const trustedOrigins = Array.isArray(trustedOriginsRaw) ? trustedOriginsRaw : [];
       if (trustedOrigins.length === 0) {
@@ -3141,7 +3110,7 @@ export function createRoutes(
         }
       }
 
-      // 7. Environment Variables
+      // 6. Environment Variables
       const requiredEnvVars = ["BETTER_AUTH_SECRET", "AUTH_SECRET"];
       const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
       if (missingEnvVars.length > 0) {

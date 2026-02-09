@@ -2440,8 +2440,12 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 : status === "warning"
                     ? "warning"
                     : "info") => {
-                results.push({ category, check, status, message, suggestion, severity });
+                results.push({ category, check, message, suggestion, severity, status });
             };
+            // Resolve effective auth config (options object); when self-hosted, authConfig may be the auth instance and emailAndPassword lives on options
+            const effectiveAuthConfig = (await getAuthConfigSafe()) ||
+                (typeof authConfig?.options === "object" ? authConfig.options : authConfig) ||
+                {};
             // 1. Core Configuration Checks
             const secret = process.env.BETTER_AUTH_SECRET || process.env.AUTH_SECRET;
             if (!secret) {
@@ -2453,7 +2457,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             else {
                 addResult("Core Config", "Secret Key", "pass", "Secret key is configured and meets length requirements");
             }
-            const baseURL = authConfig.baseURL || process.env.BETTER_AUTH_URL;
+            const baseURL = effectiveAuthConfig.baseURL || process.env.BETTER_AUTH_URL;
             if (!baseURL) {
                 addResult("Core Config", "Base URL", "warning", "baseURL is not configured. Using default localhost:3000", "Set baseURL in your auth config or BETTER_AUTH_URL environment variable", "warning");
             }
@@ -2466,7 +2470,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     addResult("Core Config", "Base URL", "fail", `Base URL format is invalid: ${baseURL}`, "Ensure baseURL is a valid URL (e.g., https://example.com)", "error");
                 }
             }
-            const basePath = authConfig.basePath || "/api/auth";
+            const basePath = effectiveAuthConfig.basePath || "/api/auth";
             if (!basePath.startsWith("/")) {
                 addResult("Core Config", "Base Path", "fail", `Base path must start with '/': ${basePath}`, "Change basePath to start with a forward slash (e.g., /api/auth)", "error");
             }
@@ -2498,14 +2502,14 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 }
             }
             const dbUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.MYSQL_URL;
-            if (!dbUrl && !authConfig.database?.url) {
+            if (!dbUrl && !effectiveAuthConfig.database?.url) {
                 addResult("Database", "Connection String", "warning", "No database connection string found in environment variables", "Set DATABASE_URL, POSTGRES_URL, or MYSQL_URL in your .env file", "warning");
             }
             else {
                 addResult("Database", "Connection String", "pass", "Database connection string is configured");
             }
             // 3. OAuth/Social Providers
-            const socialProvidersRaw = (preloadedAuthOptions || authConfig || {}).socialProviders || {};
+            const socialProvidersRaw = effectiveAuthConfig.socialProviders || {};
             const effectiveSocialProviders = Array.isArray(socialProvidersRaw)
                 ? socialProvidersRaw
                 : Object.entries(socialProvidersRaw).map(([id, p]) => ({
@@ -2535,8 +2539,10 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                             addResult("OAuth Providers", `${provider.name} - Client Secret`, "pass", "Client Secret is configured");
                         }
                         if (provider.redirectURI) {
-                            const baseUrl = authConfig.baseURL || process.env.BETTER_AUTH_URL || "http://localhost:3000";
-                            const expectedRedirect = `${baseUrl}${authConfig.basePath || "/api/auth"}/callback/${provider.id}`;
+                            const baseUrl = effectiveAuthConfig.baseURL ||
+                                process.env.BETTER_AUTH_URL ||
+                                "http://localhost:3000";
+                            const expectedRedirect = `${baseUrl}${effectiveAuthConfig.basePath || "/api/auth"}/callback/${provider.id}`;
                             if (!provider.redirectURI.includes(baseUrl)) {
                                 addResult("OAuth Providers", `${provider.name} - Redirect URI`, "warning", `Redirect URI may not match baseURL: ${provider.redirectURI}`, `Expected format: ${expectedRedirect}. Ensure this matches your OAuth provider settings`, "warning");
                             }
@@ -2551,7 +2557,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 });
             }
             // 4. Email & Password
-            const emailAndPassword = authConfig.emailAndPassword;
+            const emailAndPassword = effectiveAuthConfig.emailAndPassword;
             if (emailAndPassword?.enabled) {
                 addResult("Email & Password", "Enabled", "pass", "Email and password authentication is enabled");
                 if (emailAndPassword.minPasswordLength && emailAndPassword.minPasswordLength < 8) {
@@ -2565,7 +2571,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 addResult("Email & Password", "Enabled", "warning", "Email and password authentication is disabled", "Enable emailAndPassword in your config if you need email/password auth", "info");
             }
             // 5. Security Settings
-            const advanced = authConfig.advanced || {};
+            const advanced = effectiveAuthConfig.advanced || {};
             const cookieAttrs = advanced.defaultCookieAttributes || {};
             if (process.env.NODE_ENV === "production") {
                 if (cookieAttrs.secure !== true) {
@@ -2590,7 +2596,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 addResult("Security", "Cookie HttpOnly", "warning", "HttpOnly flag is disabled", "Enable httpOnly: true for better security", "warning");
             }
             // 6. Trusted Origins
-            const trustedOriginsRaw = authConfig.trustedOrigins || [];
+            const trustedOriginsRaw = effectiveAuthConfig.trustedOrigins || [];
             const trustedOrigins = Array.isArray(trustedOriginsRaw) ? trustedOriginsRaw : [];
             if (trustedOrigins.length === 0) {
                 addResult("Security", "Trusted Origins", "warning", "No trusted origins configured", "Configure trustedOrigins to restrict CORS to specific domains", "warning");

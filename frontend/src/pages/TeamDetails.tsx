@@ -70,7 +70,7 @@ export default function TeamDetails() {
   const [members, setMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"details" | "members">("details");
-
+  const [isUpdatingTeam, setIsUpdatingTeam] = useState(false);
   const [showAddMemberModal, setShowAddMemberModal] = useState(false);
   const [showEditTeamModal, setShowEditTeamModal] = useState(false);
 
@@ -141,7 +141,7 @@ export default function TeamDetails() {
       toast.error("Please enter a team name");
       return;
     }
-
+    setIsUpdatingTeam(true)
     const toastId = toast.loading("Updating team...");
 
     try {
@@ -758,10 +758,10 @@ export default function TeamDetails() {
               </Button>
               <Button
                 onClick={handleUpdateTeam}
-                disabled={teamFormData.name === team.name}
+                disabled={teamFormData.name === team.name || isUpdatingTeam}
                 className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none"
               >
-                Update Team
+                {isUpdatingTeam ? "Updating..." : "Update Team"}
               </Button>
             </div>
           </div>

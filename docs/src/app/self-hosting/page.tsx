@@ -1360,8 +1360,8 @@ lastSeenAt: {
                 <strong className="text-white/90">optional datetime</strong> (nullable timestamp),
                 then run your migration (e.g.{" "}
                 <code className="bg-white/10 px-1 text-white/90">prisma migrate dev</code>,{" "}
-                <code className="bg-white/10 px-1 text-white/90">drizzle-kit push</code>) or
-                update the schema with your database client.
+                <code className="bg-white/10 px-1 text-white/90">drizzle-kit push</code>) or update
+                the schema with your database client.
               </p>
             </div>
           </PixelCard>
@@ -1384,7 +1384,8 @@ lastSeenAt: {
               <p className="text-sm font-light tracking-tight text-white/70">
                 To show IP geolocation (city, country) for Events and Sessions, you can use an
                 external API via <code className="bg-white/10 px-1 text-white/90">ipAddress</code>{" "}
-                in your <code className="bg-white/10 px-1 text-white/90">studio.config.ts</code>, or use a local MaxMind GeoLite2 database (no API key).
+                in your <code className="bg-white/10 px-1 text-white/90">studio.config.ts</code>, or
+                use a local MaxMind GeoLite2 database (no API key).
               </p>
 
               <div>
