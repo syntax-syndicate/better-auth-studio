@@ -875,17 +875,23 @@ ADMIN_EMAIL_3=admin3@example.com`}
                   <p className="text-sm font-light tracking-tight text-white/50 mt-1">
                     IP geolocation for Events and Sessions. Set{" "}
                     <code className="text-white/70 bg-white/10 px-1 py-0.5">provider</code> to{" "}
-                    <code className="text-white/70 bg-white/10 px-1 py-0.5">&quot;ipinfo&quot;</code>
+                    <code className="text-white/70 bg-white/10 px-1 py-0.5">
+                      &quot;ipinfo&quot;
+                    </code>
                     ,{" "}
                     <code className="text-white/70 bg-white/10 px-1 py-0.5">&quot;ipapi&quot;</code>
                     , or{" "}
-                    <code className="text-white/70 bg-white/10 px-1 py-0.5">&quot;static&quot;</code>{" "}
-                    (with <code className="text-white/70 bg-white/10 px-1 py-0.5">path</code> to your
-                    .mmdb). For ipinfo/ipapi: optional{" "}
+                    <code className="text-white/70 bg-white/10 px-1 py-0.5">
+                      &quot;static&quot;
+                    </code>{" "}
+                    (with <code className="text-white/70 bg-white/10 px-1 py-0.5">path</code> to
+                    your .mmdb). For ipinfo/ipapi: optional{" "}
                     <code className="text-white/70 bg-white/10 px-1 py-0.5">apiToken</code>,{" "}
-                    <code className="text-white/70 bg-white/10 px-1 py-0.5">baseUrl</code>; ipinfo also
-                    supports{" "}
-                    <code className="text-white/70 bg-white/10 px-1 py-0.5">endpoint: &quot;lite&quot; | &quot;lookup&quot;</code>
+                    <code className="text-white/70 bg-white/10 px-1 py-0.5">baseUrl</code>; ipinfo
+                    also supports{" "}
+                    <code className="text-white/70 bg-white/10 px-1 py-0.5">
+                      endpoint: &quot;lite&quot; | &quot;lookup&quot;
+                    </code>
                     . See the{" "}
                     <button
                       type="button"
@@ -1368,30 +1374,29 @@ export default config;`}
             <div className="pt-4 space-y-4">
               <p className="text-sm font-light tracking-tight text-white/70">
                 To show IP geolocation (city, country) for Events and Sessions, you can use an
-                external API via <code className="bg-white/10 px-1 text-white/90">ipAddress</code> in
-                your Studio config, or use a local MaxMind GeoLite2 database (no API key).
+                external API via <code className="bg-white/10 px-1 text-white/90">ipAddress</code>{" "}
+                in your Studio config, or use a local MaxMind GeoLite2 database (no API key).
               </p>
 
               <div>
-                <p className="text-sm font-medium text-white/90 mb-2">
-                  Supported providers
-                </p>
+                <p className="text-sm font-medium text-white/90 mb-2">Supported providers</p>
                 <ul className="text-sm font-light tracking-tight text-white/70 space-y-1 list-disc list-inside">
                   <li>
                     <strong className="text-white/90">ipinfo</strong> — ipinfo.io (token as query
                     param; <code className="bg-white/10 px-1">endpoint: &quot;lite&quot;</code> for
-                    free plan, <code className="bg-white/10 px-1">endpoint: &quot;lookup&quot;</code>{" "}
-                    for city/region)
+                    free plan,{" "}
+                    <code className="bg-white/10 px-1">endpoint: &quot;lookup&quot;</code> for
+                    city/region)
                   </li>
                   <li>
                     <strong className="text-white/90">ipapi</strong> — ipapi.co (optional token in
                     path)
                   </li>
                   <li>
-                    <strong className="text-white/90">static</strong> —  MaxMind GeoLite2
-                    (.mmdb) file; set <code className="bg-white/10 px-1">path</code> to your .mmdb
-                    (e.g. your own GeoLite2 or ipdb). No API key; Studio figures out location from
-                    the file.
+                    <strong className="text-white/90">static</strong> — MaxMind GeoLite2 (.mmdb)
+                    file; set <code className="bg-white/10 px-1">path</code> to your .mmdb (e.g.
+                    your own GeoLite2 or ipdb). No API key; Studio figures out location from the
+                    file.
                   </li>
                 </ul>
               </div>
@@ -1426,9 +1431,11 @@ export default config;`}
               </div>
 
               <p className="text-sm font-light tracking-tight text-white/70">
-                <strong className="text-white/90">Example — MaxMind GeoLite2 .mmdb (static):</strong> If you
-                have a DB (e.g. GeoLite2-City or your own ipdb), point to it in config. Studio will
-                use this path and resolve locations from the file.
+                <strong className="text-white/90">
+                  Example — MaxMind GeoLite2 .mmdb (static):
+                </strong>{" "}
+                If you have a DB (e.g. GeoLite2-City or your own ipdb), point to it in config.
+                Studio will use this path and resolve locations from the file.
               </p>
               <div className="p-3 bg-white/5 border border-white/10 rounded-none mb-2">
                 <CodeHighlighter
@@ -1444,11 +1451,13 @@ export default config;`}
                 studio package to download the default GeoLite2-City.mmdb into{" "}
                 <code className="bg-white/10 px-1 text-white/90">./data/</code>. If you omit{" "}
                 <code className="bg-white/10 px-1 text-white/90">ipAddress</code> entirely, Studio
-                falls back to <code className="bg-white/10 px-1 text-white/90">./data/GeoLite2-City.mmdb</code> when
-                present, then default-geo/ranges. <strong className="text-white/90">Production:</strong>{" "}
+                falls back to{" "}
+                <code className="bg-white/10 px-1 text-white/90">./data/GeoLite2-City.mmdb</code>{" "}
+                when present, then default-geo/ranges.{" "}
+                <strong className="text-white/90">Production:</strong>{" "}
                 <code className="bg-white/10 px-1">static</code> works in prod as long as the .mmdb
-                file is deployed with your app and <code className="bg-white/10 px-1">path</code> points
-                to its location at runtime (relative to process cwd or absolute).
+                file is deployed with your app and <code className="bg-white/10 px-1">path</code>{" "}
+                points to its location at runtime (relative to process cwd or absolute).
               </p>
             </div>
           </PixelCard>
