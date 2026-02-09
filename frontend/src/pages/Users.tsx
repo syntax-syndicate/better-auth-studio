@@ -1786,14 +1786,7 @@ export default function Users() {
                               selectedUser.lastSeenAt ??
                               (selectedUser as any)[lastSeenAtColumnName];
                             return lastSeen ? (
-                              <span className="block text-right max-w-[60%]">
-                                <span className="block text-[10px] font-mono uppercase text-white">
-                                  {formatDateTime(lastSeen)}
-                                </span>
-                                <span className="block text-[9px] font-mono text-gray-500 mt-0.5">
-                                  {formatTimeAgo(lastSeen)}
-                                </span>
-                              </span>
+                              formatDateTime(lastSeen)
                             ) : (
                               "—"
                             );

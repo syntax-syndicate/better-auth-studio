@@ -16,7 +16,7 @@ import { createRequire } from "module";
 import { createMockAccount, createMockSession, createMockUser, createMockVerification, getAuthAdapter, } from "./auth-adapter.js";
 import { getPathAliases, possiblePaths } from "./config.js";
 import { getAuthData } from "./data.js";
-import { initializeGeoService, resolveIPLocation, setGeoDbPath } from "./geo-service.js";
+import { initializeGeoService, resolveIPLocationAsync, setGeoDbPath } from "./geo-service.js";
 import { detectDatabaseWithDialect } from "./utils/database-detection.js";
 import { createStudioSession, decryptSession, encryptSession, isSessionValid, STUDIO_COOKIE_NAME, } from "./utils/session.js";
 const config = {
@@ -836,7 +836,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             });
         }
     });
-    router.post("/api/geo/resolve", (req, res) => {
+    router.post("/api/geo/resolve", async (req, res) => {
         try {
             const body = req.body || {};
             const { ipAddress } = body;
@@ -846,7 +846,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     error: "IP address is required",
                 });
             }
-            const location = resolveIPLocation(ipAddress);
+            const location = await resolveIPLocationAsync(ipAddress);
             if (!location) {
                 return res.status(404).json({
                     success: false,

@@ -977,14 +977,9 @@ export default function OrganizationDetails() {
                   </div>
                   <div>
                     <label className="text-sm text-gray-400 font-mono uppercase">Created</label>
-                    <div className="flex flex-col font-mono text-xs mt-1">
-                      <span className="text-white">
-                        {format(new Date(organization.createdAt), "dd MMM yyyy, HH:mm")}
-                      </span>
-                      <p className="text-gray-500 text-xs mt-0.5">
-                        {formatDistanceToNow(new Date(organization.createdAt), { addSuffix: true })}
-                      </p>
-                    </div>
+                    <p className="text-white font-sans mt-1">
+                      {format(new Date(organization.createdAt), "dd MMM yyyy, HH:mm")}
+                    </p>
                   </div>
                 </div>
               </div>

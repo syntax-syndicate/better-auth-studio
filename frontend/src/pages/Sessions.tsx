@@ -6,6 +6,7 @@ import {
   Edit,
   Eye,
   Filter,
+  Globe,
   Loader,
   Plus,
   Search,
@@ -13,7 +14,7 @@ import {
   User,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { CopyableId } from "../components/CopyableId";
 import { Terminal } from "../components/Terminal";
@@ -27,6 +28,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select";
+import { buildApiUrl } from "../utils/api";
+
+interface LocationData {
+  country: string;
+  countryCode: string;
+  city: string;
+  region: string;
+}
 
 interface Session {
   id: string;
@@ -34,6 +43,7 @@ interface Session {
   expiresAt: string;
   createdAt: string;
   updatedAt: string;
+  ipAddress?: string;
 }
 
 export default function Sessions() {
@@ -60,17 +70,71 @@ export default function Sessions() {
   >([]);
   const [isSeeding, setIsSeeding] = useState(false);
   const [sessionSortOrder, setSessionSortOrder] = useState<"newest" | "oldest">("newest");
+  const [sessionLocations, setSessionLocations] = useState<Record<string, LocationData>>({});
+  const sessionLocationsRef = useRef<Record<string, LocationData>>({});
+
+  const resolveIPLocation = useCallback(async (ipAddress: string): Promise<LocationData | null> => {
+    try {
+      const response = await fetch(buildApiUrl("/api/geo/resolve"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ipAddress }),
+      });
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success && data.location) return data.location;
+      }
+      return null;
+    } catch (_error) {
+      return null;
+    }
+  }, []);
+
+  const resolveSessionLocations = useCallback(
+    async (sessionsList: Session[]) => {
+      const pending = sessionsList.filter(
+        (s) => s.ipAddress && !sessionLocationsRef.current[s.id],
+      );
+      if (pending.length === 0) return;
+      const results = await Promise.all(
+        pending.map(async (session) => {
+          const location = await resolveIPLocation(session.ipAddress!);
+          return location ? { sessionId: session.id, location } : null;
+        }),
+      );
+      const updates: Record<string, LocationData> = {};
+      results.forEach((r) => {
+        if (r) updates[r.sessionId] = r.location;
+      });
+      if (Object.keys(updates).length > 0) {
+        sessionLocationsRef.current = { ...sessionLocationsRef.current, ...updates };
+        setSessionLocations(sessionLocationsRef.current);
+      }
+    },
+    [resolveIPLocation],
+  );
+
+  const getCountryFlag = useCallback((countryCode: string): string => {
+    if (!countryCode) return "🌍";
+    const codePoints = countryCode
+      .toUpperCase()
+      .split("")
+      .map((char) => 127397 + char.charCodeAt(0));
+    return String.fromCodePoint(...codePoints);
+  }, []);
 
   const fetchSessions = useCallback(async () => {
     try {
-      const response = await fetch("/api/sessions");
+      const response = await fetch(buildApiUrl("/api/sessions"));
       const data = await response.json();
-      setSessions(data.sessions || []);
+      const list = data.sessions || [];
+      setSessions(list);
+      resolveSessionLocations(list);
     } catch (_error) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [resolveSessionLocations]);
 
   useEffect(() => {
     fetchSessions();
@@ -245,6 +309,19 @@ export default function Sessions() {
     setShowViewModal(true);
   };
 
+  useEffect(() => {
+    if (!showViewModal || !selectedSession?.ipAddress || sessionLocations[selectedSession.id]) return;
+    let cancelled = false;
+    resolveIPLocation(selectedSession.ipAddress).then((location) => {
+      if (cancelled || !location) return;
+      setSessionLocations((prev) => ({ ...prev, [selectedSession.id]: location }));
+      sessionLocationsRef.current = { ...sessionLocationsRef.current, [selectedSession.id]: location };
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [showViewModal, selectedSession?.id, selectedSession?.ipAddress, sessionLocations, resolveIPLocation]);
+
   const openEditModal = (session: Session) => {
     setSelectedSession(session);
     setShowEditModal(true);
@@ -396,6 +473,9 @@ export default function Sessions() {
                   User ID
                 </th>
                 <th className="text-left py-4 px-4 text-white font-mono uppercase text-xs">
+                  IP / Location
+                </th>
+                <th className="text-left py-4 px-4 text-white font-mono uppercase text-xs">
                   Status
                 </th>
                 <th className="text-left py-4 px-4 text-white font-mono uppercase text-xs">
@@ -439,6 +519,29 @@ export default function Sessions() {
                     </div>
                   </td>
                   <td className="py-4 px-4 text-white">{session.userId}</td>
+                  <td className="py-4 px-4 text-sm text-gray-400">
+                    {session.ipAddress ? (
+                      <div className="flex flex-col font-mono text-xs">
+                        <span className="text-white/90">{session.ipAddress}</span>
+                        {sessionLocations[session.id] ? (
+                          <div className="flex items-center gap-1.5 mt-1 text-gray-500">
+                            <Globe className="w-3 h-3 shrink-0" />
+                            <span>
+                              {sessionLocations[session.id].city},{" "}
+                              {sessionLocations[session.id].country}
+                            </span>
+                            {sessionLocations[session.id].countryCode && (
+                              <span>{getCountryFlag(sessionLocations[session.id].countryCode)}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-gray-500 mt-1">Resolving...</span>
+                        )}
+                      </div>
+                    ) : (
+                      <span className="text-gray-500">—</span>
+                    )}
+                  </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center space-x-2">
                       {new Date(session.expiresAt) > new Date() ? (
@@ -862,6 +965,20 @@ export default function Sessions() {
                     label: "Status",
                     value: new Date(selectedSession.expiresAt) > new Date() ? "Active" : "Expired",
                   },
+                  ...(selectedSession.ipAddress
+                    ? [
+                        {
+                          label: "IP",
+                          value: selectedSession.ipAddress,
+                        },
+                        {
+                          label: "Location",
+                          value: sessionLocations[selectedSession.id]
+                            ? `${sessionLocations[selectedSession.id].city}, ${sessionLocations[selectedSession.id].region}, ${sessionLocations[selectedSession.id].country} ${sessionLocations[selectedSession.id].countryCode ? getCountryFlag(sessionLocations[selectedSession.id].countryCode) : ""}`.trim()
+                            : "Resolving...",
+                        },
+                      ]
+                    : []),
                   {
                     label: "Expires",
                     value: format(new Date(selectedSession.expiresAt), "dd MMM yyyy, HH:mm"),

@@ -1,5 +1,5 @@
 /**
- * IP geolocation using maxmind (GeoLite2-City.mmdb), then data/default-geo.json, then hardcoded ranges.
+ * IP geolocation: tries ipapi.co first, then maxmind (GeoLite2-City.mmdb), data/default-geo.json, then hardcoded ranges.
  * Run `pnpm geo:update` to download the latest GeoLite2-City.mmdb for fallback.
  */
 import { existsSync, readFileSync } from "node:fs";
@@ -15,6 +15,19 @@ export interface LocationData {
   countryCode: string;
   city: string;
   region: string;
+}
+
+/** ipapi.co JSON response (subset we use) */
+interface IpApiCoResponse {
+  ip?: string;
+  city?: string | null;
+  region?: string | null;
+  region_code?: string | null;
+  country?: string | null;
+  country_name?: string | null;
+  country_code?: string | null;
+  error?: boolean;
+  reason?: string;
 }
 
 interface DefaultGeoDatabase {
@@ -61,6 +74,37 @@ export async function initializeGeoService(): Promise<void> {
   }
   if (!lookup) {
     loadDefaultDatabase();
+  }
+}
+
+const IPAPI_CO_BASE = "https://ipapi.co";
+
+/**
+ * Resolve IP location using ipapi.co first, then fallback to local DB/ranges.
+ * Use this for API handlers (async).
+ */
+export async function resolveIPLocationAsync(ipAddress: string): Promise<LocationData | null> {
+  const trimmed = ipAddress.trim();
+  if (!trimmed) return null;
+
+  try {
+    const url = `${IPAPI_CO_BASE}/${encodeURIComponent(trimmed)}/json/`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    if (!res.ok) throw new Error(`ipapi.co ${res.status}`);
+
+    const data = (await res.json()) as IpApiCoResponse;
+    if (data.error || !data.country_code) {
+      throw new Error(data.reason || "Invalid response");
+    }
+
+    return {
+      country: data.country_name || "Unknown",
+      countryCode: data.country_code || "",
+      city: data.city ?? "Unknown",
+      region: data.region ?? data.region_code ?? "Unknown",
+    };
+  } catch (_error) {
+    return resolveIPLocation(trimmed);
   }
 }
 

@@ -33,7 +33,7 @@ import {
 import type { AuthConfig } from "./config.js";
 import { getPathAliases, possiblePaths } from "./config.js";
 import { getAuthData } from "./data.js";
-import { initializeGeoService, resolveIPLocation, setGeoDbPath } from "./geo-service.js";
+import { initializeGeoService, resolveIPLocationAsync, setGeoDbPath } from "./geo-service.js";
 import type { AuthEvent, AuthEventType } from "./types/events.js";
 import type { StudioConfig } from "./types/handler.js";
 import { detectDatabaseWithDialect } from "./utils/database-detection.js";
@@ -992,7 +992,7 @@ export function createRoutes(
     }
   });
 
-  router.post("/api/geo/resolve", (req: Request, res: Response) => {
+  router.post("/api/geo/resolve", async (req: Request, res: Response) => {
     try {
       const body = req.body || {};
       const { ipAddress } = body;
@@ -1004,7 +1004,7 @@ export function createRoutes(
         });
       }
 
-      const location = resolveIPLocation(ipAddress);
+      const location = await resolveIPLocationAsync(ipAddress);
 
       if (!location) {
         return res.status(404).json({

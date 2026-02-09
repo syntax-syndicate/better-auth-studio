@@ -1294,13 +1294,8 @@ export default function UserDetails() {
                         <div className="text-xs uppercase font-mono text-gray-500 mb-1">
                           Member Since
                         </div>
-                        <div className="flex flex-col font-mono text-xs">
-                          <span className="text-white">
-                            {format(new Date(user.createdAt), "dd MMM yyyy, HH:mm")}
-                          </span>
-                          <p className="text-gray-500 text-xs mt-0.5">
-                            {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
-                          </p>
+                        <div className="text-white font-mono text-sm">
+                          {format(new Date(user.createdAt), "dd MMM yyyy, HH:mm")}
                         </div>
                       </div>
                     </div>
@@ -1750,16 +1745,24 @@ export default function UserDetails() {
                                 })}
                               </span>
                             </div>
-                            <div className="flex flex-col font-mono text-xs">
-                              <span className="text-gray-500 uppercase">Created</span>
-                              <span className="text-white">
-                                {format(new Date(session.createdAt), "dd MMM yyyy, HH:mm")}
+                            <div className="flex items-center space-x-2">
+                              <span className="text-gray-500 font-mono text-xs uppercase">
+                                Created:{" "}
                               </span>
-                              <p className="text-gray-500 text-xs mt-0.5">
-                                {formatDistanceToNow(new Date(session.createdAt), {
-                                  addSuffix: true,
+                              <span className="text-white font-mono text-xs">
+                                {new Date(session.createdAt).toLocaleDateString("en-US", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
                                 })}
-                              </p>
+                                ,{" "}
+                                {new Date(session.createdAt).toLocaleTimeString("en-US", {
+                                  hour: "numeric",
+                                  minute: "2-digit",
+                                  hour12: true,
+                                })}
+                              </span>
+                              
                             </div>
                           </div>
                         </div>
