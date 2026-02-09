@@ -141,7 +141,7 @@ export default function TeamDetails() {
       toast.error("Please enter a team name");
       return;
     }
-    setIsUpdatingTeam(true)
+    setIsUpdatingTeam(true);
     const toastId = toast.loading("Updating team...");
 
     try {
