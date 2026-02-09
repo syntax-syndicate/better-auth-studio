@@ -1307,7 +1307,8 @@ export default config;`}
                 </code>
                 . Add a <code className="bg-white/10 px-1 text-white/90">lastSeenAt</code> column
                 (or your chosen <code className="bg-white/10 px-1 text-white/90">columnName</code>)
-                to your user table and run your migration (e.g.{" "}
+                to your user table as an <strong className="text-white/90">optional datetime</strong>{" "}
+                (nullable timestamp) field, then run your migration (e.g.{" "}
                 <code className="bg-white/10 px-1 text-white/90">prisma migrate dev</code>,{" "}
                 <code className="bg-white/10 px-1 text-white/90">drizzle-kit push</code>) or with
                 your database client of choice.
