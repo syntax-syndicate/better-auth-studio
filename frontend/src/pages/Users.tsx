@@ -1491,14 +1491,14 @@ export default function Users() {
                   setShowCreateModal(false);
                   setCreateRole("");
                 }}
-                className="border border-dashed border-white/20 text-white hover:bg-white/10 rounded-none"
+                className="border border-dashed border-white/20 font-mono uppercase text-white hover:bg-white/10 rounded-none"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateUser}
                 disabled={isCreating}
-                className="bg-white hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
+                className="bg-white font-mono uppercase hover:bg-white/90 text-black border border-white/20 rounded-none disabled:opacity-50"
               >
                 {isCreating ? "Creating..." : "Create"}
               </Button>
