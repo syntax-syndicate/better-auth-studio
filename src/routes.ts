@@ -2460,6 +2460,9 @@ export function createRoutes(
     }
   });
 
+  const isInternalStudioPlugin = (id: string) =>
+    id === "better-auth-studio-events" || id === "better-auth-studio-last-seen";
+
   router.get("/api/plugins", async (_req: Request, res: Response) => {
     try {
       const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
@@ -2467,7 +2470,7 @@ export function createRoutes(
       if (betterAuthConfig) {
         const plugins = betterAuthConfig.plugins || [];
         const pluginInfo = plugins
-          .filter((plugin: any) => plugin.id !== "better-auth-studio-events")
+          .filter((plugin: any) => !isInternalStudioPlugin(plugin?.id || ""))
           .map((plugin: any) => ({
             id: plugin.id,
             name: plugin.name || plugin.id,
@@ -2520,7 +2523,7 @@ export function createRoutes(
           }
           const plugins = auth.options?.plugins || [];
           const pluginInfo = plugins
-            .filter((plugin: any) => plugin.id !== "better-auth-studio-events")
+            .filter((plugin: any) => !isInternalStudioPlugin(plugin?.id || ""))
             .map((plugin: any) => ({
               id: plugin.id,
               name: plugin.name || plugin.id,
@@ -4743,7 +4746,7 @@ export function createRoutes(
         enabled: !!hasOrganizationPlugin,
         configPath: configPath || null,
         availablePlugins:
-          plugins.filter((p: any) => p.id !== "better-auth-studio-events").map((p: any) => p.id) ||
+          plugins.filter((p: any) => !isInternalStudioPlugin(p?.id || "")).map((p: any) => p.id) ||
           [],
         organizationPlugin: hasOrganizationPlugin || null,
       });

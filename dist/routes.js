@@ -2157,13 +2157,14 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             res.status(500).json({ error: "Failed to delete user" });
         }
     });
+    const isInternalStudioPlugin = (id) => id === "better-auth-studio-events" || id === "better-auth-studio-last-seen";
     router.get("/api/plugins", async (_req, res) => {
         try {
             const betterAuthConfig = preloadedAuthOptions || (await getAuthConfigSafe());
             if (betterAuthConfig) {
                 const plugins = betterAuthConfig.plugins || [];
                 const pluginInfo = plugins
-                    .filter((plugin) => plugin.id !== "better-auth-studio-events")
+                    .filter((plugin) => !isInternalStudioPlugin(plugin?.id || ""))
                     .map((plugin) => ({
                     id: plugin.id,
                     name: plugin.name || plugin.id,
@@ -2213,7 +2214,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     }
                     const plugins = auth.options?.plugins || [];
                     const pluginInfo = plugins
-                        .filter((plugin) => plugin.id !== "better-auth-studio-events")
+                        .filter((plugin) => !isInternalStudioPlugin(plugin?.id || ""))
                         .map((plugin) => ({
                         id: plugin.id,
                         name: plugin.name || plugin.id,
@@ -2556,21 +2557,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     }
                 });
             }
-            // 4. Email & Password
-            const emailAndPassword = effectiveAuthConfig.emailAndPassword;
-            if (emailAndPassword?.enabled) {
-                addResult("Email & Password", "Enabled", "pass", "Email and password authentication is enabled");
-                if (emailAndPassword.minPasswordLength && emailAndPassword.minPasswordLength < 8) {
-                    addResult("Email & Password", "Password Policy", "warning", `Minimum password length is ${emailAndPassword.minPasswordLength}. Recommended minimum is 8`, "Consider increasing minPasswordLength to 8 or higher", "warning");
-                }
-                else {
-                    addResult("Email & Password", "Password Policy", "pass", "Password policy is configured");
-                }
-            }
-            else {
-                addResult("Email & Password", "Enabled", "warning", "Email and password authentication is disabled", "Enable emailAndPassword in your config if you need email/password auth", "info");
-            }
-            // 5. Security Settings
+            // 4. Security Settings
             const advanced = effectiveAuthConfig.advanced || {};
             const cookieAttrs = advanced.defaultCookieAttributes || {};
             if (process.env.NODE_ENV === "production") {
@@ -2595,7 +2582,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             else {
                 addResult("Security", "Cookie HttpOnly", "warning", "HttpOnly flag is disabled", "Enable httpOnly: true for better security", "warning");
             }
-            // 6. Trusted Origins
+            // 5. Trusted Origins
             const trustedOriginsRaw = effectiveAuthConfig.trustedOrigins || [];
             const trustedOrigins = Array.isArray(trustedOriginsRaw) ? trustedOriginsRaw : [];
             if (trustedOrigins.length === 0) {
@@ -2618,7 +2605,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     addResult("Security", "Trusted Origins", "pass", `${trustedOrigins.length} trusted origin(s) configured`);
                 }
             }
-            // 7. Environment Variables
+            // 6. Environment Variables
             const requiredEnvVars = ["BETTER_AUTH_SECRET", "AUTH_SECRET"];
             const missingEnvVars = requiredEnvVars.filter((varName) => !process.env[varName]);
             if (missingEnvVars.length > 0) {
@@ -4104,7 +4091,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             return res.json({
                 enabled: !!hasOrganizationPlugin,
                 configPath: configPath || null,
-                availablePlugins: plugins.filter((p) => p.id !== "better-auth-studio-events").map((p) => p.id) ||
+                availablePlugins: plugins.filter((p) => !isInternalStudioPlugin(p?.id || "")).map((p) => p.id) ||
                     [],
                 organizationPlugin: hasOrganizationPlugin || null,
             });
