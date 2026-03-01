@@ -27,6 +27,7 @@ export default function Navigation({ currentPage }: NavigationProps) {
   const navItems = [
     { name: "HOME", href: "/" },
     { name: "INSTALLATION", href: "/installation" },
+    { name: "GUIDES", href: "/guides" },
     { name: "SELF-HOSTING", href: "/self-hosting" },
     { name: "CHANGELOG", href: "/changelog" },
     { name: "GITHUB", href: "https://github.com/Kinfe123/better-auth-studio" },

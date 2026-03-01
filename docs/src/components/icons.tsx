@@ -321,6 +321,15 @@ export const DocumentIcon = ({ className = "w-3 h-3 inline-flex" }: IconProps) =
   </svg>
 );
 
+export const GuideIcon = ({ className = "w-3 h-3 inline-flex" }: IconProps) => (
+  <svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className={className}>
+    <path
+      d="M4 2h16v20H4V2zm2 2v16h12V4H6zm2 2h8v2H8V6zm0 4h8v2H8v-2zm0 4h5v2H8v-2z"
+      fill="currentColor"
+    />
+  </svg>
+);
+
 export const CalendarIcon = ({
   className = "w-3 h-3 inline-flex mr-1 text-white/70",
 }: IconProps) => (
