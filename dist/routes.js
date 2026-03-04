@@ -2110,10 +2110,11 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                         providerError?.code === "P2025" ||
                         providerError?.code === "42P01";
                     if (isSchemaError) {
-                        return res.status(503).json({
-                            error: "Events not ready",
-                            retryable: true,
-                            details: providerError?.message || String(providerError),
+                        return res.status(200).json({
+                            events: [],
+                            hasMore: false,
+                            total: 0,
+                            ready: false,
                         });
                     }
                     console.error("Event provider query failed:", providerError);
@@ -2165,10 +2166,11 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                         adapterError?.message?.includes("Model") ||
                         adapterError?.code === "P2025" ||
                         adapterError?.code === "42P01") {
-                        return res.status(503).json({
-                            error: "Events not ready",
-                            retryable: true,
-                            details: adapterError?.message || String(adapterError),
+                        return res.status(200).json({
+                            events: [],
+                            hasMore: false,
+                            total: 0,
+                            ready: false,
                         });
                     }
                     throw adapterError;
@@ -2251,10 +2253,11 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 msg?.includes("Model") ||
                 error?.code === "P2025" ||
                 error?.code === "42P01") {
-                return res.status(503).json({
-                    error: "Events not ready",
-                    retryable: true,
-                    details: msg,
+                return res.status(200).json({
+                    events: [],
+                    hasMore: false,
+                    total: 0,
+                    ready: false,
                 });
             }
             console.error("Failed to fetch events:", error);
@@ -2349,11 +2352,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     }
                     catch (e) {
                         if (isSchemaError(e)) {
-                            return res.status(503).json({
-                                error: "Events not ready",
-                                retryable: true,
-                                details: e?.message || String(e),
-                            });
+                            return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
                         }
                         throw e;
                     }
@@ -2372,11 +2371,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                     }
                     catch (e) {
                         if (isSchemaError(e)) {
-                            return res.status(503).json({
-                                error: "Events not ready",
-                                retryable: true,
-                                details: e?.message || String(e),
-                            });
+                            return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
                         }
                         throw e;
                     }
@@ -2390,11 +2385,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 }
                 catch (e) {
                     if (isSchemaError(e)) {
-                        return res.status(503).json({
-                            error: "Events not ready",
-                            retryable: true,
-                            details: e?.message || String(e),
-                        });
+                        return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
                     }
                     throw e;
                 }
@@ -2406,11 +2397,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 }
                 catch (e) {
                     if (isSchemaError(e)) {
-                        return res.status(503).json({
-                            error: "Events not ready",
-                            retryable: true,
-                            details: e?.message || String(e),
-                        });
+                        return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
                     }
                     throw e;
                 }
@@ -2428,11 +2415,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 }
                 catch (e) {
                     if (isSchemaError(e)) {
-                        return res.status(503).json({
-                            error: "Events not ready",
-                            retryable: true,
-                            details: e?.message || String(e),
-                        });
+                        return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
                     }
                     throw e;
                 }
@@ -2457,11 +2440,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 }
                 catch (e) {
                     if (isSchemaError(e)) {
-                        return res.status(503).json({
-                            error: "Events not ready",
-                            retryable: true,
-                            details: e?.message || String(e),
-                        });
+                        return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
                     }
                     throw e;
                 }
@@ -2474,11 +2453,7 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
                 msg?.includes("Model") ||
                 error?.code === "P2025" ||
                 error?.code === "42P01") {
-                return res.status(503).json({
-                    error: "Events not ready",
-                    retryable: true,
-                    details: msg,
-                });
+                return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
             }
             console.error("Failed to get events count:", error);
             res.status(500).json({

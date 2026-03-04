@@ -126,18 +126,17 @@ export function WorldMapWidget() {
             )}
           </div>
           <hr className="border-white/5 mb-2 -mx-2 shrink-0" />
-          <div className="flex-1 flex flex-col min-h-[200px]">
-            {loading ? (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-xs font-mono text-gray-600">Loading...</p>
-              </div>
-            ) : distribution.length === 0 ? (
-              <div className="flex-1 flex items-center justify-center">
-                <p className="text-xs font-mono text-gray-600">No session IP data yet</p>
-              </div>
-            ) : (
-              <div className="overflow-y-auto custom-scrollbar flex-1 min-h-0 space-y-0.5">
-                {distribution.map((d) => (
+          {loading ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-xs font-mono text-gray-600">Loading...</p>
+            </div>
+          ) : distribution.length === 0 ? (
+            <div className="flex-1 flex items-center justify-center">
+              <p className="text-xs font-mono text-gray-600">No session IP data yet</p>
+            </div>
+          ) : (
+            <div className="overflow-y-auto custom-scrollbar flex-1 min-h-0 space-y-0.5">
+                {distribution.slice(0, 20).map((d) => (
                   <button
                     key={d.countryCode}
                     type="button"
@@ -161,11 +160,10 @@ export function WorldMapWidget() {
                     <span className="text-[10px] font-mono text-gray-500 w-4 text-right shrink-0">
                       {d.uniqueUsers}
                     </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

@@ -33,6 +33,7 @@ export function EventsWidget() {
   const [events, setEvents] = useState<EventItem[]>([]);
   const [total, setTotal] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [eventsNotReady, setEventsNotReady] = useState(false);
   const [selectedHours, setSelectedHours] = useState(24);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,16 +62,27 @@ export function EventsWidget() {
           : "/api/events?limit=50&sort=desc";
         const [listRes, countRes] = await Promise.all([fetch(listUrl), fetch("/api/events/count")]);
         if (cancelled) return;
-        if (listRes.ok) {
-          const data = await listRes.json();
-          setEvents(data.events || []);
-        }
-        if (countRes.ok) {
-          const countData = await countRes.json();
-          setTotal(countData.total ?? countData.count ?? null);
+        const listData = await listRes.json().catch(() => ({}));
+        const countData = await countRes.json().catch(() => ({}));
+        if (cancelled) return;
+        const notReady =
+          listData?.error === "Events not ready" || listData?.ready === false || !listRes.ok;
+        setEventsNotReady(notReady);
+        if (notReady) {
+          setEvents([]);
+          setTotal(0);
+        } else {
+          if (listRes.ok && Array.isArray(listData.events)) {
+            setEvents(listData.events);
+          }
+          if (countRes.ok) {
+            setTotal(countData.total ?? countData.count ?? null);
+          }
         }
       } catch (_e) {
-        if (!cancelled) setEvents([]);
+        if (!cancelled) {
+          setEvents([]);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -132,17 +144,20 @@ export function EventsWidget() {
         </div>
       </div>
       <hr className="border-white/5 mb-2 -mx-2 shrink-0" />
-      <div className="flex-1 flex flex-col min-h-[200px]">
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs font-mono text-gray-600">Loading...</p>
-          </div>
-        ) : events.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs font-mono text-gray-600">No events in this period</p>
-          </div>
-        ) : (
-          <div className="overflow-auto custom-scrollbar flex-1 min-h-0">
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-mono text-gray-600">Loading...</p>
+        </div>
+      ) : events.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-mono text-gray-600 text-center px-2">
+            {eventsNotReady
+              ? "Events not configured. Enable in studio config to use the events table."
+              : "No events in this period"}
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-auto custom-scrollbar flex-1 min-h-0">
             <table className="w-full text-[11px] border-collapse">
               <thead className="sticky top-0 bg-black/90 backdrop-blur-sm z-10">
                 <tr className="border-b border-white/10">
@@ -191,8 +206,7 @@ export function EventsWidget() {
               </tbody>
             </table>
           </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }

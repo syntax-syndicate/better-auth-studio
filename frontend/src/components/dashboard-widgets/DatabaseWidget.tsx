@@ -26,27 +26,23 @@ export function DatabaseWidget() {
         </h4>
       </div>
       <hr className="border-white/5 mb-3 -mx-2 shrink-0" />
-      <div className="flex-1 flex flex-col min-h-[200px]">
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs font-mono text-gray-600">Loading...</p>
-          </div>
-        ) : (
-          <ul className="space-y-3">
-            {items.map(({ label, value, Icon }) => (
-              <li key={label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-gray-500 text-[11px]">
-                  <Icon className="w-3.5 h-3.5" />
-                  <span className="font-mono uppercase tracking-wider text-[10px]">{label}</span>
-                </div>
-                <span className="text-white font-mono text-sm">
-                  {compactFmt.format(value ?? 0)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-mono text-gray-600">Loading...</p>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {items.map(({ label, value, Icon }) => (
+            <li key={label} className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-gray-500 text-[11px]">
+                <Icon className="w-3.5 h-3.5" />
+                <span className="font-mono uppercase tracking-wider text-[10px]">{label}</span>
+              </div>
+              <span className="text-white font-mono text-sm">{compactFmt.format(value ?? 0)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

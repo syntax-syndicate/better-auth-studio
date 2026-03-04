@@ -2361,10 +2361,11 @@ export function createRoutes(
             providerError?.code === "P2025" ||
             providerError?.code === "42P01";
           if (isSchemaError) {
-            return res.status(503).json({
-              error: "Events not ready",
-              retryable: true,
-              details: providerError?.message || String(providerError),
+            return res.status(200).json({
+              events: [],
+              hasMore: false,
+              total: 0,
+              ready: false,
             });
           }
 
@@ -2422,10 +2423,11 @@ export function createRoutes(
             adapterError?.code === "P2025" ||
             adapterError?.code === "42P01"
           ) {
-            return res.status(503).json({
-              error: "Events not ready",
-              retryable: true,
-              details: adapterError?.message || String(adapterError),
+            return res.status(200).json({
+              events: [],
+              hasMore: false,
+              total: 0,
+              ready: false,
             });
           }
           throw adapterError;
@@ -2516,10 +2518,11 @@ export function createRoutes(
         error?.code === "P2025" ||
         error?.code === "42P01"
       ) {
-        return res.status(503).json({
-          error: "Events not ready",
-          retryable: true,
-          details: msg,
+        return res.status(200).json({
+          events: [],
+          hasMore: false,
+          total: 0,
+          ready: false,
         });
       }
       console.error("Failed to fetch events:", error);
@@ -2624,11 +2627,7 @@ export function createRoutes(
             return res.json({ total, success, failed, warning, info });
           } catch (e: any) {
             if (isSchemaError(e)) {
-              return res.status(503).json({
-                error: "Events not ready",
-                retryable: true,
-                details: e?.message || String(e),
-              });
+              return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
             }
             throw e;
           }
@@ -2646,11 +2645,7 @@ export function createRoutes(
             return res.json({ total, success: null, failed: null, warning: null, info: null });
           } catch (e: any) {
             if (isSchemaError(e)) {
-              return res.status(503).json({
-                error: "Events not ready",
-                retryable: true,
-                details: e?.message || String(e),
-              });
+              return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
             }
             throw e;
           }
@@ -2664,11 +2659,7 @@ export function createRoutes(
           return res.json(stats);
         } catch (e: any) {
           if (isSchemaError(e)) {
-            return res.status(503).json({
-              error: "Events not ready",
-              retryable: true,
-              details: e?.message || String(e),
-            });
+            return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
           }
           throw e;
         }
@@ -2679,11 +2670,7 @@ export function createRoutes(
           return res.json({ total, success: null, failed: null, warning: null, info: null });
         } catch (e: any) {
           if (isSchemaError(e)) {
-            return res.status(503).json({
-              error: "Events not ready",
-              retryable: true,
-              details: e?.message || String(e),
-            });
+            return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
           }
           throw e;
         }
@@ -2705,11 +2692,7 @@ export function createRoutes(
           return res.json({ total, success, failed, warning, info });
         } catch (e: any) {
           if (isSchemaError(e)) {
-            return res.status(503).json({
-              error: "Events not ready",
-              retryable: true,
-              details: e?.message || String(e),
-            });
+            return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
           }
           throw e;
         }
@@ -2742,11 +2725,7 @@ export function createRoutes(
           return res.json({ total, success, failed, warning, info });
         } catch (e: any) {
           if (isSchemaError(e)) {
-            return res.status(503).json({
-              error: "Events not ready",
-              retryable: true,
-              details: e?.message || String(e),
-            });
+            return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
           }
           throw e;
         }
@@ -2761,11 +2740,7 @@ export function createRoutes(
         error?.code === "P2025" ||
         error?.code === "42P01"
       ) {
-        return res.status(503).json({
-          error: "Events not ready",
-          retryable: true,
-          details: msg,
-        });
+        return res.json({ total: 0, success: 0, failed: 0, warning: 0, info: 0 });
       }
       console.error("Failed to get events count:", error);
       res.status(500).json({

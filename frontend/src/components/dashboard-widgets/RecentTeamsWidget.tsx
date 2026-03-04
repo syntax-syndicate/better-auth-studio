@@ -42,18 +42,17 @@ export function RecentTeamsWidget() {
         <span className="text-[10px] font-mono text-gray-600">{teams.length} total</span>
       </div>
       <hr className="border-white/5 mb-2 -mx-2 shrink-0" />
-      <div className="flex-1 flex flex-col min-h-[200px]">
-        {loading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs font-mono text-gray-600">Loading...</p>
-          </div>
-        ) : teams.length === 0 ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-xs font-mono text-gray-600">No teams</p>
-          </div>
-        ) : (
-          <div className="overflow-auto custom-scrollbar flex-1 min-h-0">
-            <table className="w-full text-[11px] border-collapse">
+      {loading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-mono text-gray-600">Loading...</p>
+        </div>
+      ) : teams.length === 0 ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-xs font-mono text-gray-600">No teams</p>
+        </div>
+      ) : (
+        <div className="overflow-auto custom-scrollbar flex-1 min-h-0">
+          <table className="w-full text-[11px] border-collapse">
               <thead className="sticky top-0 bg-black/90 backdrop-blur-sm z-10">
                 <tr className="border-b border-white/10">
                   <th className="text-left py-1.5 px-1.5 font-mono font-normal text-gray-500 uppercase text-[9px] tracking-wider">
@@ -65,7 +64,7 @@ export function RecentTeamsWidget() {
                 </tr>
               </thead>
               <tbody>
-                {teams.map((t) => (
+                {teams.slice(0, 10).map((t) => (
                   <tr
                     key={t.id}
                     onClick={() => navigate(`/teams/${t.id}`)}
@@ -82,11 +81,10 @@ export function RecentTeamsWidget() {
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }
