@@ -79,6 +79,10 @@ const formatTimeAgo = (value?: string | null): string => {
   return formatDistanceToNow(d, { addSuffix: true });
 };
 
+const studioConfig = (window as any).__STUDIO_CONFIG__ || {};
+const basePath = studioConfig.basePath !== undefined ? studioConfig.basePath : "";
+const studioAuthPath = basePath ? `${basePath}/auth` : "/api/auth";
+
 export default function Users() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -130,6 +134,7 @@ export default function Users() {
     }>
   >([]);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [currentUser, setCurrentUser] = useState<any | null>(null);
   type UserSortColumn = "createdAt" | "lastSeenAt";
   const [userSortColumn, setUserSortColumn] = useState<UserSortColumn>("createdAt");
   const [userSortOrder, setUserSortOrder] = useState<"newest" | "oldest">("newest");
@@ -186,6 +191,24 @@ export default function Users() {
       document.body.style.overflow = "";
     };
   }, [showViewModal, selectedUser]);
+
+  useEffect(() => {
+    const fetchCurrentUser = async () => {
+      try {
+        const response = await fetch(`${studioAuthPath}/session`, { credentials: "include" });
+        const data = await response.json();
+        if (data?.authenticated && data.user) {
+          setCurrentUser(data.user);
+        } else {
+          setCurrentUser(null);
+        }
+      } catch {
+        setCurrentUser(null);
+      }
+    };
+
+    fetchCurrentUser();
+  }, []);
   const handleSeedUsers = async (count: number, role?: string) => {
     setSeedingLogs([]);
     setIsSeeding(true);
@@ -1096,197 +1119,216 @@ export default function Users() {
                   </td>
                 </tr>
               ) : (
-                currentUsers.map((user) => (
-                  <tr
-                    key={user.id}
-                    className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${
-                      user.banned ? "border-red-500/30 bg-red-500/5" : "border-white/5"
-                    }`}
-                    onClick={() => navigate(`/users/${user.id}`)}
-                  >
-                    <td className="py-3 px-2 md:py-4 md:px-4">
-                      <div className="flex items-center space-x-2 md:space-x-3">
-                        <div className="relative flex-shrink-0">
-                          <img
-                            src={getImageSrc(
-                              user.image,
-                              `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+                currentUsers.map((user) => {
+                  const isCurrentUser = currentUser && currentUser.id && currentUser.id === user.id;
+                  return (
+                    <tr
+                      key={user.id}
+                      className={`border-b border-dashed hover:bg-white/5 cursor-pointer ${
+                        user.banned ? "border-red-500/30 bg-red-500/5" : "border-white/5"
+                      }`}
+                      onClick={() => navigate(`/users/${user.id}`)}
+                    >
+                      <td className="py-3 px-2 md:py-4 md:px-4">
+                        <div className="flex items-center space-x-2 md:space-x-3">
+                          <div className="relative flex-shrink-0">
+                            <img
+                              src={getImageSrc(
+                                user.image,
+                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`,
+                              )}
+                              alt={user.name}
+                              className={`w-8 h-8 md:w-10 md:h-10 rounded-none border border-dashed object-cover ${
+                                user.banned ? "border-red-400/50 opacity-60" : "border-white/20"
+                              }`}
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+                              }}
+                            />
+                            {user.banned && (
+                              <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5">
+                                <Ban className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
+                              </div>
                             )}
-                            alt={user.name}
-                            className={`w-8 h-8 md:w-10 md:h-10 rounded-none border border-dashed object-cover ${
-                              user.banned ? "border-red-400/50 opacity-60" : "border-white/20"
-                            }`}
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`;
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1 md:gap-2">
+                              <div className="text-white font-light text-xs md:text-sm truncate">
+                                {user.name}
+                              </div>
+                              {user.banned && (
+                                <span className="relative group inline-block">
+                                  <span className="px-2 py-0.5 text-[10px] font-semibold bg-red-500/20 border border-red-500/50 text-red-400 rounded-sm uppercase tracking-wide cursor-help">
+                                    Banned
+                                  </span>
+                                  {user.banReason && (
+                                    <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2 py-1 text-[10px] font-mono text-gray-300 bg-black border border-dashed border-white/20 rounded-none whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 pointer-events-none z-50">
+                                      {user.banReason}
+                                      <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-transparent border-t-white/20"></span>
+                                    </span>
+                                  )}
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-[10px] md:text-sm text-gray-400 mt-0.5 truncate">
+                              {user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="hidden md:table-cell py-4 px-4">
+                        <div className="flex items-center space-x-2">
+                          {user.emailVerified ? (
+                            <Check className="w-4 h-4 text-green-400/60" />
+                          ) : (
+                            <Mail className="w-4 h-4 text-yellow-400/60" />
+                          )}
+                          <span className="text-sm text-gray-400">
+                            {user.emailVerified ? "Verified" : "Not Verified"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="hidden sm:table-cell py-3 px-2 md:py-4 md:px-4">
+                        {user.role ? (
+                          <span className="px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-mono uppercase bg-white/5 border border-dashed border-white/15 text-white/80 rounded-sm tracking-wide">
+                            {user.role}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-gray-500">—</span>
+                        )}
+                      </td>
+                      <td className="hidden sm:table-cell py-3 px-2 md:py-4 md:px-4 text-sm text-gray-400">
+                        <div className="flex uppercase font-mono flex-col text-[10px] md:text-xs">
+                          <span>{format(new Date(user.createdAt), "dd MMM yyyy, HH:mm")}</span>
+                          <p className="text-[10px] md:text-xs text-gray-500">
+                            {formatTimeAgo(user.createdAt)}
+                          </p>
+                        </div>
+                      </td>
+                      {lastSeenAtEnabled && (
+                        <td className="hidden lg:table-cell py-4 px-4 text-sm text-gray-400">
+                          {(() => {
+                            const lastSeen = user.lastSeenAt ?? (user as any)[lastSeenAtColumnName];
+                            return lastSeen ? (
+                              <div className="flex uppercase font-mono text-xs flex-col">
+                                <span>{format(new Date(lastSeen), "dd MMM yyyy, HH:mm")}</span>
+                                <p className="text-xs text-gray-500">{formatTimeAgo(lastSeen)}</p>
+                              </div>
+                            ) : (
+                              <span className="text-gray-500">—</span>
+                            );
+                          })()}
+                        </td>
+                      )}
+                      <td className="py-3 px-2 md:py-4 md:px-4 text-right">
+                        <div className="relative flex items-center justify-end">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-gray-400 hover:text-white rounded-none"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActionMenuOpen(actionMenuOpen === user.id ? null : user.id);
                             }}
-                          />
-                          {user.banned && (
-                            <div className="absolute -top-1 -right-1 bg-red-500 rounded-full p-0.5">
-                              <Ban className="w-2.5 h-2.5 md:w-3 md:h-3 text-white" />
+                          >
+                            <MoreVertical className="w-4 h-4" />
+                          </Button>
+
+                          {actionMenuOpen === user.id && (
+                            <div
+                              className="absolute z-[999] right-0 top-full mt-1 w-48 bg-black border border-white/20 rounded-none shadow-lg"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <button
+                                className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActionMenuOpen(null);
+                                  openViewModal(user);
+                                }}
+                              >
+                                <span>View</span>
+                                <Eye className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
+                              </button>
+                              <button
+                                className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActionMenuOpen(null);
+                                  openEditModal(user);
+                                }}
+                              >
+                                <span>Edit User</span>
+                                <Edit className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
+                              </button>
+                              {adminPluginEnabled &&
+                                (user.banned ? (
+                                  <button
+                                    className="w-full px-4 py-2 text-left text-[11px] text-green-400 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedUser(user);
+                                      setShowUnbanModal(true);
+                                      setActionMenuOpen(null);
+                                    }}
+                                  >
+                                    <span>Unban User</span>
+                                    <Ban className="w-3 h-3 text-green-400/10 group-hover:text-green-400/70 transition-colors" />
+                                  </button>
+                                ) : (
+                                  <button
+                                    className="w-full px-4 py-2 text-left text-[11px] text-yellow-400 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedUser(user);
+                                      setShowBanModal(true);
+                                      setActionMenuOpen(null);
+                                    }}
+                                  >
+                                    <span>Ban User</span>
+                                    <Ban className="w-3 h-3 text-yellow-400/10 group-hover:text-yellow-400/70 transition-colors" />
+                                  </button>
+                                ))}
+                              <div className="flex flex-col items-center justify-center">
+                                <hr className="w-[calc(100%)] border-white/10 h-px" />
+                                <div className="relative z-20 h-2 w-[calc(100%)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
+                                <hr className="w-[calc(100%)] border-white/10 h-px" />
+                              </div>
+                              <button
+                                className={`w-full px-4 py-2 text-left text-[11px] ${
+                                  isCurrentUser
+                                    ? "text-gray-500 cursor-not-allowed"
+                                    : "text-red-400"
+                                } hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (isCurrentUser) {
+                                    return;
+                                  }
+                                  setActionMenuOpen(null);
+                                  openDeleteModal(user);
+                                }}
+                                disabled={!!isCurrentUser}
+                              >
+                                <span>
+                                  {isCurrentUser ? "Cannot delete current user" : "Delete User"}
+                                </span>
+                                <Trash2
+                                  className={`w-3 h-3 ${
+                                    isCurrentUser
+                                      ? "text-gray-500"
+                                      : "text-red-400/30 group-hover:text-red-400/70 transition-colors"
+                                  }`}
+                                />
+                              </button>
                             </div>
                           )}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-1 md:gap-2">
-                            <div className="text-white font-light text-xs md:text-sm truncate">
-                              {user.name}
-                            </div>
-                            {user.banned && (
-                              <span className="relative group inline-block">
-                                <span className="px-2 py-0.5 text-[10px] font-semibold bg-red-500/20 border border-red-500/50 text-red-400 rounded-sm uppercase tracking-wide cursor-help">
-                                  Banned
-                                </span>
-                                {user.banReason && (
-                                  <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 px-2 py-1 text-[10px] font-mono text-gray-300 bg-black border border-dashed border-white/20 rounded-none whitespace-nowrap opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-150 pointer-events-none z-50">
-                                    {user.banReason}
-                                    <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[4px] border-r-[4px] border-t-[4px] border-transparent border-t-white/20"></span>
-                                  </span>
-                                )}
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[10px] md:text-sm text-gray-400 mt-0.5 truncate">
-                            {user.email}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="hidden md:table-cell py-4 px-4">
-                      <div className="flex items-center space-x-2">
-                        {user.emailVerified ? (
-                          <Check className="w-4 h-4 text-green-400/60" />
-                        ) : (
-                          <Mail className="w-4 h-4 text-yellow-400/60" />
-                        )}
-                        <span className="text-sm text-gray-400">
-                          {user.emailVerified ? "Verified" : "Not Verified"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="hidden sm:table-cell py-3 px-2 md:py-4 md:px-4">
-                      {user.role ? (
-                        <span className="px-1.5 md:px-2 py-0.5 md:py-1 text-[10px] md:text-xs font-mono uppercase bg-white/5 border border-dashed border-white/15 text-white/80 rounded-sm tracking-wide">
-                          {user.role}
-                        </span>
-                      ) : (
-                        <span className="text-sm text-gray-500">—</span>
-                      )}
-                    </td>
-                    <td className="hidden sm:table-cell py-3 px-2 md:py-4 md:px-4 text-sm text-gray-400">
-                      <div className="flex uppercase font-mono flex-col text-[10px] md:text-xs">
-                        <span>{format(new Date(user.createdAt), "dd MMM yyyy, HH:mm")}</span>
-                        <p className="text-[10px] md:text-xs text-gray-500">
-                          {formatTimeAgo(user.createdAt)}
-                        </p>
-                      </div>
-                    </td>
-                    {lastSeenAtEnabled && (
-                      <td className="hidden lg:table-cell py-4 px-4 text-sm text-gray-400">
-                        {(() => {
-                          const lastSeen = user.lastSeenAt ?? (user as any)[lastSeenAtColumnName];
-                          return lastSeen ? (
-                            <div className="flex uppercase font-mono text-xs flex-col">
-                              <span>{format(new Date(lastSeen), "dd MMM yyyy, HH:mm")}</span>
-                              <p className="text-xs text-gray-500">{formatTimeAgo(lastSeen)}</p>
-                            </div>
-                          ) : (
-                            <span className="text-gray-500">—</span>
-                          );
-                        })()}
                       </td>
-                    )}
-                    <td className="py-3 px-2 md:py-4 md:px-4 text-right">
-                      <div className="relative flex items-center justify-end">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="text-gray-400 hover:text-white rounded-none"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setActionMenuOpen(actionMenuOpen === user.id ? null : user.id);
-                          }}
-                        >
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-
-                        {actionMenuOpen === user.id && (
-                          <div
-                            className="absolute z-[999] right-0 top-full mt-1 w-48 bg-black border border-white/20 rounded-none shadow-lg"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <button
-                              className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActionMenuOpen(null);
-                                openViewModal(user);
-                              }}
-                            >
-                              <span>View</span>
-                              <Eye className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
-                            </button>
-                            <button
-                              className="w-full px-4 py-2 text-left text-[11px] border-b border-dashed border-white/20 text-white/70 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActionMenuOpen(null);
-                                openEditModal(user);
-                              }}
-                            >
-                              <span>Edit User</span>
-                              <Edit className="w-3 h-3 text-white/10 group-hover:text-white/70 transition-colors" />
-                            </button>
-                            {adminPluginEnabled &&
-                              (user.banned ? (
-                                <button
-                                  className="w-full px-4 py-2 text-left text-[11px] text-green-400 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedUser(user);
-                                    setShowUnbanModal(true);
-                                    setActionMenuOpen(null);
-                                  }}
-                                >
-                                  <span>Unban User</span>
-                                  <Ban className="w-3 h-3 text-green-400/10 group-hover:text-green-400/70 transition-colors" />
-                                </button>
-                              ) : (
-                                <button
-                                  className="w-full px-4 py-2 text-left text-[11px] text-yellow-400 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedUser(user);
-                                    setShowBanModal(true);
-                                    setActionMenuOpen(null);
-                                  }}
-                                >
-                                  <span>Ban User</span>
-                                  <Ban className="w-3 h-3 text-yellow-400/10 group-hover:text-yellow-400/70 transition-colors" />
-                                </button>
-                              ))}
-                            <div className="flex flex-col items-center justify-center">
-                              <hr className="w-[calc(100%)] border-white/10 h-px" />
-                              <div className="relative z-20 h-2 w-[calc(100%)] mx-auto -translate-x-1/2 left-1/2 bg-[repeating-linear-gradient(-45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_6px)] opacity-[7%]" />
-                              <hr className="w-[calc(100%)] border-white/10 h-px" />
-                            </div>
-                            <button
-                              className="w-full px-4 py-2 text-left text-[11px] text-red-400 hover:bg-white/10 flex items-center justify-between font-mono uppercase tracking-tight group"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setActionMenuOpen(null);
-                                openDeleteModal(user);
-                              }}
-                            >
-                              <span>Delete User</span>
-                              <Trash2 className="w-3 h-3 text-red-400/30 group-hover:text-red-400/70 transition-colors" />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
