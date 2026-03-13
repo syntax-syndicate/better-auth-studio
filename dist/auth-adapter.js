@@ -102,8 +102,14 @@ export async function getAuthAdapter(configPath) {
                         image: data.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${data.email}`,
                     },
                 });
-                const hashedPassword = await hashPassword(data.password);
                 if (data.password) {
+                    let hashedPassword = data.password;
+                    try {
+                        hashedPassword = await hashPassword(data.password);
+                    }
+                    catch (err) {
+                        console.log({ err });
+                    }
                     try {
                         await adapter.create({
                             model: "account",
@@ -117,7 +123,9 @@ export async function getAuthAdapter(configPath) {
                             },
                         });
                     }
-                    catch (_accountError) { }
+                    catch (_accountError) {
+                        console.log({ _accountError });
+                    }
                 }
                 return user;
             },

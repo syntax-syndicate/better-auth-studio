@@ -1405,7 +1405,7 @@ export const auth = betterAuth({
               </Select>
             </div>
 
-            <div className="flex-1 sm:flex-none sm:w-[150px]">
+            <div className="flex-1 sm:flex-none sm:w-[200px]">
               <Select value="" onValueChange={addFilter}>
                 <SelectTrigger className="w-full font-mono uppercase sm:text-[11px] border border-dashed border-white/20 bg-black/30 text-white rounded-none">
                   <div className="flex items-center space-x-2">
