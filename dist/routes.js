@@ -3532,9 +3532,9 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
             error?.code === "P2025" ||
             error?.code === "42P01" ||
             message.includes("not found in schema") ||
-            message.includes("model") && message.includes("not found") ||
-            message.includes("relation") && message.includes("does not exist") ||
-            message.includes("table") && message.includes("does not exist") ||
+            (message.includes("model") && message.includes("not found")) ||
+            (message.includes("relation") && message.includes("does not exist")) ||
+            (message.includes("table") && message.includes("does not exist")) ||
             message.includes("unknown table") ||
             message.includes("no such table"));
     }
@@ -3554,7 +3554,8 @@ export function createRoutes(authConfig, configPath, geoDbPath, preloadedAdapter
     }
     async function resolveAvailableSchemaTables(schema) {
         const adapter = await getAuthAdapterWithConfig();
-        if (!adapter || (typeof adapter.findMany !== "function" && typeof adapter.count !== "function")) {
+        if (!adapter ||
+            (typeof adapter.findMany !== "function" && typeof adapter.count !== "function")) {
             return {
                 tables: schema.tables.map((table) => ({
                     ...table,

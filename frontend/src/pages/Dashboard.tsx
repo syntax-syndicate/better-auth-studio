@@ -1638,7 +1638,7 @@ export default function Dashboard() {
                   <div className="absolute bottom-0 left-0 w-[0.5px] h-[12px] bg-white/20" />
                   <div className="absolute bottom-0 right-0 w-[12px] h-[0.5px] bg-white/20" />
                   <div className="absolute bottom-0 right-0 w-[0.5px] h-[12px] bg-white/20" />
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4 shrink-0">
                     <div>
                       <h3 className="text-sm text-white uppercase font-light">Activity Hits</h3>
                       <p className="text-4xl text-white font-light mt-1">
@@ -1662,45 +1662,52 @@ export default function Dashboard() {
                       ))}
                     </div>
                   </div>
-                  <div className="space-y-2 relative">
-                    <div className="h-40 flex items-end gap-1">
-                      {resolvedActivityLabels.map((label, index) => {
-                        const bucketTotal = activityBuckets[index] || 0;
-                        const barHeightFraction =
-                          maxActivityValue === 0 ? 0 : Math.min(1, bucketTotal / maxActivityValue);
-                        return (
-                          <div
-                            key={`${label}-${index}`}
-                            className="flex-1 flex flex-col justify-end gap-[1px] h-full cursor-pointer"
-                            onMouseEnter={(event) =>
-                              handleActivityHover(event, index, barHeightFraction)
-                            }
-                            onMouseLeave={() => {
-                              setHoveredAreaIndex(null);
-                              setHoveredAreaPosition(null);
-                            }}
-                          >
-                            {activityStreams.map((stream) => {
-                              const value = activitySeries[stream.id]?.[index] ?? 0;
-                              const heightPercent =
-                                bucketTotal === 0 || maxActivityValue === 0
-                                  ? 0
-                                  : Math.max((value / maxActivityValue) * 100, value > 0 ? 4 : 0);
-                              return (
-                                <div
-                                  key={`${stream.id}-${index}`}
-                                  className={`w-full ${stream.barClass}`}
-                                  style={{ height: `${heightPercent}%` }}
-                                />
-                              );
-                            })}
-                          </div>
-                        );
-                      })}
+                  <div className="relative flex flex-1 min-h-0 flex-col gap-2">
+                    <div className="relative flex-1 min-h-0">
+                      <div className="absolute inset-0 flex items-end gap-1">
+                        {resolvedActivityLabels.map((label, index) => {
+                          const bucketTotal = activityBuckets[index] || 0;
+                          const barHeightFraction =
+                            maxActivityValue === 0
+                              ? 0
+                              : Math.min(1, bucketTotal / maxActivityValue);
+                          return (
+                            <div
+                              key={`${label}-${index}`}
+                              className="flex-1 flex flex-col justify-end gap-[1px] h-full cursor-pointer"
+                              onMouseEnter={(event) =>
+                                handleActivityHover(event, index, barHeightFraction)
+                              }
+                              onMouseLeave={() => {
+                                setHoveredAreaIndex(null);
+                                setHoveredAreaPosition(null);
+                              }}
+                            >
+                              {activityStreams.map((stream) => {
+                                const value = activitySeries[stream.id]?.[index] ?? 0;
+                                const heightPercent =
+                                  bucketTotal === 0 || maxActivityValue === 0
+                                    ? 0
+                                    : Math.max(
+                                        (value / maxActivityValue) * 100,
+                                        value > 0 ? 4 : 0,
+                                      );
+                                return (
+                                  <div
+                                    key={`${stream.id}-${index}`}
+                                    className={`w-full ${stream.barClass}`}
+                                    style={{ height: `${heightPercent}%` }}
+                                  />
+                                );
+                              })}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {activityLoading && (
+                        <div className={activityLoadingOverlayClass}>Loading activity...</div>
+                      )}
                     </div>
-                    {activityLoading && (
-                      <div className={activityLoadingOverlayClass}>Loading activity...</div>
-                    )}
                     {hoveredAreaIndex !== null && hoveredAreaPosition && (
                       <div
                         className="fixed z-50 pointer-events-none transition-all duration-200 ease-out animate-in fade-in"
@@ -1761,7 +1768,7 @@ export default function Dashboard() {
                       </div>
                     )}
                     <div
-                      className={`flex justify-between font-mono ${activityPeriod === "1M" || activityPeriod === "1D" ? "text-[10px]" : "text-xs"} ${totalUsersAxisTextClass}`}
+                      className={`shrink-0 flex justify-between font-mono ${activityPeriod === "1M" || activityPeriod === "1D" ? "text-[10px]" : "text-xs"} ${totalUsersAxisTextClass}`}
                     >
                       {resolvedActivityLabels.map((label, i) => {
                         // For daily (1D), only show every 4th label with AM/PM format
@@ -1792,7 +1799,7 @@ export default function Dashboard() {
                         );
                       })}
                     </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mt-4 pt-4 border-t border-white/10">
+                    <div className="shrink-0 grid grid-cols-2 lg:grid-cols-5 gap-3 mt-4 pt-4 border-t border-white/10">
                       {activityStreams.map((stream) => (
                         <div
                           key={stream.id}
