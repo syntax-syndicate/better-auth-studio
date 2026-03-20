@@ -15,6 +15,7 @@ import { useCallback, useEffect, useState } from "react";
 import "@xyflow/react/dist/style.css";
 import { Link2, Settings, X } from "lucide-react";
 import { Analytics } from "@/components/PixelIcons";
+import type { DatabaseSchemaSummary } from "@/hooks/useDatabaseSchemaSummary";
 import { DatabaseSchemaNode, type DatabaseSchemaNodeData } from "../components/DatabaseSchemaNode";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
@@ -43,6 +44,8 @@ interface Table {
   name: string;
   displayName: string;
   origin?: string;
+  model?: string;
+  rowCount?: number | null;
   fields: Field[];
   relationships: Relationship[];
 }
@@ -68,6 +71,7 @@ interface PluginContribution {
 
 export default function DatabaseVisualizer() {
   const [schema, setSchema] = useState<Schema | null>(null);
+  const [summary, setSummary] = useState<DatabaseSchemaSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [enabledPlugins, setEnabledPlugins] = useState<Plugin[]>([]);
@@ -108,6 +112,7 @@ export default function DatabaseVisualizer() {
 
       if (data.success) {
         setSchema(data.schema);
+        setSummary(data.summary ?? null);
       } else {
         setError(data.error || "Failed to fetch schema");
       }
@@ -469,10 +474,12 @@ export default function DatabaseVisualizer() {
                           : "border-white/10 hover:border-white/20 hover:bg-white/5"
                       }`}
                     >
-                      <div className="flex items-center justify-between text-xs md:text-sm text-white">
-                        <span className="truncate">{table.displayName}</span>
-                        <span className="text-[10px] md:text-xs uppercase font-mono text-gray-400 flex-shrink-0 ml-1">
-                          {table.origin === "core" ? "Core" : "Extended"}
+                      <div className="flex items-center justify-between gap-3 text-xs md:text-sm text-white">
+                        <span className="truncate font-mono">{table.name}</span>
+                        <span className="text-[10px] md:text-xs uppercase font-mono text-gray-400 flex-shrink-0">
+                          {typeof table.rowCount === "number"
+                            ? table.rowCount.toLocaleString()
+                            : "—"}
                         </span>
                       </div>
                       <div className="text-[10px] md:text-xs text-gray-400 mt-0.5 md:mt-1">
@@ -505,7 +512,7 @@ export default function DatabaseVisualizer() {
                     Tables
                   </span>
                   <span className="text-white text-sm font-mono font-light">
-                    {schema.tables.length}
+                    {summary?.tableCount ?? schema.tables.length}
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline">
@@ -513,7 +520,8 @@ export default function DatabaseVisualizer() {
                     Total Fields
                   </span>
                   <span className="text-white text-sm font-mono font-light">
-                    {schema.tables.reduce((sum, table) => sum + table.fields.length, 0)}
+                    {summary?.fieldCount ??
+                      schema.tables.reduce((sum, table) => sum + table.fields.length, 0)}
                   </span>
                 </div>
                 <div className="flex justify-between items-baseline">
@@ -521,7 +529,8 @@ export default function DatabaseVisualizer() {
                     Relationships
                   </span>
                   <span className="text-white text-sm font-mono font-light">
-                    {schema.tables.reduce((sum, table) => sum + table.relationships.length, 0)}
+                    {summary?.relationshipCount ??
+                      schema.tables.reduce((sum, table) => sum + table.relationships.length, 0)}
                   </span>
                 </div>
               </CardContent>
@@ -645,7 +654,10 @@ export default function DatabaseVisualizer() {
                     {selectedTable.displayName}
                   </h3>
                   <p className="text-[10px] md:text-xs text-gray-400 mt-0.5 uppercase font-mono truncate">
-                    {selectedTable.name} · {selectedTable.origin === "core" ? "Core" : "Extended"}
+                    {selectedTable.name} ·{" "}
+                    {typeof selectedTable.rowCount === "number"
+                      ? `${selectedTable.rowCount.toLocaleString()} records`
+                      : "records unavailable"}
                   </p>
                 </div>
                 <Button
@@ -785,6 +797,16 @@ export default function DatabaseVisualizer() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
                   <div className="space-y-1">
                     <span className="text-gray-400 uppercase font-mono text-[10px] md:text-xs tracking-wider block">
+                      Records
+                    </span>
+                    <p className="text-white text-base md:text-lg font-mono font-light">
+                      {typeof selectedTable.rowCount === "number"
+                        ? selectedTable.rowCount.toLocaleString()
+                        : "—"}
+                    </p>
+                  </div>
+                  <div className="border-l-0 sm:border-l border-dashed border-white/20 pl-0 sm:pl-6 space-y-1">
+                    <span className="text-gray-400 uppercase font-mono text-[10px] md:text-xs tracking-wider block">
                       Fields
                     </span>
                     <p className="text-white text-base md:text-lg font-mono font-light">
@@ -797,14 +819,6 @@ export default function DatabaseVisualizer() {
                     </span>
                     <p className="text-white text-base md:text-lg font-mono font-light">
                       {selectedTable.relationships.length}
-                    </p>
-                  </div>
-                  <div className="border-l-0 sm:border-l border-dashed border-white/20 pl-0 sm:pl-6 space-y-1">
-                    <span className="text-gray-400 uppercase font-mono text-[10px] md:text-xs tracking-wider block">
-                      Origin
-                    </span>
-                    <p className="text-white text-xs md:text-sm uppercase font-mono font-light">
-                      {selectedTable.origin === "core" ? "Core" : "Extended"}
                     </p>
                   </div>
                 </div>

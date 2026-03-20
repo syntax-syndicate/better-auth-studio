@@ -1,6 +1,7 @@
 import type React from "react";
 import { useCallback, useState } from "react";
 import { GripVertical, PanelRightClose, PanelRightOpen, X } from "lucide-react";
+import { useDatabaseSchemaSummary } from "@/hooks/useDatabaseSchemaSummary";
 import { useDashboardWidgets } from "@/contexts/DashboardWidgetsContext";
 import { WIDGET_LABELS } from "@/contexts/DashboardWidgetsContext";
 import { WIDGET_TYPE_DRAG_KEY } from "./DropTargetSlot";
@@ -67,22 +68,38 @@ function PreviewEvents() {
 }
 
 function PreviewDatabase() {
-  const items = [
-    { label: "Users", value: "1,247" },
-    { label: "Sessions", value: "8,431" },
-    { label: "Organizations", value: "52" },
-    { label: "Events", value: "24.1K" },
-  ];
+  const { tables, loading } = useDatabaseSchemaSummary();
+  const previewTables = tables.slice(0, 4);
+
+  if (loading) {
+    return (
+      <div className="text-[7px] font-mono text-gray-600 uppercase tracking-wider">Loading</div>
+    );
+  }
+
+  if (previewTables.length === 0) {
+    return (
+      <div className="text-[7px] font-mono text-gray-600 uppercase tracking-wider">No tables</div>
+    );
+  }
+
   return (
     <div className="space-y-1.5">
-      {items.map((it, i) => (
+      {previewTables.map((table, i) => (
         <div key={i} className="flex items-center justify-between">
-          <span className="text-[7px] font-mono text-gray-500 uppercase tracking-wider">
-            {it.label}
+          <span className="text-[7px] font-mono text-gray-500 uppercase tracking-wider truncate pr-2">
+            {table.name}
           </span>
-          <span className="text-[8px] font-mono text-gray-300">{it.value}</span>
+          <span className="text-[8px] font-mono text-gray-300">
+            {typeof table.rowCount === "number" ? table.rowCount.toLocaleString() : "—"}
+          </span>
         </div>
       ))}
+      {tables.length > previewTables.length && (
+        <div className="text-[7px] font-mono text-gray-600 uppercase tracking-wider">
+          +{tables.length - previewTables.length} more
+        </div>
+      )}
     </div>
   );
 }
