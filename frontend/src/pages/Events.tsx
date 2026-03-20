@@ -486,9 +486,11 @@ export default function Events() {
       isPollingRef.current = true;
 
       try {
-        const { events: fetchedEvents, total, ready } = isInitial
-          ? await fetchAllEvents()
-          : await fetchEventsPage(EVENTS_POLL_LIMIT, false);
+        const {
+          events: fetchedEvents,
+          total,
+          ready,
+        } = isInitial ? await fetchAllEvents() : await fetchEventsPage(EVENTS_POLL_LIMIT, false);
 
         setIsConnected(true);
         setLastPollAt(Date.now());
@@ -507,7 +509,9 @@ export default function Events() {
 
         if (fetchedEvents.length === 0) {
           if (typeof total === "number") {
-            setTotalEventCount((prevTotal) => getSafeEventCount(total, currentEvents.length, prevTotal));
+            setTotalEventCount((prevTotal) =>
+              getSafeEventCount(total, currentEvents.length, prevTotal),
+            );
           }
           return;
         }
