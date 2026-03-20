@@ -1688,10 +1688,7 @@ export default function Dashboard() {
                                 const heightPercent =
                                   bucketTotal === 0 || maxActivityValue === 0
                                     ? 0
-                                    : Math.max(
-                                        (value / maxActivityValue) * 100,
-                                        value > 0 ? 4 : 0,
-                                      );
+                                    : Math.max((value / maxActivityValue) * 100, value > 0 ? 4 : 0);
                                 return (
                                   <div
                                     key={`${stream.id}-${index}`}
