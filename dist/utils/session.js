@@ -55,4 +55,3 @@ export function createStudioSession(user, durationMs = 7 * 24 * 60 * 60 * 1000) 
     };
 }
 export const STUDIO_COOKIE_NAME = "better_auth_studio_session";
-//# sourceMappingURL=session.js.map

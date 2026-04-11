@@ -222,4 +222,3 @@ export function wrapAuthCallbacks(auth, eventsConfig) {
     }
     catch (error) { }
 }
-//# sourceMappingURL=auth-callbacks-injector.js.map

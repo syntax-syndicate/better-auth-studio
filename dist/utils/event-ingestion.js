@@ -244,4 +244,3 @@ export function getEventQueueSize() {
 export function getEventIngestionProvider() {
     return provider;
 }
-//# sourceMappingURL=event-ingestion.js.map

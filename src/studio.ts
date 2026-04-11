@@ -101,9 +101,13 @@ export async function startStudio(options: StudioOptions) {
 
   app.use(createRoutes(authConfig, configPath, geoDbPath));
 
-  const publicDir = existsSync(join(__dirname, "../public"))
-    ? join(__dirname, "../public")
-    : join(__dirname, "../../public");
+  const publicDirCandidates = [
+    join(__dirname, "public"),
+    join(__dirname, "../public"),
+    join(__dirname, "../../public"),
+  ];
+  const publicDir =
+    publicDirCandidates.find((candidate) => existsSync(candidate)) || publicDirCandidates[0];
   let studioEnabled = false;
   let studioConfigPath: string | null = null;
   const possibleFiles = [

@@ -105,4 +105,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=remix.js.map

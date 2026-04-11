@@ -50,4 +50,3 @@ export declare function getConfig({ cwd, configPath, shouldThrowOnError, noCache
 }): Promise<any>;
 export { possiblePaths };
 export declare function findAuthConfig(configPath?: string): Promise<AuthConfig | null>;
-//# sourceMappingURL=config.d.ts.map

@@ -645,4 +645,3 @@ export function wrapOrganizationPluginHooks(auth, eventsConfig) {
         console.error("[Organization Hooks] Failed to wrap hooks:", error);
     }
 }
-//# sourceMappingURL=org-hooks-injector.js.map

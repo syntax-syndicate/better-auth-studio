@@ -259,4 +259,3 @@ export function getEventSeverity(event, status) {
     // rejected, cancelled, removed, updated are informational
     return "info";
 }
-//# sourceMappingURL=events.js.map

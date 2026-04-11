@@ -33,4 +33,3 @@ export declare function createStorageProvider(options: {
     adapter: any;
     tableName?: string;
 }): EventIngestionProvider;
-//# sourceMappingURL=helpers.d.ts.map

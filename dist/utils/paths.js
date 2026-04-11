@@ -9,4 +9,3 @@ export const possiblePaths = [
     ...basePaths.map((it) => `app/${it}`),
     ...basePaths.map((it) => `apps/${it}`),
 ];
-//# sourceMappingURL=paths.js.map

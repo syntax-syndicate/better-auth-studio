@@ -16,4 +16,3 @@ import type { StudioConfig } from "../types/handler.js";
  * auto-imports enabled for h3 utilities.
  */
 export declare function betterAuthStudio(config: StudioConfig): (event: any) => Promise<Response | any>;
-//# sourceMappingURL=nuxt.d.ts.map

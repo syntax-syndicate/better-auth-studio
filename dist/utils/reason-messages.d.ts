@@ -3,4 +3,3 @@
  * Known codes (e.g. invalid_credentials) are mapped; other values are used as-is (e.g. API messages).
  */
 export declare function reasonToMessage(reason: string | undefined): string;
-//# sourceMappingURL=reason-messages.d.ts.map

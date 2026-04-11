@@ -35,4 +35,3 @@ export declare function getEventQueueSize(): number;
  * Get the current event ingestion provider
  */
 export declare function getEventIngestionProvider(): EventIngestionProvider | null;
-//# sourceMappingURL=event-ingestion.d.ts.map

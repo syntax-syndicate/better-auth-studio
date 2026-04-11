@@ -23,4 +23,3 @@ import type { StudioConfig } from "../types/handler.js";
 export declare function betterAuthStudio(config: StudioConfig): ({ request }: {
     request: Request;
 }) => Promise<Response>;
-//# sourceMappingURL=remix.d.ts.map

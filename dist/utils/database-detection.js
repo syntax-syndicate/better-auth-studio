@@ -140,4 +140,3 @@ export async function detectAllDatabases(cwd) {
     }
     return results;
 }
-//# sourceMappingURL=database-detection.js.map

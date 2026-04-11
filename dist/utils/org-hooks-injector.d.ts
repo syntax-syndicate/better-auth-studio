@@ -71,4 +71,3 @@ export declare function createOrganizationHooksWithEvents(eventsConfig: StudioCo
  * This should be called during Better Auth initialization
  */
 export declare function wrapOrganizationPluginHooks(auth: any, eventsConfig: StudioConfig["events"]): void;
-//# sourceMappingURL=org-hooks-injector.d.ts.map

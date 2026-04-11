@@ -19,4 +19,3 @@ import type { StudioConfig } from "../types/handler.js";
 export declare function betterAuthStudio(config: StudioConfig): (ctx: {
     request: Request;
 }) => Promise<Response>;
-//# sourceMappingURL=astro.d.ts.map

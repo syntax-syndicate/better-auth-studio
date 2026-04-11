@@ -115,4 +115,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=svelte-kit.js.map

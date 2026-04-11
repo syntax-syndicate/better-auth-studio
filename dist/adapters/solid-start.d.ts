@@ -27,4 +27,3 @@ type ApiEvent = {
  */
 export declare function betterAuthStudio(config: StudioConfig): (event: ApiEvent) => Promise<Response>;
 export {};
-//# sourceMappingURL=solid-start.d.ts.map

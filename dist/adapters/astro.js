@@ -102,4 +102,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=astro.js.map

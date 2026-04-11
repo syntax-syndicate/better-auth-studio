@@ -58,9 +58,12 @@ export async function startStudio(options) {
         });
     }
     app.use(createRoutes(authConfig, configPath, geoDbPath));
-    const publicDir = existsSync(join(__dirname, "../public"))
-        ? join(__dirname, "../public")
-        : join(__dirname, "../../public");
+    const publicDirCandidates = [
+        join(__dirname, "public"),
+        join(__dirname, "../public"),
+        join(__dirname, "../../public"),
+    ];
+    const publicDir = publicDirCandidates.find((candidate) => existsSync(candidate)) || publicDirCandidates[0];
     let studioEnabled = false;
     let studioConfigPath = null;
     const possibleFiles = [
@@ -213,4 +216,3 @@ export async function startStudio(options) {
     });
     return { server, wss };
 }
-//# sourceMappingURL=studio.js.map

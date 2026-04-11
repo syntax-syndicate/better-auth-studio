@@ -17,4 +17,3 @@ export declare function createStudioSession(user: {
     image?: string;
 }, durationMs?: number): StudioSession;
 export declare const STUDIO_COOKIE_NAME = "better_auth_studio_session";
-//# sourceMappingURL=session.d.ts.map

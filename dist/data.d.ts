@@ -35,4 +35,3 @@ export interface PaginatedResult<T> {
     totalPages: number;
 }
 export declare function getAuthData(_authConfig: AuthConfig, type?: "stats" | "users" | "sessions" | "providers" | "deleteUser" | "updateUser" | "analytics", options?: any, configPath?: string, preloadedAdapter?: any): Promise<any>;
-//# sourceMappingURL=data.d.ts.map

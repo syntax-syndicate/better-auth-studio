@@ -13,4 +13,3 @@ export function getTsconfigInfo(cwd, tsconfigPath) {
         return {};
     }
 }
-//# sourceMappingURL=get-tsconfig-info.js.map

@@ -139,4 +139,3 @@ function injectConfig(html, config) {
     }
     return modifiedHtml.replace("</head>", `${script}</head>`);
 }
-//# sourceMappingURL=html-injector.js.map

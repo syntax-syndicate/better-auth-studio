@@ -7381,4 +7381,3 @@ function extractParams(routePath, requestPath) {
     });
     return params;
 }
-//# sourceMappingURL=routes.js.map

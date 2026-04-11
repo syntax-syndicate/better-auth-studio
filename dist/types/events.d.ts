@@ -51,4 +51,3 @@ export declare function getEventSeverity(event: AuthEvent | {
     type: AuthEventType;
     status?: "success" | "failed";
 }, status?: "success" | "failed"): "info" | "success" | "warning" | "failed";
-//# sourceMappingURL=events.d.ts.map

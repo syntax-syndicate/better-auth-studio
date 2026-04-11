@@ -1261,4 +1261,3 @@ export function injectEventHooks(auth, eventsConfig) {
         console.error("[Event Hooks] Failed to inject:", error);
     }
 }
-//# sourceMappingURL=hook-injector.js.map

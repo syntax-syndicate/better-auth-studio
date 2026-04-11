@@ -63,4 +63,3 @@ export interface WindowStudioConfig {
     };
 }
 export declare function serveIndexHtml(publicDir: string, config?: Partial<StudioConfig>): string;
-//# sourceMappingURL=html-injector.d.ts.map

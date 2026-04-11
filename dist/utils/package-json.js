@@ -60,4 +60,3 @@ export async function getPackageVersion(packageName, cwd) {
         return undefined;
     }
 }
-//# sourceMappingURL=package-json.js.map

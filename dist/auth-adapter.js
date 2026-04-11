@@ -515,4 +515,3 @@ export async function createMockVerification(adapter, _userId, index) {
     };
     return await adapter.createVerification(verificationData);
 }
-//# sourceMappingURL=auth-adapter.js.map

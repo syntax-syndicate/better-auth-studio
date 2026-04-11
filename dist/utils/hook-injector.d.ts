@@ -9,4 +9,3 @@ export declare function injectLastSeenAtHooks(auth: any, config?: {
  * Inject middleware hooks into Better Auth using plugins
  */
 export declare function injectEventHooks(auth: any, eventsConfig: StudioConfig["events"]): void;
-//# sourceMappingURL=hook-injector.d.ts.map

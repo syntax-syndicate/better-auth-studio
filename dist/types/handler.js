@@ -18,4 +18,3 @@ export const STUDIO_TOOL_IDS = [
 export function defineStudioConfig(config) {
     return config;
 }
-//# sourceMappingURL=handler.js.map

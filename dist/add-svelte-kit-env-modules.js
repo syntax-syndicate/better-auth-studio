@@ -12,4 +12,3 @@ export function addSvelteKitEnvModules(alias) {
     alias["$app/types"] = "@sveltejs/kit";
     alias["$app/*"] = "@sveltejs/kit";
 }
-//# sourceMappingURL=add-svelte-kit-env-modules.js.map

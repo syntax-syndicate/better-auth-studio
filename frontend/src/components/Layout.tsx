@@ -642,14 +642,11 @@ export default function Layout({ children }: LayoutProps) {
             <button
               type="button"
               onClick={toggleTheme}
-              className="inline-flex h-9 items-center gap-2 border border-dashed border-white/20 bg-black px-3 text-white/70 hover:text-white hover:border-white/50 transition-colors"
+              className="inline-flex h-9 w-9 items-center justify-center border border-dashed border-white/20 bg-black text-white/70 hover:text-white hover:border-white/50 transition-colors"
               aria-label={`Switch to ${nextThemeLabel.toLowerCase()} mode`}
               title={`Switch to ${nextThemeLabel.toLowerCase()} mode`}
             >
               <ThemeIcon className="h-4 w-4" />
-              <span className="hidden md:inline font-mono text-[11px] uppercase">
-                {nextThemeLabel}
-              </span>
             </button>
 
             {isSelfHosted && userProfile && (

@@ -26,4 +26,3 @@ export declare function initializeGeoService(): Promise<void>;
  */
 export declare function resolveIPLocationAsync(ipAddress: string, ipConfig?: IpAddressProviderConfig | null): Promise<LocationData | null>;
 export declare function resolveIPLocation(ipAddress: string): LocationData | null;
-//# sourceMappingURL=geo-service.d.ts.map

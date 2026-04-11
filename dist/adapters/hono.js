@@ -62,4 +62,3 @@ function sendHonoResponse(c, universal) {
         headers,
     });
 }
-//# sourceMappingURL=hono.js.map

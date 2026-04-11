@@ -321,4 +321,3 @@ function isIPInRange(ip, minIP, maxIP) {
     const maxNum = ipToNumber(maxIP);
     return ipNum >= minNum && ipNum <= maxNum;
 }
-//# sourceMappingURL=geo-service.js.map

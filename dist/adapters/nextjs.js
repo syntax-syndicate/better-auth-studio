@@ -61,4 +61,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=nextjs.js.map

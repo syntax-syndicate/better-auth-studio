@@ -79,4 +79,3 @@ function sendElysiaResponse(context, universal) {
         headers,
     });
 }
-//# sourceMappingURL=elysia.js.map

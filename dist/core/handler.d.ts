@@ -9,4 +9,3 @@ export declare function initializeEventIngestionAndHooks(config: StudioConfig): 
  */
 export declare function handleStudioRequest(request: UniversalRequest, config: StudioConfig): Promise<UniversalResponse>;
 export declare function getAuthAdapter(auth: any): Promise<any>;
-//# sourceMappingURL=handler.d.ts.map

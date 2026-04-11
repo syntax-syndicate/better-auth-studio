@@ -20,4 +20,3 @@ export type ApiResponse = {
     }>;
 };
 export declare function routeApiRequest(ctx: ApiContext): Promise<ApiResponse>;
-//# sourceMappingURL=api-router.d.ts.map

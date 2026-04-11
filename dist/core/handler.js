@@ -612,4 +612,3 @@ function getCacheControl(path) {
     }
     return "no-cache";
 }
-//# sourceMappingURL=handler.js.map

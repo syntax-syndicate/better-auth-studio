@@ -6,4 +6,3 @@ export interface DatabaseDetectionResult extends DetectionInfo {
     dialect?: string;
     adapter?: string;
 }
-//# sourceMappingURL=index.d.ts.map

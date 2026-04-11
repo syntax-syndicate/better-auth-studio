@@ -24,4 +24,3 @@ export const possibleConfigFiles = [
     "auth.config.ts",
     "auth.config.js",
 ];
-//# sourceMappingURL=utils.js.map

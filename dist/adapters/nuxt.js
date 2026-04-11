@@ -121,4 +121,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=nuxt.js.map

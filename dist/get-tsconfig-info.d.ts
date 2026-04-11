@@ -10,4 +10,3 @@ export interface TsConfig {
     [key: string]: any;
 }
 export declare function getTsconfigInfo(cwd?: string, tsconfigPath?: string): TsConfig;
-//# sourceMappingURL=get-tsconfig-info.d.ts.map

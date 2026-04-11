@@ -109,4 +109,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=tanstack-start.js.map

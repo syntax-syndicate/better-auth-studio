@@ -17,4 +17,3 @@ export declare function detectDatabaseWithDialect(cwd?: string): Promise<Databas
  * @returns Array of all detected databases
  */
 export declare function detectAllDatabases(cwd?: string): Promise<DatabaseDetectionResult[]>;
-//# sourceMappingURL=database-detection.d.ts.map

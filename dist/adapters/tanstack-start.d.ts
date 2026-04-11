@@ -29,4 +29,3 @@ type TanStackStartHandlerContext = {
  */
 export declare function betterAuthStudio(config: StudioConfig): ({ request }: TanStackStartHandlerContext) => Promise<Response>;
 export {};
-//# sourceMappingURL=tanstack-start.d.ts.map

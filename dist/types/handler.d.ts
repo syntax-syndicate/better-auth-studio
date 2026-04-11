@@ -141,4 +141,3 @@ export type WindowStudioConfig = {
     };
 };
 export declare function defineStudioConfig(config: StudioConfig): StudioConfig;
-//# sourceMappingURL=handler.d.ts.map

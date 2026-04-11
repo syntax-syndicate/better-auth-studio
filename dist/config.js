@@ -298,4 +298,3 @@ export async function findAuthConfig(configPath) {
         return null;
     }
 }
-//# sourceMappingURL=config.js.map

@@ -252,4 +252,3 @@ function detectFramework() {
     catch { }
     return "unknown";
 }
-//# sourceMappingURL=init.js.map

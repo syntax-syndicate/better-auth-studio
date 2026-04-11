@@ -594,4 +594,3 @@ async function getRealAnalytics(adapter, options) {
         };
     }
 }
-//# sourceMappingURL=data.js.map

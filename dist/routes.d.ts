@@ -23,4 +23,3 @@ export declare function handleStudioApiRequest(ctx: {
         options: any;
     }>;
 }>;
-//# sourceMappingURL=routes.d.ts.map

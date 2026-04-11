@@ -38,4 +38,3 @@ export declare function createMockSession(adapter: AuthAdapter, userId: string, 
 export declare function createMockAccount(adapter: AuthAdapter, userId: string, index: number, providerId?: string): Promise<any>;
 export declare function createMockVerification(adapter: AuthAdapter, _userId: string, index: number): Promise<any>;
 export {};
-//# sourceMappingURL=auth-adapter.d.ts.map

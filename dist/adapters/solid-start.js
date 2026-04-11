@@ -103,4 +103,3 @@ function universalToResponse(res) {
         headers,
     });
 }
-//# sourceMappingURL=solid-start.js.map
