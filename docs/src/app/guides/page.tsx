@@ -843,8 +843,8 @@ export { handler as GET, handler as POST, handler as PUT, handler as DELETE, han
                   when not using roles.
                 </li>
                 <li>
-                  <code className="bg-white/10 px-1">allowIpAddresses</code> – Optional IP
-                  allowlist for Studio requests.
+                  <code className="bg-white/10 px-1">allowIpAddresses</code> – Optional IP allowlist
+                  for Studio requests.
                 </li>
                 <li>
                   <code className="bg-white/10 px-1">blockIpAddresses</code> – Optional IP blocklist

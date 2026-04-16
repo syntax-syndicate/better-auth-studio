@@ -1018,8 +1018,8 @@ ADMIN_EMAIL_3=admin3@example.com`}
                   <span className="text-white/50 text-xs ml-2">(optional)</span>
                   <p className="text-sm font-light tracking-tight text-white/50 mt-1">
                     IP allowlist for Studio requests. Supports exact IPs and wildcard patterns
-                    (e.g.,{" "}
-                    <code className="text-white/70 bg-white/10 px-1 py-0.5">192.168.*</code>).
+                    (e.g., <code className="text-white/70 bg-white/10 px-1 py-0.5">192.168.*</code>
+                    ).
                   </p>
                 </div>
                 <div className="border-b border-white/10 pb-3">
